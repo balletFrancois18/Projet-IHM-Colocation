@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>CoLoc — App Colocation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:       #5B6CFF;
+  --primary-light: #EEF2FF;
+  --primary-dark:  #4455EE;
+  --secondary:     #A78BFA;
+  --accent:        #FF7A59;
+  --success:       #34D399;
+  --bg:            #F6F8FC;
+  --surface:       rgba(255,255,255,0.82);
+  --text:          #111827;
+  --text-muted:    #6B7280;
+  --border:        #E5E7EB;
+  --shadow:        0 8px 24px rgba(0,0,0,0.06);
+  --shadow-hover:  0 12px 32px rgba(0,0,0,0.10);
+  --radius:        20px;
+  --sidebar-w:     268px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* bg blobs */
+.bg-blob {
+  position: fixed; pointer-events: none; z-index: 0; border-radius: 50%;
+}
+.bg-blob-1 {
+  width: 560px; height: 560px;
+  top: -160px; left: -120px;
+  background: radial-gradient(circle, rgba(91,108,255,0.11) 0%, transparent 70%);
+}
+.bg-blob-2 {
+  width: 420px; height: 420px;
+  bottom: -80px; right: -60px;
+  background: radial-gradient(circle, rgba(167,139,250,0.09) 0%, transparent 70%);
+}
+.bg-blob-3 {
+  width: 300px; height: 300px;
+  top: 40%; left: 40%;
+  background: radial-gradient(circle, rgba(52,211,153,0.06) 0%, transparent 70%);
+}
+
+/* ═══════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════ */
+.app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(229,231,235,0.6);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 18px;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 2px 0 24px rgba(0,0,0,0.04);
+  z-index: 100;
+}
+
+.sidebar-logo {
+  display: flex; align-items: center; gap: 11px;
+  margin-bottom: 28px; padding: 0 4px;
+}
+.logo-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 14px rgba(91,108,255,0.38);
+}
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 23px; font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.logo-text span { color: var(--primary); }
+
+/* Coloc pill */
+.coloc-pill {
+  background: var(--primary-light);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 26px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  border: 1px solid rgba(91,108,255,0.12);
+}
+.coloc-pill:hover { background: #dde4ff; }
+.coloc-avatars { display: flex; }
+.coloc-avatars .av {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid white; margin-left: -7px;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  color: white; flex-shrink: 0;
+}
+.coloc-avatars .av:first-child { margin-left: 0; }
+.coloc-name { font-size: 13px; font-weight: 600; color: var(--primary); flex: 1; }
+.coloc-arrow { color: var(--primary); font-size: 14px; }
+
+/* Nav */
+.nav-section { margin-bottom: 6px; }
+.nav-label {
+  font-size: 10.5px; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.09em; text-transform: uppercase;
+  padding: 0 8px; margin-bottom: 5px; margin-top: 16px;
+  display: block;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  margin-bottom: 2px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-muted);
+  user-select: none;
+  border: none; background: transparent; width: 100%; text-align: left;
+  font-family: 'DM Sans', sans-serif;
+}
+.nav-item:hover { background: #F1F5F9; color: var(--text); }
+.nav-item.active {
+  background: var(--primary); color: white;
+  box-shadow: 0 4px 16px rgba(91,108,255,0.38);
+  font-weight: 600;
+}
+.nav-item .icon { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--accent); color: white;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px;
+  min-width: 20px; text-align: center;
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,0.28); }
+
+.sidebar-spacer { flex: 1; min-height: 20px; }
+
+.sidebar-user {
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px 12px; border-radius: 14px;
+  cursor: pointer; transition: all 0.2s ease-out;
+  margin-top: 8px;
+}
+.sidebar-user:hover { background: #F1F5F9; }
+.user-av {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF7A59, #FFB347);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 15px; flex-shrink: 0;
+}
+.user-info { flex: 1; }
+.user-name { font-size: 14px; font-weight: 600; }
+.user-role { font-size: 11.5px; color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════
+   MAIN
+═══════════════════════════════════════════════ */
+.main {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  padding: 30px 30px 40px;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Screen pages */
+.screen { display: none; flex-direction: column; gap: 22px; animation: fadeIn 0.28s ease-out; }
+.screen.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════════ */
+
+/* Header */
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.page-title-group {}
+.page-eyebrow { font-size: 13px; color: var(--text-muted); margin-bottom: 3px; }
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 27px; font-weight: 800; letter-spacing: -0.5px;
+}
+.page-title span { color: var(--primary); }
+
+.header-actions { display: flex; gap: 9px; align-items: center; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 19px; border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: all 0.2s ease-out;
+}
+.btn:hover { transform: scale(1.02); }
+.btn-primary {
+  background: var(--primary); color: white;
+  box-shadow: 0 4px 14px rgba(91,108,255,0.33);
+}
+.btn-primary:hover { box-shadow: 0 6px 20px rgba(91,108,255,0.45); }
+.btn-ghost {
+  background: white; color: var(--text);
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.btn-accent {
+  background: var(--accent); color: white;
+  box-shadow: 0 4px 14px rgba(255,122,89,0.30);
+}
+.btn-success {
+  background: var(--success); color: white;
+  box-shadow: 0 4px 14px rgba(52,211,153,0.30);
+}
+.btn-icon {
+  width: 42px; height: 42px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; background: white;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+  border-radius: 13px; cursor: pointer;
+  transition: all 0.2s ease-out;
+  position: relative;
+}
+.btn-icon:hover { transform: scale(1.06); box-shadow: var(--shadow-hover); }
+.notif-dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 7px; height: 7px;
+  background: var(--accent); border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Card */
+.card {
+  background: var(--surface);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease-out;
+}
+.card:hover { box-shadow: var(--shadow-hover); }
+
+/* Grids */
+.grid { display: grid; gap: 20px; }
+.g4 { grid-template-columns: repeat(4,1fr); }
+.g3 { grid-template-columns: repeat(3,1fr); }
+.g2 { grid-template-columns: repeat(2,1fr); }
+.g-7-5 { grid-template-columns: 7fr 5fr; }
+.g-8-4 { grid-template-columns: 8fr 4fr; }
+.g-5-7 { grid-template-columns: 5fr 7fr; }
+
+/* Section header */
+.sec-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px; font-weight: 700; letter-spacing: -0.2px;
+}
+.sec-link {
+  font-size: 12.5px; color: var(--primary);
+  font-weight: 600; cursor: pointer; text-decoration: none;
+}
+
+/* Avatar */
+.av-circle {
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: white; flex-shrink: 0;
+}
+
+/* Badge / tag */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.tag-blue   { background: #EEF2FF; color: var(--primary); }
+.tag-purple { background: #F3F0FF; color: #7C3AED; }
+.tag-orange { background: #FFF7ED; color: #9A3412; }
+.tag-green  { background: #ECFDF5; color: #065F46; }
+.tag-red    { background: #FEF2F2; color: #991B1B; }
+
+/* Status pill */
+.status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 20px;
+  font-size: 11.5px; font-weight: 600;
+}
+.status-pending { background: #FFF7ED; color: #9A3412; }
+.status-paid    { background: #ECFDF5; color: #065F46; }
+.status-partial { background: #EEF2FF; color: var(--primary); }
+
+/* Separator */
+.divider { border: none; border-top: 1px solid rgba(229,231,235,0.6); margin: 10px 0; }
+
+/* Progress bar */
+.prog-wrap { margin-bottom: 12px; }
+.prog-head { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 6px; font-weight: 500; }
+.prog-track { height: 7px; background: var(--border); border-radius: 20px; overflow: hidden; }
+.prog-fill  { height: 100%; border-radius: 20px; transition: width 1s ease-out; }
+
+/* Stat card */
+.stat-card { position: relative; overflow: hidden; }
+.stat-deco {
+  position: absolute; right: -24px; top: -24px;
+  width: 90px; height: 90px; border-radius: 50%; opacity: 0.10;
+}
+.stat-icon { font-size: 26px; margin-bottom: 12px; display: block; }
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px; font-weight: 700; letter-spacing: -1px; margin-bottom: 3px;
+}
+.stat-lbl { font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
+.stat-chg {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11.5px; font-weight: 600;
+  margin-top: 8px; padding: 3px 8px; border-radius: 20px;
+}
+.chg-up   { background: #ECFDF5; color: #065F46; }
+.chg-down { background: #FEF2F2; color: #991B1B; }
+.chg-warn { background: #FFF7ED; color: #9A3412; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ══════════════════════════════════════════════
+   SCREEN 1 — DASHBOARD
+══════════════════════════════════════════════ */
+
+/* Members */
+.member-strip { display: flex; gap: 10px; }
+.member-tile {
+  flex: 1; background: rgba(246,248,252,0.9);
+  border-radius: 16px; padding: 15px 10px;
+  text-align: center; cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+.member-tile:hover { background: rgba(91,108,255,0.07); transform: translateY(-2px); }
+.mtile-av {
+  width: 46px; height: 46px; border-radius: 50%;
+  margin: 0 auto 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: white;
+  position: relative;
+}
+.online-dot {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 11px; height: 11px;
+  background: var(--success); border-radius: 50%; border: 2px solid white;
+}
+.mtile-name { font-size: 12.5px; font-weight: 600; margin-bottom: 3px; }
+.mtile-bal { font-size: 12px; font-weight: 600; }
+.bal-pos { color: var(--success); }
+.bal-neg { color: var(--accent); }
+
+/* Quick actions */
+.qa-grid { display: grid; grid-template-columns: repeat(8,1fr); gap: 10px; }
+.qa-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 15px 8px; background: rgba(246,248,252,0.9);
+  border-radius: 16px; cursor: pointer;
+  transition: all 0.2s ease-out;
+  border: none; font-family: 'DM Sans', sans-serif;
+}
+.qa-btn:hover { background: rgba(91,108,255,0.08); transform: translateY(-2px); }
+.qa-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.qa-lbl { font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: center; line-height: 1.3; }
+
+/* Activity */
+.act-item {
+  display: flex; gap: 11px; padding: 11px 0;
+  border-bottom: 1px solid rgba(229,231,235,0.5);
+  align-items: flex-start;
+}
+.act-item:last-child { border-bottom: none; padding-bottom: 0; }
+.act-txt { font-size: 13px; line-height: 1.45; }
+.act-txt strong { font-weight: 600; }
+.act-txt .hi { color: var(--primary); font-weight: 600; }
+.act-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.act-emoji { font-size: 18px; margin-top: 3px; }
+
+/* announce */
+.announce-card {
+  background: linear-gradient(135deg, rgba(91,108,255,0.07), rgba(167,139,250,0.05));
+  border: 1px solid rgba(91,108,255,0.14);
+  border-radius: 16px; padding: 15px; margin-bottom: 10px;
+}
+.ann-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.ann-time { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.ann-txt { font-size: 13.5px; line-height: 1.5; }
+
+/* Poll */
+.poll-card { background: rgba(246,248,252,0.9); border-radius: 16px; padding: 15px; }
+.poll-q { font-size: 13.5px; font-weight: 600; margin-bottom: 12px; }
+.poll-opt { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; cursor: pointer; }
+.poll-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2.5px solid var(--border); flex-shrink: 0;
+  transition: all 0.2s ease-out;
+}
+.poll-dot.sel { background: var(--primary); border-color: var(--primary); }
+.poll-bar-bg { flex: 1; height: 6px; background: var(--border); border-radius: 20px; overflow: hidden; }
+.poll-bar-fill { height: 100%; border-radius: 20px; }
+.poll-label { font-size: 12.5px; font-weight: 500; min-width: 58px; }
+.poll-pct { font-size: 11.5px; font-weight: 600; color: var(--text-muted); min-width: 44px; text-align: right; }
+
+/* ══════════════════════════════════════════════
+   SCREEN 2 — DÉPENSES
+══════════════════════════════════════════════ */
+
+/* Owed summary */
+.owed-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 0; }
+.owed-card {
+  background: rgba(246,248,252,0.9); border-radius: 16px;
+  padding: 16px 14px; cursor: pointer;
+  transition: all 0.2s ease-out; border: 2px solid transparent;
+  text-align: center;
+}
+.owed-card:hover { border-color: rgba(91,108,255,0.2); transform: translateY(-2px); }
+.owed-av {
+  width: 40px; height: 40px; border-radius: 50%;
+  margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: white;
+}
+.owed-name { font-size: 12.5px; font-weight: 600; margin-bottom: 4px; }
+.owed-amt { font-size: 16px; font-weight: 700; }
+
+/* Filters */
+.filter-row { display: flex; gap: 8px; align-items: center; }
+.filter-btn {
+  padding: 8px 16px; border-radius: 20px; font-size: 12.5px;
+  font-weight: 600; cursor: pointer; border: 1.5px solid var(--border);
+  background: white; color: var(--text-muted);
+  transition: all 0.2s ease-out; font-family: 'DM Sans', sans-serif;
+}
+.filter-btn:hover { border-color: var(--primary); color: var(--primary); }
+.filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 3px 10px rgba(91,108,255,0.3); }
+.filter-spacer { flex: 1; }
+.search-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: white; border: 1.5px solid var(--border);
+  border-radius: 13px; padding: 9px 14px;
+  font-size: 13px; color: var(--text-muted);
+  box-shadow: var(--shadow);
+}
+
+/* Expense rows */
+.exp-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 15px 16px; border-radius: 14px;
+  transition: all 0.2s ease-out; cursor: pointer;
+}
+.exp-row:hover { background: rgba(91,108,255,0.05); transform: translateX(3px); }
+.exp-emoji {
+  width: 44px; height: 44px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.exp-info { flex: 1; }
+.exp-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.exp-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 6px; align-items: center; }
+.exp-paid-by {
+  display: flex; align-items: center; gap: 5px; font-size: 12px;
+}
+.exp-paid-av {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: white;
+}
+.exp-amount { font-size: 15px; font-weight: 700; text-align: right; }
+.exp-share { font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px; text-align: right; }
+.exp-dividers { display: flex; align-items: center; gap: 4px; }
+.exp-av-sm {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid white;
+  margin-left: -5px; display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: white;
+}
+.exp-av-sm:first-child { margin-left: 0; }
+
+/* Settlement */
+.settle-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; background: rgba(246,248,252,0.9);
+  border-radius: 14px; margin-bottom: 8px;
+}
+.settle-arrow { color: var(--text-muted); font-size: 20px; }
+.settle-amt { font-size: 15px; font-weight: 700; color: var(--accent); margin-left: auto; }
+.settle-btn {
+  padding: 7px 15px; border-radius: 10px; font-size: 12px; font-weight: 600;
+  background: var(--primary); color: white; border: none;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s ease-out;
+}
+.settle-btn:hover { background: var(--primary-dark); transform: scale(1.03); }
+
+/* Donut / spending chart */
+.spending-legend { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.leg-item { display: flex; align-items: center; gap: 10px; }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.leg-label { font-size: 12.5px; flex: 1; }
+.leg-val { font-size: 12.5px; font-weight: 600; }
+.leg-bar { flex: 2; height: 5px; background: var(--border); border-radius: 20px; overflow: hidden; }
+.leg-bar-fill { height: 100%; border-radius: 20px; }
+
+/* SVG Donut */
+.donut-wrap { display: flex; align-items: center; gap: 24px; }
+
+/* ══════════════════════════════════════════════
+   SCREEN 3 — TÂCHES
+══════════════════════════════════════════════ */
+
+/* Kanban cols */
+.kanban { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; align-items: start; }
+.kan-col { background: rgba(246,248,252,0.8); border-radius: 18px; padding: 16px; }
+.kan-col-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px; padding-bottom: 12px;
+  border-bottom: 1px solid rgba(229,231,235,0.6);
+}
+.kan-col-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; flex: 1; }
+.kan-count {
+  width: 24px; height: 24px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white;
+}
+.kan-card {
+  background: white; border-radius: 14px; padding: 14px 15px;
+  margin-bottom: 10px; cursor: pointer;
+  border: 1.5px solid var(--border);
+  transition: all 0.2s ease-out;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.kan-card:last-child { margin-bottom: 0; }
+.kan-card:hover { border-color: rgba(91,108,255,0.3); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.kan-card-title { font-size: 13.5px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+.kan-card-meta { display: flex; align-items: center; gap: 8px; }
+.kan-card-zone { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+.kan-card-av {
+  width: 24px; height: 24px; border-radius: 50%; margin-left: auto;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: white;
+}
+.kan-card-due {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px;
+}
+.due-today { background: #FFF7ED; color: #9A3412; }
+.due-ok    { background: #ECFDF5; color: #065F46; }
+.due-late  { background: #FEF2F2; color: #991B1B; }
+
+/* Rota calendar */
+.rota-grid {
+  display: grid;
+  grid-template-columns: 110px repeat(7,1fr);
+  gap: 6px;
+  font-size: 12px;
+}
+.rota-header { text-align: center; font-weight: 600; font-size: 11px; color: var(--text-muted); padding: 6px 0; }
+.rota-row-label { font-weight: 600; font-size: 12.5px; display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+.rota-cell {
+  background: rgba(246,248,252,0.9); border-radius: 10px;
+  padding: 8px 4px; text-align: center;
+  transition: all 0.2s ease-out; cursor: pointer;
+  min-height: 50px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+}
+.rota-cell:hover { transform: scale(1.04); }
+.rota-cell.assigned { background: var(--primary-light); border: 1.5px solid rgba(91,108,255,0.2); }
+.rota-cell.today-col { box-shadow: 0 0 0 2px var(--primary); }
+.rota-av-sm {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: white;
+}
+.rota-cell .checkmark { color: var(--success); font-size: 16px; }
+
+/* Stats mini */
+.task-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.ts-card {
+  background: rgba(246,248,252,0.9); border-radius: 16px;
+  padding: 14px; text-align: center;
+}
+.ts-num { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 700; }
+.ts-lbl { font-size: 11.5px; color: var(--text-muted); font-weight: 500; margin-top: 3px; }
+
+/* Member progress */
+.member-prog-item {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.member-prog-item:last-child { margin-bottom: 0; }
+
+/* ══════════════════════════════════════════════
+   SCREEN 4 — CHAT
+══════════════════════════════════════════════ */
+
+.chat-layout { display: grid; grid-template-columns: 280px 1fr 260px; gap: 0; height: calc(100vh - 110px); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.5); }
+
+/* Channels list */
+.channels-panel {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 20px 0;
+}
+.chan-head { padding: 0 18px 14px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.chan-head-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+.chan-section { padding: 4px 18px; }
+.chan-sec-label { font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin: 12px 0 6px; display: block; }
+.chan-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 11px; border-radius: 12px;
+  cursor: pointer; transition: all 0.2s ease-out;
+  margin-bottom: 2px;
+}
+.chan-item:hover { background: var(--bg); }
+.chan-item.active { background: var(--primary-light); }
+.chan-icon { font-size: 16px; width: 20px; text-align: center; }
+.chan-name { font-size: 13.5px; font-weight: 500; flex: 1; }
+.chan-item.active .chan-name { color: var(--primary); font-weight: 600; }
+.chan-badge {
+  background: var(--accent); color: white;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 20px;
+}
+
+/* DM section */
+.dm-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px; border-radius: 12px;
+  cursor: pointer; transition: all 0.2s ease-out;
+  margin-bottom: 2px;
+}
+.dm-item:hover { background: var(--bg); }
+.dm-av-wrap { position: relative; }
+.dm-av {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white;
+}
+.dm-online {
+  position: absolute; bottom: 0; right: 0;
+  width: 10px; height: 10px;
+  background: var(--success); border-radius: 50%; border: 2px solid white;
+}
+.dm-name { font-size: 13px; font-weight: 500; flex: 1; }
+.dm-time { font-size: 10.5px; color: var(--text-muted); }
+
+/* Chat messages */
+.chat-panel {
+  background: var(--bg);
+  display: flex; flex-direction: column;
+}
+.chat-header {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 22px;
+  display: flex; align-items: center; gap: 12px;
+}
+.chat-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
+.chat-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.chat-actions { margin-left: auto; display: flex; gap: 8px; }
+
+.chat-messages {
+  flex: 1; overflow-y: auto;
+  padding: 22px 22px 10px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+
+/* Date divider */
+.chat-date {
+  text-align: center; font-size: 11px; color: var(--text-muted);
+  font-weight: 600; margin: 12px 0 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.chat-date::before, .chat-date::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Message bubble */
+.msg-group { display: flex; gap: 10px; margin-bottom: 10px; }
+.msg-group.mine { flex-direction: row-reverse; }
+.msg-av-col { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-top: 2px; }
+.msg-av {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.msg-content { display: flex; flex-direction: column; gap: 3px; max-width: 62%; }
+.msg-group.mine .msg-content { align-items: flex-end; }
+.msg-sender { font-size: 11.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 2px; }
+.bubble {
+  display: inline-block;
+  padding: 11px 15px; border-radius: 18px;
+  font-size: 13.5px; line-height: 1.5;
+  max-width: 100%;
+}
+.bubble-other {
+  background: white; color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.bubble-mine {
+  background: var(--primary); color: white;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 4px 12px rgba(91,108,255,0.3);
+}
+.bubble-emoji { background: none; border: none; box-shadow: none; font-size: 28px; padding: 0; }
+.msg-time { font-size: 10.5px; color: var(--text-muted); padding: 0 4px; }
+
+/* Card message */
+.msg-card {
+  background: white; border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 14px;
+  max-width: 280px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.msg-card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.msg-card-detail { font-size: 12.5px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+.msg-card-action {
+  display: flex; gap: 8px;
+}
+.msg-card-btn {
+  flex: 1; padding: 8px; border-radius: 10px; font-size: 12px;
+  font-weight: 600; text-align: center; cursor: pointer;
+  transition: all 0.2s ease-out; border: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.mcb-primary { background: var(--primary); color: white; }
+.mcb-ghost { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* Typing */
+.typing-indicator {
+  display: flex; gap: 4px; align-items: center; padding: 12px 16px;
+  background: white; border-radius: 18px; display: inline-flex;
+  border: 1px solid var(--border); margin-left: 42px;
+}
+.typing-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-muted); opacity: 0.4;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(1); opacity: 0.4; }
+  40% { transform: scale(1.25); opacity: 1; }
+}
+
+/* Chat input */
+.chat-input-wrap {
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+}
+.chat-input-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 11px 16px;
+}
+.chat-input-placeholder { font-size: 13.5px; color: var(--text-muted); flex: 1; }
+.chat-actions-row { display: flex; gap: 8px; }
+.chat-action-btn {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; cursor: pointer; background: transparent;
+  border: none; transition: all 0.2s ease-out; color: var(--text-muted);
+}
+.chat-action-btn:hover { background: var(--border); color: var(--text); }
+.send-btn {
+  width: 36px; height: 36px; border-radius: 11px;
+  background: var(--primary); display: flex; align-items: center;
+  justify-content: center; font-size: 16px; cursor: pointer;
+  border: none; box-shadow: 0 3px 10px rgba(91,108,255,0.35);
+  transition: all 0.2s ease-out;
+}
+.send-btn:hover { transform: scale(1.08); }
+
+/* Chat sidebar */
+.chat-sidebar {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border-left: 1px solid var(--border);
+  padding: 20px 18px;
+  display: flex; flex-direction: column; gap: 18px;
+  overflow-y: auto;
+}
+.chat-sidebar-section {}
+.css-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.pinned-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px; background: var(--bg);
+  border-radius: 12px; margin-bottom: 7px; cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+.pinned-item:hover { background: rgba(91,108,255,0.07); }
+.pinned-icon { font-size: 18px; }
+.pinned-info {}
+.pinned-name { font-size: 12.5px; font-weight: 600; }
+.pinned-meta { font-size: 11px; color: var(--text-muted); }
+
+.online-member {
+  display: flex; align-items: center; gap: 9px; margin-bottom: 9px;
+}
+.online-info { flex: 1; }
+.online-name { font-size: 13px; font-weight: 600; }
+.online-status { font-size: 11px; color: var(--text-muted); }
+.online-pill {
+  font-size: 10px; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px; background: #ECFDF5; color: #065F46;
+}
+
+/* Cal mini */
+.cal-strip { display: flex; gap: 6px; margin-top: 4px; }
+.cal-day {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 7px 3px; border-radius: 10px; cursor: pointer;
+  transition: all 0.2s ease-out; font-size: 11px;
+}
+.cal-day:hover { background: rgba(91,108,255,0.07); }
+.cal-day.today { background: var(--primary); color: white; box-shadow: 0 3px 10px rgba(91,108,255,0.3); }
+.cal-day-name { font-weight: 600; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.7; margin-bottom: 3px; }
+.cal-day-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; }
+.cal-day-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 3px; }
+.cal-day:not(.today) .cal-day-dot { background: var(--accent); }
+.cal-day.today .cal-day-dot { background: rgba(255,255,255,0.6); }
+.cal-day.no-event .cal-day-dot { background: transparent; }
+
+</style>
+</head>
+<body>
+
+<!-- bg blobs -->
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="bg-blob bg-blob-3"></div>
+
+<div class="app">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar">
+
+    <div class="sidebar-logo">
+      <div class="logo-icon">🏡</div>
+      <div class="logo-text">Co<span>Loc</span></div>
+    </div>
+
+    <div class="coloc-pill">
+      <div class="coloc-avatars">
+        <div class="av" style="background:#5B6CFF">L</div>
+        <div class="av" style="background:#FF7A59">M</div>
+        <div class="av" style="background:#34D399">T</div>
+        <div class="av" style="background:#A78BFA">J</div>
+      </div>
+      <span class="coloc-name">Appart' Voltaire ✨</span>
+      <span class="coloc-arrow">⌄</span>
+    </div>
+
+    <span class="nav-label">Principal</span>
+    <button class="nav-item active" onclick="showScreen('dashboard',this)">
+      <span class="icon">🏠</span> Accueil
+    </button>
+    <button class="nav-item" onclick="showScreen('depenses',this)">
+      <span class="icon">💸</span> Dépenses
+      <span class="nav-badge">3</span>
+    </button>
+    <button class="nav-item" onclick="showScreen('taches',this)">
+      <span class="icon">🧹</span> Tâches
+      <span class="nav-badge">5</span>
+    </button>
+    <button class="nav-item" onclick="showScreen('chat',this)">
+      <span class="icon">💬</span> Messages
+      <span class="nav-badge">2</span>
+    </button>
+
+    <span class="nav-label">Coloc</span>
+    <button class="nav-item" onclick="showScreen('dashboard',this)">
+      <span class="icon">📅</span> Planning
+    </button>
+    <button class="nav-item" onclick="showScreen('dashboard',this)">
+      <span class="icon">📢</span> Annonces
+    </button>
+    <button class="nav-item" onclick="showScreen('dashboard',this)">
+      <span class="icon">🛒</span> Courses
+    </button>
+
+    <span class="nav-label">Gestion</span>
+    <button class="nav-item" onclick="showScreen('dashboard',this)">
+      <span class="icon">📄</span> Documents
+    </button>
+    <button class="nav-item" onclick="showScreen('dashboard',this)">
+      <span class="icon">⚙️</span> Réglages
+    </button>
+
+    <div class="sidebar-spacer"></div>
+
+    <div class="sidebar-user">
+      <div class="user-av">L</div>
+      <div class="user-info">
+        <div class="user-name">Lucas M.</div>
+        <div class="user-role">Admin coloc 👑</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="main">
+
+    <!-- ══════════════════════════════════
+         SCREEN 1 — DASHBOARD
+    ══════════════════════════════════ -->
+    <div id="screen-dashboard" class="screen active">
+
+      <div class="page-header">
+        <div class="page-title-group">
+          <div class="page-eyebrow">Vendredi 27 février 2026 · ☀️ Beau temps à Paris</div>
+          <div class="page-title">Bonjour, <span>Lucas</span> 👋</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-icon">🔔<span class="notif-dot"></span></button>
+          <button class="btn btn-ghost">🛒 Courses</button>
+          <button class="btn btn-primary">＋ Ajouter</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid g4">
+        <div class="card stat-card">
+          <div class="stat-deco" style="background:#5B6CFF"></div>
+          <span class="stat-icon">💰</span>
+          <div class="stat-val">342 €</div>
+          <div class="stat-lbl">Dépenses ce mois</div>
+          <span class="stat-chg chg-up">↑ +12% vs mois dernier</span>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-deco" style="background:#FF7A59"></div>
+          <span class="stat-icon">🧾</span>
+          <div class="stat-val" style="color:var(--accent)">–58 €</div>
+          <div class="stat-lbl">Tu dois rembourser</div>
+          <span class="stat-chg chg-warn">⚠ 2 remboursements</span>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-deco" style="background:#34D399"></div>
+          <span class="stat-icon">✅</span>
+          <div class="stat-val">8<span style="font-size:18px;font-weight:500;opacity:.6">/13</span></div>
+          <div class="stat-lbl">Tâches ce mois</div>
+          <span class="stat-chg chg-up">↑ 62% terminé</span>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-deco" style="background:#A78BFA"></div>
+          <span class="stat-icon">📅</span>
+          <div class="stat-val">3 mars</div>
+          <div class="stat-lbl">Prochain loyer</div>
+          <span class="stat-chg chg-warn">⏰ Dans 4 jours</span>
+        </div>
+      </div>
+
+      <!-- Middle row -->
+      <div class="grid g-7-5">
+
+        <!-- Left -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- Dépenses récentes -->
+          <div class="card">
+            <div class="sec-head">
+              <div class="sec-title">💸 Dépenses récentes</div>
+              <a class="sec-link" onclick="showScreen('depenses',null)">Tout voir →</a>
+            </div>
+            <div>
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#EEF2FF">🛒</div>
+                <div class="exp-info">
+                  <div class="exp-name">Courses Monoprix</div>
+                  <div class="exp-meta"><span class="exp-paid-by"><span class="exp-paid-av" style="background:#FF7A59">M</span> Marie</span> · Hier · Partagé ×4</div>
+                </div>
+                <div>
+                  <div class="exp-share">Ta part</div>
+                  <div class="exp-amount" style="color:var(--accent)">–14,25 €</div>
+                </div>
+                <span class="status status-pending" style="margin-left:12px">En attente</span>
+              </div>
+              <hr class="divider">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#ECFDF5">⚡</div>
+                <div class="exp-info">
+                  <div class="exp-name">Facture EDF</div>
+                  <div class="exp-meta"><span class="exp-paid-by"><span class="exp-paid-av" style="background:#34D399">T</span> Thibault</span> · 24 fév · Partagé ×4</div>
+                </div>
+                <div>
+                  <div class="exp-share">Ta part</div>
+                  <div class="exp-amount" style="color:var(--accent)">–22,50 €</div>
+                </div>
+                <span class="status status-pending" style="margin-left:12px">En attente</span>
+              </div>
+              <hr class="divider">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#F3F0FF">📶</div>
+                <div class="exp-info">
+                  <div class="exp-name">Abonnement Fibre</div>
+                  <div class="exp-meta"><span class="exp-paid-by"><span class="exp-paid-av" style="background:#5B6CFF">L</span> Lucas</span> · 20 fév · Partagé ×4</div>
+                </div>
+                <div>
+                  <div class="exp-share">Tu as reçu</div>
+                  <div class="exp-amount" style="color:var(--success)">+29,97 €</div>
+                </div>
+                <span class="status status-paid" style="margin-left:12px">Remboursé ✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks preview + Members -->
+          <div class="grid g2">
+            <div class="card">
+              <div class="sec-head">
+                <div class="sec-title">🧹 Tâches du jour</div>
+                <a class="sec-link" onclick="showScreen('taches',null)">Voir →</a>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px">
+                  <div style="width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;flex-shrink:0">✓</div>
+                  <div style="flex:1;font-size:13.5px;font-weight:500;text-decoration:line-through;color:var(--text-muted)">Passer l'aspirateur</div>
+                  <div class="kan-card-av" style="background:#5B6CFF">L</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px">
+                  <div style="width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;flex-shrink:0">✓</div>
+                  <div style="flex:1;font-size:13.5px;font-weight:500;text-decoration:line-through;color:var(--text-muted)">Sortir les poubelles</div>
+                  <div class="kan-card-av" style="background:#FF7A59">M</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px;border-left:3px solid var(--primary)">
+                  <div style="width:20px;height:20px;border-radius:50%;border:2.5px solid var(--border);flex-shrink:0"></div>
+                  <div style="flex:1;font-size:13.5px;font-weight:600">Nettoyer la cuisine</div>
+                  <div class="kan-card-av" style="background:#34D399">T</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px">
+                  <div style="width:20px;height:20px;border-radius:50%;border:2.5px solid var(--border);flex-shrink:0"></div>
+                  <div style="flex:1;font-size:13.5px;font-weight:600">Changer les draps</div>
+                  <div class="kan-card-av" style="background:#A78BFA">J</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="sec-head">
+                <div class="sec-title">📊 Budget commun</div>
+              </div>
+              <div style="text-align:center;margin-bottom:14px">
+                <svg width="100" height="100" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#E5E7EB" stroke-width="10"/>
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="url(#grad1)" stroke-width="10" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="60"/>
+                  <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5B6CFF"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs>
+                </svg>
+                <div style="margin-top:-58px;font-family:'Syne',sans-serif;font-size:22px;font-weight:700">75%</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:0">300 / 400 €</div>
+                <div style="margin-top:42px"></div>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-head"><span>🛒 Courses</span><span style="font-weight:600">128 €</span></div>
+                <div class="prog-track"><div class="prog-fill" style="width:64%;background:linear-gradient(90deg,#5B6CFF,#A78BFA)"></div></div>
+              </div>
+              <div class="prog-wrap">
+                <div class="prog-head"><span>⚡ Factures</span><span style="font-weight:600">95 €</span></div>
+                <div class="prog-track"><div class="prog-fill" style="width:48%;background:linear-gradient(90deg,#34D399,#5B6CFF)"></div></div>
+              </div>
+              <div class="prog-wrap" style="margin-bottom:0">
+                <div class="prog-head"><span>🎉 Sorties</span><span style="font-weight:600">77 €</span></div>
+                <div class="prog-track"><div class="prog-fill" style="width:38%;background:linear-gradient(90deg,#FF7A59,#FFB347)"></div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- Membres -->
+          <div class="card">
+            <div class="sec-head">
+              <div class="sec-title">👥 Colocataires</div>
+              <a class="sec-link">Profils →</a>
+            </div>
+            <div class="member-strip">
+              <div class="member-tile">
+                <div class="mtile-av" style="background:linear-gradient(135deg,#5B6CFF,#A78BFA)">L<span class="online-dot"></span></div>
+                <div class="mtile-name">Lucas</div>
+                <div class="mtile-bal bal-pos">+32 €</div>
+              </div>
+              <div class="member-tile">
+                <div class="mtile-av" style="background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+                <div class="mtile-name">Marie</div>
+                <div class="mtile-bal bal-neg">–14 €</div>
+              </div>
+              <div class="member-tile">
+                <div class="mtile-av" style="background:linear-gradient(135deg,#34D399,#5B6CFF)">T<span class="online-dot"></span></div>
+                <div class="mtile-name">Thibault</div>
+                <div class="mtile-bal bal-pos">+22 €</div>
+              </div>
+              <div class="member-tile">
+                <div class="mtile-av" style="background:linear-gradient(135deg,#A78BFA,#EC4899)">J</div>
+                <div class="mtile-name">Julie</div>
+                <div class="mtile-bal bal-neg">–40 €</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Calendrier -->
+          <div class="card">
+            <div class="sec-head">
+              <div class="sec-title">📅 Cette semaine</div>
+              <a class="sec-link">Calendrier →</a>
+            </div>
+            <div class="cal-strip">
+              <div class="cal-day"><div class="cal-day-name">Lun</div><div class="cal-day-num">24</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day"><div class="cal-day-name">Mar</div><div class="cal-day-num">25</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day"><div class="cal-day-name">Mer</div><div class="cal-day-num">26</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day today"><div class="cal-day-name">Jeu</div><div class="cal-day-num">27</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day"><div class="cal-day-name">Ven</div><div class="cal-day-num">28</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day no-event"><div class="cal-day-name">Sam</div><div class="cal-day-num">1</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day no-event"><div class="cal-day-name">Dim</div><div class="cal-day-num">2</div><div class="cal-day-dot"></div></div>
+            </div>
+            <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(91,108,255,0.07);border-radius:12px;border-left:3px solid var(--primary)">
+                <span style="font-size:16px">🧹</span>
+                <div style="flex:1"><div style="font-size:13px;font-weight:600">Ménage — Cuisine</div><div style="font-size:11px;color:var(--text-muted)">Thibault · Auj.</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,122,89,0.07);border-radius:12px;border-left:3px solid var(--accent)">
+                <span style="font-size:16px">💰</span>
+                <div style="flex:1"><div style="font-size:13px;font-weight:600">Loyer — Rappel</div><div style="font-size:11px;color:var(--text-muted)">Dans 4 jours · 600 €</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fil coloc -->
+          <div class="card">
+            <div class="sec-head">
+              <div class="sec-title">📢 Fil coloc</div>
+              <a class="sec-link" onclick="showScreen('chat',null)">Chat →</a>
+            </div>
+            <div class="announce-card">
+              <div class="ann-head">
+                <div class="av-circle" style="width:28px;height:28px;background:linear-gradient(135deg,#FF7A59,#FFB347);font-size:12px">M</div>
+                <span style="font-size:13px;font-weight:600">Marie</span>
+                <span class="ann-time">Il y a 2h</span>
+              </div>
+              <div class="ann-txt">Quelqu'un peut acheter du liquide vaisselle ? On est à cours 🙏</div>
+            </div>
+            <div class="poll-card">
+              <div class="poll-q">🗳️ Soirée raclette — quel soir ?</div>
+              <div class="poll-opt">
+                <div class="poll-dot sel"></div>
+                <span class="poll-label">Vendredi</span>
+                <div class="poll-bar-bg"><div class="poll-bar-fill" style="width:60%;background:var(--primary)"></div></div>
+                <span class="poll-pct">3 votes</span>
+              </div>
+              <div class="poll-opt">
+                <div class="poll-dot"></div>
+                <span class="poll-label">Samedi</span>
+                <div class="poll-bar-bg"><div class="poll-bar-fill" style="width:20%;background:var(--secondary)"></div></div>
+                <span class="poll-pct">1 vote</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activité -->
+          <div class="card">
+            <div class="sec-head"><div class="sec-title">⚡ Activité récente</div></div>
+            <div>
+              <div class="act-item">
+                <div class="av-circle" style="width:30px;height:30px;background:linear-gradient(135deg,#34D399,#5B6CFF);font-size:12px;flex-shrink:0;margin-top:2px">T</div>
+                <div style="flex:1"><div class="act-txt"><strong>Thibault</strong> a <span class="hi">validé</span> "Sortir les poubelles"</div><div class="act-time">Il y a 45 min</div></div>
+                <div class="act-emoji">✅</div>
+              </div>
+              <div class="act-item">
+                <div class="av-circle" style="width:30px;height:30px;background:linear-gradient(135deg,#FF7A59,#FFB347);font-size:12px;flex-shrink:0;margin-top:2px">M</div>
+                <div style="flex:1"><div class="act-txt"><strong>Marie</strong> a <span class="hi">ajouté</span> une dépense : Courses</div><div class="act-time">Il y a 2h</div></div>
+                <div class="act-emoji">🛒</div>
+              </div>
+              <div class="act-item">
+                <div class="av-circle" style="width:30px;height:30px;background:linear-gradient(135deg,#A78BFA,#EC4899);font-size:12px;flex-shrink:0;margin-top:2px">J</div>
+                <div style="flex:1"><div class="act-txt"><strong>Julie</strong> a <span class="hi">remboursé</span> Lucas (Fibre)</div><div class="act-time">Hier, 19h30</div></div>
+                <div class="act-emoji">💸</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:14px">⚡ Actions rapides</div>
+        <div class="qa-grid">
+          <button class="qa-btn" onclick="showScreen('depenses',null)"><div class="qa-icon" style="background:#EEF2FF">💸</div><div class="qa-lbl">Ajouter<br>dépense</div></button>
+          <button class="qa-btn" onclick="showScreen('taches',null)"><div class="qa-icon" style="background:#ECFDF5">✅</div><div class="qa-lbl">Nouvelle<br>tâche</div></button>
+          <button class="qa-btn"><div class="qa-icon" style="background:#FFF7ED">🛒</div><div class="qa-lbl">Maj<br>courses</div></button>
+          <button class="qa-btn" onclick="showScreen('chat',null)"><div class="qa-icon" style="background:#F3F0FF">💬</div><div class="qa-lbl">Envoyer<br>message</div></button>
+          <button class="qa-btn"><div class="qa-icon" style="background:#FEF2F2">⚡</div><div class="qa-lbl">Rappel<br>paiement</div></button>
+          <button class="qa-btn"><div class="qa-icon" style="background:#ECFDF5">🗳️</div><div class="qa-lbl">Créer<br>vote</div></button>
+          <button class="qa-btn"><div class="qa-icon" style="background:#EEF2FF">📅</div><div class="qa-lbl">Planifier<br>event</div></button>
+          <button class="qa-btn"><div class="qa-icon" style="background:#FFF7ED">📄</div><div class="qa-lbl">Partager<br>doc</div></button>
+        </div>
+      </div>
+
+    </div><!-- /dashboard -->
+
+
+    <!-- ══════════════════════════════════
+         SCREEN 2 — DÉPENSES
+    ══════════════════════════════════ -->
+    <div id="screen-depenses" class="screen">
+
+      <div class="page-header">
+        <div class="page-title-group">
+          <div class="page-eyebrow">Février 2026</div>
+          <div class="page-title">Dépenses <span>& Comptes</span></div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost">📤 Exporter</button>
+          <button class="btn btn-accent">＋ Nouvelle dépense</button>
+        </div>
+      </div>
+
+      <!-- Qui doit à qui -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-title">🤝 Soldes entre colocataires</div>
+          <button class="btn btn-success" style="font-size:12.5px;padding:9px 16px">✨ Simplifier les dettes</button>
+        </div>
+        <div class="owed-grid">
+          <div class="owed-card" style="border-color:rgba(52,211,153,0.3)">
+            <div class="owed-av" style="background:linear-gradient(135deg,#5B6CFF,#A78BFA)">L</div>
+            <div class="owed-name">Lucas (toi)</div>
+            <div class="owed-amt" style="color:var(--success)">+32 €</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">On te doit</div>
+          </div>
+          <div class="owed-card" style="border-color:rgba(255,122,89,0.3)">
+            <div class="owed-av" style="background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+            <div class="owed-name">Marie</div>
+            <div class="owed-amt" style="color:var(--accent)">–14 €</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Doit à Lucas</div>
+          </div>
+          <div class="owed-card" style="border-color:rgba(52,211,153,0.3)">
+            <div class="owed-av" style="background:linear-gradient(135deg,#34D399,#5B6CFF)">T</div>
+            <div class="owed-name">Thibault</div>
+            <div class="owed-amt" style="color:var(--success)">+22 €</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">On lui doit</div>
+          </div>
+          <div class="owed-card" style="border-color:rgba(255,122,89,0.3)">
+            <div class="owed-av" style="background:linear-gradient(135deg,#A78BFA,#EC4899)">J</div>
+            <div class="owed-name">Julie</div>
+            <div class="owed-amt" style="color:var(--accent)">–40 €</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Doit à rembourser</div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px">
+          <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.07em;font-size:11px">Remboursements suggérés</div>
+          <div class="settle-item">
+            <div class="av-circle" style="width:34px;height:34px;background:linear-gradient(135deg,#FF7A59,#FFB347);font-size:13px">M</div>
+            <div style="font-size:13px;font-weight:500;flex:1"><strong>Marie</strong> → <strong>Lucas</strong></div>
+            <div class="settle-amt">14 €</div>
+            <button class="settle-btn">Rembourser</button>
+          </div>
+          <div class="settle-item">
+            <div class="av-circle" style="width:34px;height:34px;background:linear-gradient(135deg,#A78BFA,#EC4899);font-size:13px">J</div>
+            <div style="font-size:13px;font-weight:500;flex:1"><strong>Julie</strong> → <strong>Thibault</strong></div>
+            <div class="settle-amt">22 €</div>
+            <button class="settle-btn">Rembourser</button>
+          </div>
+          <div class="settle-item">
+            <div class="av-circle" style="width:34px;height:34px;background:linear-gradient(135deg,#A78BFA,#EC4899);font-size:13px">J</div>
+            <div style="font-size:13px;font-weight:500;flex:1"><strong>Julie</strong> → <strong>Lucas</strong></div>
+            <div class="settle-amt">18 €</div>
+            <button class="settle-btn">Rembourser</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtres + liste + graph -->
+      <div class="grid g-8-4">
+
+        <!-- Liste dépenses -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div class="filter-row">
+              <button class="filter-btn active">Toutes</button>
+              <button class="filter-btn">En attente</button>
+              <button class="filter-btn">Remboursées</button>
+              <button class="filter-btn">🛒 Courses</button>
+              <button class="filter-btn">⚡ Factures</button>
+              <button class="filter-btn">🎉 Sorties</button>
+            </div>
+            <div class="filter-spacer"></div>
+            <div class="search-wrap">🔍&nbsp; Rechercher…</div>
+          </div>
+
+          <div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700">Ce mois · Février</div>
+              <span style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--accent)">– 342,00 €</span>
+            </div>
+
+            <div style="padding:6px 8px">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#EEF2FF">🛒</div>
+                <div class="exp-info">
+                  <div class="exp-name">Courses Monoprix</div>
+                  <div class="exp-meta"><span>Payé par <strong>Marie</strong></span> · Hier · <span class="tag tag-blue">Courses</span></div>
+                </div>
+                <div style="text-align:right;margin-right:10px">
+                  <div class="exp-share">Total : 57 €</div>
+                  <div class="exp-amount">Ta part : 14,25 €</div>
+                </div>
+                <span class="status status-pending">En attente</span>
+              </div>
+              <hr class="divider" style="margin:0 16px">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#ECFDF5">⚡</div>
+                <div class="exp-info">
+                  <div class="exp-name">Facture EDF — Janvier</div>
+                  <div class="exp-meta"><span>Payé par <strong>Thibault</strong></span> · 24 fév · <span class="tag tag-orange">Factures</span></div>
+                </div>
+                <div style="text-align:right;margin-right:10px">
+                  <div class="exp-share">Total : 90 €</div>
+                  <div class="exp-amount">Ta part : 22,50 €</div>
+                </div>
+                <span class="status status-pending">En attente</span>
+              </div>
+              <hr class="divider" style="margin:0 16px">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#FFF7ED">🍕</div>
+                <div class="exp-info">
+                  <div class="exp-name">Soirée pizza vendredi</div>
+                  <div class="exp-meta"><span>Payé par <strong>Julie</strong></span> · 21 fév · <span class="tag tag-purple">Sorties</span></div>
+                </div>
+                <div style="text-align:right;margin-right:10px">
+                  <div class="exp-share">Total : 85 €</div>
+                  <div class="exp-amount">Ta part : 21,25 €</div>
+                </div>
+                <span class="status status-pending">En attente</span>
+              </div>
+              <hr class="divider" style="margin:0 16px">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#F3F0FF">📶</div>
+                <div class="exp-info">
+                  <div class="exp-name">Abonnement Fibre SFR</div>
+                  <div class="exp-meta"><span>Payé par <strong>Lucas</strong></span> · 20 fév · <span class="tag tag-orange">Factures</span></div>
+                </div>
+                <div style="text-align:right;margin-right:10px">
+                  <div class="exp-share">Total : 39,99 €</div>
+                  <div class="exp-amount" style="color:var(--success)">+29,97 €</div>
+                </div>
+                <span class="status status-paid">Remboursé ✓</span>
+              </div>
+              <hr class="divider" style="margin:0 16px">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#ECFDF5">🧴</div>
+                <div class="exp-info">
+                  <div class="exp-name">Produits ménagers</div>
+                  <div class="exp-meta"><span>Payé par <strong>Lucas</strong></span> · 15 fév · <span class="tag tag-blue">Courses</span></div>
+                </div>
+                <div style="text-align:right;margin-right:10px">
+                  <div class="exp-share">Total : 28 €</div>
+                  <div class="exp-amount" style="color:var(--success)">+21 €</div>
+                </div>
+                <span class="status status-paid">Remboursé ✓</span>
+              </div>
+              <hr class="divider" style="margin:0 16px">
+              <div class="exp-row">
+                <div class="exp-emoji" style="background:#EEF2FF">🎮</div>
+                <div class="exp-info">
+                  <div class="exp-name">Netflix — Abonnement</div>
+                  <div class="exp-meta"><span>Payé par <strong>Marie</strong></span> · 10 fév · <span class="tag tag-purple">Loisirs</span></div>
+                </div>
+                <div style="text-align:right;margin-right:10px">
+                  <div class="exp-share">Total : 17,99 €</div>
+                  <div class="exp-amount">Ta part : 4,50 €</div>
+                </div>
+                <span class="status status-partial">Partiellement</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Right: graph + stats -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <div class="card">
+            <div class="sec-title" style="margin-bottom:16px">📊 Répartition</div>
+            <div style="text-align:center;margin-bottom:16px">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <!-- Donut slices -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="#E5E7EB" stroke-width="20"/>
+                <!-- Courses 37% -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="#5B6CFF" stroke-width="20"
+                  stroke-dasharray="115 199" stroke-dashoffset="0"
+                  style="transform:rotate(-90deg);transform-origin:70px 70px"/>
+                <!-- Factures 28% -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="#A78BFA" stroke-width="20"
+                  stroke-dasharray="87 227" stroke-dashoffset="-115"
+                  style="transform:rotate(-90deg);transform-origin:70px 70px"/>
+                <!-- Sorties 22% -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="#FF7A59" stroke-width="20"
+                  stroke-dasharray="69 245" stroke-dashoffset="-202"
+                  style="transform:rotate(-90deg);transform-origin:70px 70px"/>
+                <!-- Loisirs 13% -->
+                <circle cx="70" cy="70" r="50" fill="none" stroke="#34D399" stroke-width="20"
+                  stroke-dasharray="40 274" stroke-dashoffset="-271"
+                  style="transform:rotate(-90deg);transform-origin:70px 70px"/>
+                <text x="70" y="65" text-anchor="middle" font-family="Syne,sans-serif" font-size="18" font-weight="700" fill="#111827">342€</text>
+                <text x="70" y="82" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6B7280">ce mois</text>
+              </svg>
+            </div>
+            <div class="spending-legend">
+              <div class="leg-item">
+                <div class="leg-dot" style="background:#5B6CFF"></div>
+                <span class="leg-label">🛒 Courses</span>
+                <div class="leg-bar"><div class="leg-bar-fill" style="width:64%;background:#5B6CFF"></div></div>
+                <span class="leg-val">128 €</span>
+              </div>
+              <div class="leg-item">
+                <div class="leg-dot" style="background:#A78BFA"></div>
+                <span class="leg-label">⚡ Factures</span>
+                <div class="leg-bar"><div class="leg-bar-fill" style="width:48%;background:#A78BFA"></div></div>
+                <span class="leg-val">95 €</span>
+              </div>
+              <div class="leg-item">
+                <div class="leg-dot" style="background:#FF7A59"></div>
+                <span class="leg-label">🎉 Sorties</span>
+                <div class="leg-bar"><div class="leg-bar-fill" style="width:38%;background:#FF7A59"></div></div>
+                <span class="leg-val">77 €</span>
+              </div>
+              <div class="leg-item">
+                <div class="leg-dot" style="background:#34D399"></div>
+                <span class="leg-label">🎮 Loisirs</span>
+                <div class="leg-bar"><div class="leg-bar-fill" style="width:22%;background:#34D399"></div></div>
+                <span class="leg-val">42 €</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="sec-title" style="margin-bottom:14px">💳 Par personne</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div class="member-prog-item">
+                <div class="av-circle" style="width:32px;height:32px;background:linear-gradient(135deg,#5B6CFF,#A78BFA);font-size:12px">L</div>
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span style="font-weight:600">Lucas</span><span style="font-weight:700;color:var(--success)">+32 €</span></div>
+                  <div class="prog-track"><div class="prog-fill" style="width:78%;background:linear-gradient(90deg,#5B6CFF,#A78BFA)"></div></div>
+                </div>
+              </div>
+              <div class="member-prog-item">
+                <div class="av-circle" style="width:32px;height:32px;background:linear-gradient(135deg,#FF7A59,#FFB347);font-size:12px">M</div>
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span style="font-weight:600">Marie</span><span style="font-weight:700;color:var(--accent)">–14 €</span></div>
+                  <div class="prog-track"><div class="prog-fill" style="width:55%;background:linear-gradient(90deg,#FF7A59,#FFB347)"></div></div>
+                </div>
+              </div>
+              <div class="member-prog-item">
+                <div class="av-circle" style="width:32px;height:32px;background:linear-gradient(135deg,#34D399,#5B6CFF);font-size:12px">T</div>
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span style="font-weight:600">Thibault</span><span style="font-weight:700;color:var(--success)">+22 €</span></div>
+                  <div class="prog-track"><div class="prog-fill" style="width:65%;background:linear-gradient(90deg,#34D399,#5B6CFF)"></div></div>
+                </div>
+              </div>
+              <div class="member-prog-item">
+                <div class="av-circle" style="width:32px;height:32px;background:linear-gradient(135deg,#A78BFA,#EC4899);font-size:12px">J</div>
+                <div style="flex:1">
+                  <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px"><span style="font-weight:600">Julie</span><span style="font-weight:700;color:var(--accent)">–40 €</span></div>
+                  <div class="prog-track"><div class="prog-fill" style="width:40%;background:linear-gradient(90deg,#A78BFA,#EC4899)"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div><!-- /depenses -->
+
+
+    <!-- ══════════════════════════════════
+         SCREEN 3 — TÂCHES
+    ══════════════════════════════════ -->
+    <div id="screen-taches" class="screen">
+
+      <div class="page-header">
+        <div class="page-title-group">
+          <div class="page-eyebrow">Semaine du 24 au 2 mars</div>
+          <div class="page-title">Tâches <span>& Ménage</span></div>
+        </div>
+        <div class="header-actions">
+          <div class="filter-row">
+            <button class="filter-btn active">Kanban</button>
+            <button class="filter-btn">Rota</button>
+            <button class="filter-btn">Liste</button>
+          </div>
+          <button class="btn btn-primary">＋ Nouvelle tâche</button>
+        </div>
+      </div>
+
+      <!-- Mini stats -->
+      <div class="task-stats">
+        <div class="ts-card"><div class="ts-num" style="color:var(--primary)">13</div><div class="ts-lbl">Total ce mois</div></div>
+        <div class="ts-card"><div class="ts-num" style="color:var(--success)">8</div><div class="ts-lbl">Terminées ✅</div></div>
+        <div class="ts-card"><div class="ts-num" style="color:var(--accent)">3</div><div class="ts-lbl">En cours 🔄</div></div>
+        <div class="ts-card"><div class="ts-num" style="color:var(--text-muted)">2</div><div class="ts-lbl">À faire 📋</div></div>
+      </div>
+
+      <!-- Kanban board -->
+      <div class="kanban">
+
+        <!-- À faire -->
+        <div class="kan-col">
+          <div class="kan-col-head">
+            <span style="font-size:18px">📋</span>
+            <div class="kan-col-title">À faire</div>
+            <div class="kan-count" style="background:var(--text-muted)">2</div>
+          </div>
+
+          <div class="kan-card">
+            <div class="kan-card-title">🧽 Nettoyer la salle de bain</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Zone principale · Rotation hebdo</div>
+            <div class="kan-card-meta">
+              <span class="kan-card-due due-today">Auj.</span>
+              <span class="tag tag-orange" style="font-size:10.5px">Priorité haute</span>
+              <div class="kan-card-av" style="background:#A78BFA">J</div>
+            </div>
+          </div>
+
+          <div class="kan-card">
+            <div class="kan-card-title">🛒 Aller aux courses de la semaine</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Budget max : 80 € · Liste partagée</div>
+            <div class="kan-card-meta">
+              <span class="kan-card-due due-ok">Sam. 1 mars</span>
+              <div class="kan-card-av" style="background:#FF7A59">M</div>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;padding:12px;border:2px dashed var(--border);border-radius:12px;text-align:center;color:var(--text-muted);font-size:13px;cursor:pointer" onclick="">
+            ＋ Ajouter une tâche
+          </div>
+        </div>
+
+        <!-- En cours -->
+        <div class="kan-col">
+          <div class="kan-col-head">
+            <span style="font-size:18px">🔄</span>
+            <div class="kan-col-title">En cours</div>
+            <div class="kan-count" style="background:var(--primary)">3</div>
+          </div>
+
+          <div class="kan-card" style="border-color:rgba(91,108,255,0.25);box-shadow:0 4px 14px rgba(91,108,255,0.08)">
+            <div class="kan-card-title">🧹 Passer l'aspirateur — Salon</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Commencé ce matin</div>
+            <div style="margin-bottom:10px">
+              <div class="prog-head" style="font-size:11.5px"><span>Progression</span><span style="font-weight:600">60%</span></div>
+              <div class="prog-track"><div class="prog-fill" style="width:60%;background:linear-gradient(90deg,#5B6CFF,#A78BFA)"></div></div>
+            </div>
+            <div class="kan-card-meta">
+              <span class="kan-card-due due-today">Auj.</span>
+              <div class="kan-card-av" style="background:#5B6CFF">L</div>
+            </div>
+          </div>
+
+          <div class="kan-card">
+            <div class="kan-card-title">🪴 Arroser les plantes</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Plantes salon + cuisine</div>
+            <div class="kan-card-meta">
+              <span class="kan-card-due due-ok">Demain</span>
+              <div class="kan-card-av" style="background:#34D399">T</div>
+            </div>
+          </div>
+
+          <div class="kan-card">
+            <div class="kan-card-title">🧺 Faire la lessive commune</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Serviettes + torchons</div>
+            <div class="kan-card-meta">
+              <span class="kan-card-due due-late">En retard</span>
+              <div class="kan-card-av" style="background:#A78BFA">J</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminées -->
+        <div class="kan-col">
+          <div class="kan-col-head">
+            <span style="font-size:18px">✅</span>
+            <div class="kan-col-title">Terminées</div>
+            <div class="kan-count" style="background:var(--success)">8</div>
+          </div>
+
+          <div class="kan-card" style="opacity:0.75">
+            <div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🗑️ Sortir les poubelles</div>
+            <div class="kan-card-meta">
+              <span class="tag tag-green">Fait ✓</span>
+              <div class="av-circle" style="width:22px;height:22px;background:#FF7A59;font-size:9px;margin-left:auto">M</div>
+            </div>
+          </div>
+
+          <div class="kan-card" style="opacity:0.75">
+            <div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🍽️ Faire la vaisselle</div>
+            <div class="kan-card-meta">
+              <span class="tag tag-green">Fait ✓</span>
+              <div class="av-circle" style="width:22px;height:22px;background:#5B6CFF;font-size:9px;margin-left:auto">L</div>
+            </div>
+          </div>
+
+          <div class="kan-card" style="opacity:0.75">
+            <div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">📦 Vider le compost</div>
+            <div class="kan-card-meta">
+              <span class="tag tag-green">Fait ✓</span>
+              <div class="av-circle" style="width:22px;height:22px;background:#34D399;font-size:9px;margin-left:auto">T</div>
+            </div>
+          </div>
+
+          <div class="kan-card" style="opacity:0.75">
+            <div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🪥 Nettoyer les toilettes</div>
+            <div class="kan-card-meta">
+              <span class="tag tag-green">Fait ✓</span>
+              <div class="av-circle" style="width:22px;height:22px;background:#A78BFA;font-size:9px;margin-left:auto">J</div>
+            </div>
+          </div>
+
+          <div class="kan-card" style="opacity:0.75">
+            <div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🛒 Produits ménagers</div>
+            <div class="kan-card-meta">
+              <span class="tag tag-green">Fait ✓</span>
+              <div class="av-circle" style="width:22px;height:22px;background:#5B6CFF;font-size:9px;margin-left:auto">L</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Rota hebdo -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-title">📆 Rotation ménagère — cette semaine</div>
+          <a class="sec-link">Modifier le planning →</a>
+        </div>
+        <div class="rota-grid">
+          <div></div>
+          <div class="rota-header">Lun 24</div>
+          <div class="rota-header">Mar 25</div>
+          <div class="rota-header">Mer 26</div>
+          <div class="rota-header" style="color:var(--primary);font-weight:700">Jeu 27 ★</div>
+          <div class="rota-header">Ven 28</div>
+          <div class="rota-header">Sam 1</div>
+          <div class="rota-header">Dim 2</div>
+
+          <!-- Cuisine -->
+          <div class="rota-row-label">🍳 Cuisine</div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#5B6CFF">L</div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#FF7A59">M</div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
+          <div class="rota-cell assigned today-col"><div class="rota-av-sm" style="background:#34D399">T</div><div style="font-size:9px;color:var(--accent);font-weight:600">Auj.</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#A78BFA">J</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+
+          <!-- Salon -->
+          <div class="rota-row-label">🛋️ Salon</div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#A78BFA">J</div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned today-col"><div class="rota-av-sm" style="background:#5B6CFF">L</div><div style="font-size:9px;color:var(--accent);font-weight:600">En cours</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#FF7A59">M</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#34D399">T</div></div>
+
+          <!-- Salle de bain -->
+          <div class="rota-row-label">🚿 S. de bain</div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#FF7A59">M</div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#34D399">T</div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
+          <div class="rota-cell today-col"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#A78BFA">J</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#5B6CFF">L</div></div>
+
+          <!-- Poubelles -->
+          <div class="rota-row-label">🗑️ Poubelles</div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#5B6CFF">L</div><div class="checkmark">✓</div></div>
+          <div class="rota-cell today-col"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+          <div class="rota-cell assigned"><div class="rota-av-sm" style="background:#FF7A59">M</div></div>
+          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
+
+        </div>
+      </div>
+
+    </div><!-- /taches -->
+
+
+    <!-- ══════════════════════════════════
+         SCREEN 4 — CHAT
+    ══════════════════════════════════ -->
+    <div id="screen-chat" class="screen">
+
+      <div class="page-header" style="margin-bottom:16px">
+        <div class="page-title-group">
+          <div class="page-eyebrow">4 membres en ligne</div>
+          <div class="page-title">Messages <span>coloc</span></div>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost">＋ Nouveau salon</button>
+        </div>
+      </div>
+
+      <div class="chat-layout">
+
+        <!-- Channels -->
+        <div class="channels-panel">
+          <div class="chan-head">
+            <div class="chan-head-title">🏡 Appart' Voltaire</div>
+          </div>
+          <div class="chan-section">
+            <span class="chan-sec-label">Salons</span>
+            <div class="chan-item active">
+              <span class="chan-icon">💬</span>
+              <span class="chan-name">général</span>
+            </div>
+            <div class="chan-item">
+              <span class="chan-icon">🛒</span>
+              <span class="chan-name">courses</span>
+              <span class="chan-badge">1</span>
+            </div>
+            <div class="chan-item">
+              <span class="chan-icon">📅</span>
+              <span class="chan-name">planning</span>
+            </div>
+            <div class="chan-item">
+              <span class="chan-icon">💸</span>
+              <span class="chan-name">dépenses</span>
+              <span class="chan-badge">2</span>
+            </div>
+            <div class="chan-item">
+              <span class="chan-icon">🎉</span>
+              <span class="chan-name">événements</span>
+            </div>
+            <div class="chan-item">
+              <span class="chan-icon">📢</span>
+              <span class="chan-name">annonces</span>
+            </div>
+          </div>
+          <div class="chan-section">
+            <span class="chan-sec-label">Messages privés</span>
+            <div class="dm-item">
+              <div class="dm-av-wrap">
+                <div class="dm-av" style="background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+                <div class="dm-online"></div>
+              </div>
+              <span class="dm-name">Marie</span>
+              <span class="dm-time">10:24</span>
+            </div>
+            <div class="dm-item">
+              <div class="dm-av-wrap">
+                <div class="dm-av" style="background:linear-gradient(135deg,#34D399,#5B6CFF)">T</div>
+                <div class="dm-online"></div>
+              </div>
+              <span class="dm-name">Thibault</span>
+              <span class="dm-time">Hier</span>
+            </div>
+            <div class="dm-item">
+              <div class="dm-av-wrap">
+                <div class="dm-av" style="background:linear-gradient(135deg,#A78BFA,#EC4899)">J</div>
+              </div>
+              <span class="dm-name">Julie</span>
+              <span class="dm-time">Lun</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-panel">
+          <div class="chat-header">
+            <span style="font-size:20px">💬</span>
+            <div>
+              <div class="chat-title"># général</div>
+              <div class="chat-sub">4 membres · Appart' Voltaire</div>
+            </div>
+            <div class="chat-actions">
+              <button class="btn-icon" style="width:36px;height:36px;font-size:16px">🔍</button>
+              <button class="btn-icon" style="width:36px;height:36px;font-size:16px">📌</button>
+              <button class="btn-icon" style="width:36px;height:36px;font-size:16px">👥</button>
+            </div>
+          </div>
+
+          <div class="chat-messages">
+
+            <div class="chat-date">Mercredi 26 février</div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+              </div>
+              <div class="msg-content">
+                <div class="msg-sender">Marie</div>
+                <div class="bubble bubble-other">Salut tout le monde ! 👋 Quelqu'un a vu la télécommande de la télé ?</div>
+                <div class="msg-time">09:14</div>
+              </div>
+            </div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#34D399,#5B6CFF)">T</div>
+              </div>
+              <div class="msg-content">
+                <div class="msg-sender">Thibault</div>
+                <div class="bubble bubble-other">Haha je l'avais laissée sur le canapé ce matin 😅</div>
+                <div class="msg-time">09:22</div>
+              </div>
+            </div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+              </div>
+              <div class="msg-content">
+                <div class="msg-sender">Marie</div>
+                <div class="bubble bubble-other">Au fait, j'ai ajouté les courses de ce matin sur l'appli !</div>
+                <div class="msg-time">09:45</div>
+              </div>
+            </div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+              </div>
+              <div class="msg-content">
+                <!-- Card message: dépense partagée -->
+                <div class="msg-card">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                    <span style="font-size:20px">🛒</span>
+                    <div>
+                      <div class="msg-card-title">Dépense ajoutée</div>
+                      <div style="font-size:11px;color:var(--text-muted)">Partagée entre 4 colocataires</div>
+                    </div>
+                    <span class="status status-pending" style="margin-left:auto;font-size:10px">En attente</span>
+                  </div>
+                  <div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:10px">
+                    <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:2px">
+                      <span>Courses Monoprix</span>
+                      <span style="color:var(--accent)">57,00 €</span>
+                    </div>
+                    <div style="font-size:11.5px;color:var(--text-muted)">Ta part : <strong style="color:var(--text)">14,25 €</strong></div>
+                  </div>
+                  <div class="msg-card-action">
+                    <button class="msg-card-btn mcb-primary">✓ Confirmer</button>
+                    <button class="msg-card-btn mcb-ghost">Voir détails</button>
+                  </div>
+                </div>
+                <div class="msg-time">09:46</div>
+              </div>
+            </div>
+
+            <div class="chat-date">Aujourd'hui · 27 février</div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#A78BFA,#EC4899)">J</div>
+              </div>
+              <div class="msg-content">
+                <div class="msg-sender">Julie</div>
+                <div class="bubble bubble-other">Bonjour ! 🌞 Quelqu'un peut acheter du liquide vaisselle ? On est à cours</div>
+                <div class="msg-time">08:30</div>
+              </div>
+            </div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#A78BFA,#EC4899)">J</div>
+              </div>
+              <div class="msg-content">
+                <div class="bubble bubble-emoji">🙏</div>
+              </div>
+            </div>
+
+            <div class="msg-group mine">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#5B6CFF,#A78BFA)">L</div>
+              </div>
+              <div class="msg-content">
+                <div class="bubble bubble-mine">Pas de souci ! Je passe au supermarché ce soir, j'en prends 🙌</div>
+                <div class="msg-time" style="text-align:right">10:05</div>
+              </div>
+            </div>
+
+            <div class="msg-group mine">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#5B6CFF,#A78BFA)">L</div>
+              </div>
+              <div class="msg-content">
+                <div class="bubble bubble-mine">Au fait, qui est dispo vendredi soir pour la soirée raclette ? 🧀</div>
+                <div class="msg-time" style="text-align:right">10:06</div>
+              </div>
+            </div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#34D399,#5B6CFF)">T</div>
+              </div>
+              <div class="msg-content">
+                <div class="msg-sender">Thibault</div>
+                <div class="bubble bubble-other">Moi ! J'ai déjà voté vendredi dans le sondage 🙋‍♂️</div>
+                <div class="msg-time">10:18</div>
+              </div>
+            </div>
+
+            <div class="msg-group">
+              <div class="msg-av-col">
+                <div class="msg-av" style="background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+              </div>
+              <div class="msg-content">
+                <div class="msg-sender">Marie</div>
+                <div class="bubble bubble-other">Pareil pour moi ✋ Hâte !</div>
+                <div class="msg-time">10:24</div>
+              </div>
+            </div>
+
+            <!-- typing -->
+            <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+              <div class="msg-av" style="background:linear-gradient(135deg,#A78BFA,#EC4899);width:30px;height:30px;font-size:11px;flex-shrink:0">J</div>
+              <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+              </div>
+              <div style="font-size:11.5px;color:var(--text-muted)">Julie est en train d'écrire…</div>
+            </div>
+
+          </div><!-- /chat-messages -->
+
+          <div class="chat-input-wrap">
+            <div class="chat-input-box">
+              <div class="chat-actions-row">
+                <button class="chat-action-btn">😊</button>
+                <button class="chat-action-btn">📎</button>
+                <button class="chat-action-btn">🖼️</button>
+              </div>
+              <div class="chat-input-placeholder">Écrire un message dans #général…</div>
+              <div class="chat-actions-row">
+                <button class="chat-action-btn">💸</button>
+                <button class="chat-action-btn">📋</button>
+              </div>
+              <button class="send-btn">➤</button>
+            </div>
+          </div>
+
+        </div><!-- /chat-panel -->
+
+        <!-- Chat sidebar: info + members -->
+        <div class="chat-sidebar">
+
+          <div class="chat-sidebar-section">
+            <div class="css-title">📌 Épinglés</div>
+            <div class="pinned-item">
+              <div class="pinned-icon">💰</div>
+              <div class="pinned-info">
+                <div class="pinned-name">Loyer mars — 3 mars</div>
+                <div class="pinned-meta">600 € · Epinglé par Lucas</div>
+              </div>
+            </div>
+            <div class="pinned-item">
+              <div class="pinned-icon">🗳️</div>
+              <div class="pinned-info">
+                <div class="pinned-name">Vote soirée raclette</div>
+                <div class="pinned-meta">3 votes · Se termine demain</div>
+              </div>
+            </div>
+            <div class="pinned-item">
+              <div class="pinned-icon">📄</div>
+              <div class="pinned-info">
+                <div class="pinned-name">Règles de la coloc</div>
+                <div class="pinned-meta">PDF · Mis à jour janv.</div>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid var(--border)">
+
+          <div class="chat-sidebar-section">
+            <div class="css-title">👥 Membres en ligne</div>
+            <div class="online-member">
+              <div class="dm-av-wrap">
+                <div class="dm-av" style="width:34px;height:34px;font-size:13px;background:linear-gradient(135deg,#5B6CFF,#A78BFA)">L</div>
+                <div class="dm-online"></div>
+              </div>
+              <div class="online-info">
+                <div class="online-name">Lucas <span style="font-size:11px;color:var(--text-muted)">(toi)</span></div>
+                <div class="online-status">En ligne</div>
+              </div>
+              <span class="online-pill">✓</span>
+            </div>
+            <div class="online-member">
+              <div class="dm-av-wrap">
+                <div class="dm-av" style="width:34px;height:34px;font-size:13px;background:linear-gradient(135deg,#FF7A59,#FFB347)">M</div>
+                <div class="dm-online"></div>
+              </div>
+              <div class="online-info">
+                <div class="online-name">Marie</div>
+                <div class="online-status">En ligne</div>
+              </div>
+              <span class="online-pill">✓</span>
+            </div>
+            <div class="online-member">
+              <div class="dm-av-wrap">
+                <div class="dm-av" style="width:34px;height:34px;font-size:13px;background:linear-gradient(135deg,#34D399,#5B6CFF)">T</div>
+                <div class="dm-online"></div>
+              </div>
+              <div class="online-info">
+                <div class="online-name">Thibault</div>
+                <div class="online-status">En ligne</div>
+              </div>
+              <span class="online-pill">✓</span>
+            </div>
+            <div class="online-member">
+              <div class="dm-av-wrap">
+                <div class="dm-av" style="width:34px;height:34px;font-size:13px;background:linear-gradient(135deg,#A78BFA,#EC4899)">J</div>
+              </div>
+              <div class="online-info">
+                <div class="online-name">Julie</div>
+                <div class="online-status" style="color:var(--accent)">Tape…</div>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid var(--border)">
+
+          <div class="chat-sidebar-section">
+            <div class="css-title">📅 Prochains events</div>
+            <div class="cal-strip">
+              <div class="cal-day"><div class="cal-day-name">Lun</div><div class="cal-day-num">24</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day"><div class="cal-day-name">Mar</div><div class="cal-day-num">25</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day"><div class="cal-day-name">Mer</div><div class="cal-day-num">26</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day today"><div class="cal-day-name">Jeu</div><div class="cal-day-num">27</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day"><div class="cal-day-name">Ven</div><div class="cal-day-num">28</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day no-event"><div class="cal-day-name">Sam</div><div class="cal-day-num">1</div><div class="cal-day-dot"></div></div>
+              <div class="cal-day no-event"><div class="cal-day-name">Dim</div><div class="cal-day-num">2</div><div class="cal-day-dot"></div></div>
+            </div>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px">
+              <div style="padding:10px 12px;background:rgba(255,122,89,0.08);border-radius:12px;border-left:3px solid var(--accent)">
+                <div style="font-size:12.5px;font-weight:600">💰 Loyer à payer</div>
+                <div style="font-size:11px;color:var(--text-muted)">Lundi 3 mars · 600 €</div>
+              </div>
+              <div style="padding:10px 12px;background:rgba(91,108,255,0.07);border-radius:12px;border-left:3px solid var(--primary)">
+                <div style="font-size:12.5px;font-weight:600">🧀 Soirée raclette</div>
+                <div style="font-size:11px;color:var(--text-muted)">Vendredi 28 fév. · 20h</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /chat-sidebar -->
+
+      </div><!-- /chat-layout -->
+
+    </div><!-- /chat -->
+
+  </main>
+</div><!-- /app -->
+
+<script>
+function showScreen(id, navBtn) {
+  // hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  // show target
+  const target = document.getElementById('screen-' + id);
+  if (target) target.classList.add('active');
+
+  // update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navBtn) {
+    navBtn.classList.add('active');
+  } else {
+    // find matching nav item and activate it
+    const icons = { dashboard: '🏠', depenses: '💸', taches: '🧹', chat: '💬' };
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.textContent.includes(icons[id])) n.classList.add('active');
+    });
+  }
+
+  // scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Filter button toggle
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const siblings = this.closest('.filter-row') ? this.closest('.filter-row').querySelectorAll('.filter-btn') : this.parentElement.querySelectorAll('.filter-btn');
+    siblings.forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
