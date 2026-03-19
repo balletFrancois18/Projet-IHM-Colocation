@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoLoc — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+}
+
+.login-card {
+  background: var(--surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.65);
+  border-radius: 28px;
+  padding: 44px 44px 40px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.10);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+  border-radius: 28px 28px 0 0;
+}
+
+/* Logo */
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.login-logo-icon {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 6px 18px rgba(91,108,255,0.40);
+  flex-shrink: 0;
+}
+.login-logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.login-logo-text span { color: var(--primary); }
+
+/* Heading */
+.login-heading {
+  margin-bottom: 28px;
+}
+.login-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -0.4px;
+  margin-bottom: 6px;
+}
+.login-subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Form */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 17px;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
+.form-input {
+  width: 100%;
+  padding: 13px 14px 13px 44px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border);
+  background: rgba(246,248,252,0.9);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s ease-out;
+}
+.form-input::placeholder { color: var(--text-muted); }
+.form-input:focus {
+  border-color: var(--primary);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(91,108,255,0.10);
+}
+
+.form-input-action {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  color: var(--text-muted);
+  padding: 4px;
+  transition: color 0.2s ease-out;
+}
+.form-input-action:hover { color: var(--text); }
+
+/* Remember + forgot */
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.checkbox-label input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.checkbox-label input[type="checkbox"]:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 11px;
+}
+
+.forgot-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease-out;
+}
+.forgot-link:hover { opacity: 0.75; }
+
+/* Submit button */
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  box-shadow: 0 6px 20px rgba(91,108,255,0.38);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-login:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 8px 28px rgba(91,108,255,0.48);
+  transform: translateY(-1px);
+}
+.btn-login:active { transform: translateY(0); }
+
+/* Divider */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Social buttons */
+.social-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 13px;
+  border: 1.5px solid var(--border);
+  background: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  box-shadow: var(--shadow);
+}
+.btn-social:hover {
+  border-color: rgba(91,108,255,0.25);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+.btn-social-icon { font-size: 18px; }
+
+/* Signup link */
+.login-footer {
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-top: 24px;
+}
+.login-footer a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.login-footer a:hover { text-decoration: underline; }
+
+/* Coloc avatars preview */
+.coloc-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--primary-light);
+  border: 1px solid rgba(91,108,255,0.14);
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 28px;
+}
+.coloc-preview-avatars {
+  display: flex;
+}
+.coloc-preview-avatars .pav {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2.5px solid white;
+  margin-left: -8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+.coloc-preview-avatars .pav:first-child { margin-left: 0; }
+.coloc-preview-text {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.coloc-preview-text span {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Error message */
+.form-error {
+  display: none;
+  font-size: 12px;
+  color: #DC2626;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 10px 13px;
+  gap: 7px;
+  align-items: center;
+}
+.form-error.visible { display: flex; }
+</style>
+</head>
+<body>
+
+<!-- bg blobs -->
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="bg-blob bg-blob-3"></div>
+
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <div class="login-logo-icon">🏠</div>
+      <div class="login-logo-text">Co<span>Loc</span></div>
+    </div>
+
+    <!-- Coloc invite banner -->
+    <div class="coloc-preview">
+      <div class="coloc-preview-avatars">
+        <div class="pav" style="background: linear-gradient(135deg,#5B6CFF,#818CF8);">N</div>
+        <div class="pav" style="background: linear-gradient(135deg,#FF7A59,#FFB347);">L</div>
+        <div class="pav" style="background: linear-gradient(135deg,#34D399,#059669);">F</div>
+        <div class="pav" style="background: linear-gradient(135deg,#A78BFA,#7C3AED);">B</div>
+      </div>
+      <div class="coloc-preview-text">
+        Appart' des 4 vous attend !<br>
+        <span>Rejoignez votre colocation</span>
+      </div>
+    </div>
+
+    <!-- Error banner -->
+    <div class="form-error" id="errorMsg">
+      <span>⚠️</span>
+      <span>Email ou mot de passe incorrect.</span>
+    </div>
+
+    <!-- Form -->
+    <form class="login-form" onsubmit="handleLogin(event)">
+
+      <div class="form-group">
+        <label class="form-label" for="email">Adresse email</label>
+        <div class="form-input-wrap">
+          <span class="form-input-icon">✉️</span>
+          <input
+            class="form-input"
+            type="email"
+            id="email"
+            placeholder="vous@exemple.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Mot de passe</label>
+        <div class="form-input-wrap">
+          <span class="form-input-icon">🔒</span>
+          <input
+            class="form-input"
+            type="password"
+            id="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          >
+          <button type="button" class="form-input-action" onclick="togglePassword()" id="eyeBtn" title="Afficher/masquer">👁️</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-login">
+        <span>Se connecter</span>
+        <span>→</span>
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+<script>
+  function togglePassword() {
+    const input = document.getElementById('password');
+    const btn = document.getElementById('eyeBtn');
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁️';
+    }
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    const email    = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('errorMsg');
+    const btn      = e.target.querySelector('.btn-login');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>Connexion…</span>';
+    errorDiv.classList.remove('visible');
+
+    try {
+      const res  = await fetch('http://localhost:5000/api/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errorDiv.querySelector('span:last-child').textContent = data.error;
+        errorDiv.classList.add('visible');
+        btn.disabled = false;
+        btn.innerHTML = '<span>Se connecter</span><span>→</span>';
+      } else {
+        window.location.href = 'Template.html';
+      }
+    } catch {
+      errorDiv.querySelector('span:last-child').textContent = 'Impossible de joindre le serveur.';
+      errorDiv.classList.add('visible');
+      btn.disabled = false;
+      btn.innerHTML = '<span>Se connecter</span><span>→</span>';
+    }
+  }
+</script>
+
+</body>
+</html>
