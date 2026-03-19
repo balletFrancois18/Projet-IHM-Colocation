@@ -44,6 +44,15 @@ pip list
 
 activer le venv à chaque nouveau terminal
 
+
+
+créer le venv dans le dossier
+```
+python3 -m venv venv
+```
+
+
+activer le venv
 ```
 source venv/bin/activate
 ```
