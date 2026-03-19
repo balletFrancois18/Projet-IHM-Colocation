@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, flash, render_template, request, redirect, url_for, session
 from models import db, User
 
 auth_bp = Blueprint('auth', __name__)
@@ -18,8 +18,10 @@ def inscription():
         )
         db.session.add(nouveau)
         db.session.commit()
-        return redirect(url_for('index'))
+        flash('Compte créé avec succès ! Connectez-vous.', 'success')
+        return redirect(url_for('auth.login'))
     return render_template('inscription.html')
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
