@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from flask_mail import Mail
 from models import db, Tache, Depense
 from routes.taches   import taches_bp
 from routes.depenses import depenses_bp
@@ -9,6 +10,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coloc.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'changeme'
 
+app.config['MAIL_SERVER']        = 'smtp.gmail.com'
+app.config['MAIL_PORT']          = 587
+app.config['MAIL_USE_TLS']       = True
+app.config['MAIL_USERNAME']      = 'ton.email@gmail.com'  # ← ton Gmail
+app.config['MAIL_PASSWORD']      = 'abcdefghijklmnop'     # ← le code 16 caractères
+app.config['MAIL_DEFAULT_SENDER'] = 'ton.email@gmail.com'
+
+mail = Mail(app)
 db.init_app(app)
 
 app.register_blueprint(taches_bp)
