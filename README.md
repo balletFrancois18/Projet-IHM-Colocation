@@ -19,3 +19,12 @@ coloc-app/
 ├── templates/
 ├── static/
 └── coloc.db
+
+# installations
+
+
+Vérifie les packages installés sont dans la liste
+
+```
+pip list
+```
