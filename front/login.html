@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>Appart' Voltaire 🏡</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style-login.css">
+</head>
+<body>
+
+<div class="scene"></div>
+
+<div class="top-bar">
+  <div class="top-logo">
+    <div class="top-logo-icon">🏡</div>
+    <div class="top-logo-name">Appart' <span>Voltaire</span></div>
+  </div>
+  <div class="top-time" id="clock"></div>
+</div>
+
+<div class="wrapper">
+
+  <!-- Chargement -->
+  <div id="screen-loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Connexion à la coloc…</div>
+  </div>
+
+  <!-- Erreur Flask pas lancé -->
+  <div id="screen-error">
+    <div class="error-icon">😴</div>
+    <div class="error-title">Le serveur est éteint</div>
+    <div class="error-msg">
+      Lance le serveur Flask avec <code>python app.py</code> puis recharge la page.
+    </div>
+    <button class="btn-retry" onclick="init()">🔄 Réessayer</button>
+  </div>
+
+  <!-- ÉCRAN 1 : Qui es-tu ? -->
+  <div id="screen-pick">
+    <div class="pick-eyebrow">Accès privé · Résidents uniquement</div>
+    <div class="pick-title">C'est qui ? <span class="wave">👋</span></div>
+    <div class="pick-sub">Sélectionne ton profil pour entrer dans la coloc</div>
+    <div class="coloc-grid" id="coloc-grid"></div>
+  </div>
+
+  <!-- ÉCRAN 2 : PIN -->
+  <div id="screen-pin">
+    <div class="pin-avatar" id="pin-avatar"></div>
+    <div class="pin-greeting" id="pin-greeting"></div>
+    <div class="pin-sub">Entre ton code PIN à 4 chiffres</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="dot-0"></div>
+      <div class="pin-dot" id="dot-1"></div>
+      <div class="pin-dot" id="dot-2"></div>
+      <div class="pin-dot" id="dot-3"></div>
+    </div>
+    <div class="pin-error" id="pin-error">Code incorrect, réessaie 🙈</div>
+    <div class="pin-loading" id="pin-loading">Vérification…</div>
+    <div class="pin-pad" id="pin-pad">
+      <button class="pin-key" onclick="pressKey('1')"><div class="key-num">1</div></button>
+      <button class="pin-key" onclick="pressKey('2')"><div class="key-num">2</div><div class="key-letters">ABC</div></button>
+      <button class="pin-key" onclick="pressKey('3')"><div class="key-num">3</div><div class="key-letters">DEF</div></button>
+      <button class="pin-key" onclick="pressKey('4')"><div class="key-num">4</div><div class="key-letters">GHI</div></button>
+      <button class="pin-key" onclick="pressKey('5')"><div class="key-num">5</div><div class="key-letters">JKL</div></button>
+      <button class="pin-key" onclick="pressKey('6')"><div class="key-num">6</div><div class="key-letters">MNO</div></button>
+      <button class="pin-key" onclick="pressKey('7')"><div class="key-num">7</div><div class="key-letters">PQRS</div></button>
+      <button class="pin-key" onclick="pressKey('8')"><div class="key-num">8</div><div class="key-letters">TUV</div></button>
+      <button class="pin-key" onclick="pressKey('9')"><div class="key-num">9</div><div class="key-letters">WXYZ</div></button>
+      <button class="pin-key key-empty"></button>
+      <button class="pin-key" onclick="pressKey('0')"><div class="key-num">0</div></button>
+      <button class="pin-key key-del" onclick="deleteLast()">⌫</button>
+    </div>
+    <button class="back-btn" onclick="goBack()">← Changer de profil</button>
+  </div>
+
+</div>
+
+<!-- Succès -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-content">
+    <div class="success-icon">🏡</div>
+    <div class="success-text" id="success-text"></div>
+    <div class="success-sub">Redirection en cours…</div>
+  </div>
+</div>
+
+<div class="page-footer">Appart' Voltaire · Accès réservé aux résidents · 2026</div>
+
+<script>
+/* ════════════════════════════════
+   CONFIG
+   Si un autre ordi accède au serveur,
+   remplace localhost par l'IP Flask
+════════════════════════════════ */
+const API = 'http://163.173.113.178:5000'
+
+/* ════════════════════════════════
+   ÉTAT
+════════════════════════ */
+let currentUser = null
+let enteredPin  = ''
+let isChecking  = false
+
+/* ════════════════════════════════
+   INIT — charge les users depuis Flask
+════════════════════════ */
+async function init() {
+  showScreen('loading')
+  try {
+    const res   = await fetch(`${API}/api/users`)
+    if (!res.ok) throw new Error('Serveur inaccessible')
+    const users = await res.json()
+    buildGrid(users)
+    showScreen('pick')
+  } catch(e) {
+    console.error('Flask inaccessible :', e)
+    showScreen('error')
+  }
+}
+
+/* ════════════════════════════════
+   GÉNÈRE LES CARTES depuis les users Flask
+════════════════════════ */
+const EMOJIS = { admin: '👑', coloc: '🏠' }
+
+function buildGrid(users) {
+  const grid = document.getElementById('coloc-grid')
+  grid.innerHTML = ''
+
+  users.forEach((user, i) => {
+    const initial = user.name[0].toUpperCase()
+    const isAdmin = user.role === 'admin'
+
+    const card = document.createElement('button')
+    card.className = 'coloc-btn'
+    card.style.animationDelay = `${i * 0.07}s`
+    card.onclick = () => selectColoc(user)
+
+    card.innerHTML = `
+      <div class="coloc-role-badge ${isAdmin ? 'admin' : ''}">
+        ${isAdmin ? '👑 Admin' : 'Coloc'}
+      </div>
+      <div class="coloc-av" style="background:${user.color}">${initial}</div>
+      <div class="coloc-name">${user.name}</div>
+      <div class="coloc-role-txt">${isAdmin ? 'Administrateur' : 'Colocataire'}</div>
+    `
+
+    // Lueur colorée au hover
+    card.addEventListener('mouseenter', () => {
+      card.style.boxShadow = `0 24px 48px ${user.color}30, 0 0 0 1px ${user.color}40`
+    })
+    card.addEventListener('mouseleave', () => {
+      card.style.boxShadow = ''
+    })
+
+    grid.appendChild(card)
+  })
+}
+
+/* ════════════════════════════════
+   SÉLECTION COLOCATAIRE
+════════════════════════ */
+function selectColoc(user) {
+  currentUser = user
+  enteredPin  = ''
+  resetDots()
+  hideError()
+  hidePinLoading()
+
+  const av = document.getElementById('pin-avatar')
+  av.style.background = user.color
+  av.textContent = user.name[0].toUpperCase()
+
+  document.getElementById('pin-greeting').textContent =
+    `Salut ${user.name} 👋`
+
+  setPadDisabled(false)
+  showScreen('pin')
+}
+
+function goBack() {
+  enteredPin  = ''
+  isChecking  = false
+  resetDots(); hideError(); hidePinLoading()
+  setPadDisabled(false)
+  showScreen('pick')
+}
+
+/* ════════════════════════════════
+   CLAVIER PIN
+════════════════════════ */
+function pressKey(num) {
+  if (enteredPin.length >= 4 || isChecking) return
+  enteredPin += num
+
+  const dot = document.getElementById(`dot-${enteredPin.length - 1}`)
+  dot.classList.add('filled')
+  dot.style.background = currentUser.color
+  hideError()
+
+  if (enteredPin.length === 4) setTimeout(verifyPin, 120)
+}
+
+function deleteLast() {
+  if (!enteredPin.length || isChecking) return
+  const dot = document.getElementById(`dot-${enteredPin.length - 1}`)
+  dot.classList.remove('filled'); dot.style.background = ''
+  enteredPin = enteredPin.slice(0,-1)
+  hideError()
+}
+
+/* ════════════════════════════════
+   VÉRIFICATION PIN via Flask
+════════════════════════ */
+async function verifyPin() {
+  isChecking = true
+  setPadDisabled(true)
+  showPinLoading()
+
+  try {
+    const res  = await fetch(`${API}/api/login`, {
+      method:      'POST',
+      credentials: 'include',       // important pour la session Flask
+      headers:     { 'Content-Type': 'application/json' },
+      body:        JSON.stringify({ email: currentUser.email, pin: enteredPin })
+    })
+
+    const data = await res.json()
+
+    if (res.ok && data.success) {
+      // ✅ PIN correct
+      document.querySelectorAll('.pin-dot').forEach(d => {
+        d.classList.remove('filled'); d.classList.add('success'); d.style.background = ''
+      })
+      hidePinLoading()
+      // Sauvegarde le user en localStorage pour que index.html sache qui est connecté
+      localStorage.setItem('coloc_user', JSON.stringify(data.user))
+      showSuccess(data.user)
+
+    } else {
+      // ❌ PIN incorrect
+      wrongPin()
+    }
+
+  } catch(e) {
+    console.error('Erreur réseau :', e)
+    wrongPin('Erreur réseau, réessaie 🌐')
+  }
+
+  isChecking = false
+  setPadDisabled(false)
+}
+
+function wrongPin(msg = 'Code incorrect, réessaie 🙈') {
+  document.querySelectorAll('.pin-dot').forEach(d => {
+    d.classList.remove('filled'); d.classList.add('error'); d.style.background = ''
+  })
+  hidePinLoading()
+  document.getElementById('pin-error').textContent = msg
+  showError()
+  setTimeout(() => {
+    document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('error'))
+    enteredPin = ''
+    isChecking = false
+    setPadDisabled(false)
+  }, 640)
+}
+
+/* ════════════════════════════════
+   SUCCÈS → REDIRECT
+════════════════════════ */
+function showSuccess(user) {
+  document.getElementById('success-text').textContent = `Bienvenue ${user.name} !`
+  document.getElementById('success-overlay').classList.add('show')
+  setTimeout(() => { window.location.href = 'index.html' }, 1300)
+}
+
+/* ════════════════════════════════
+   UTILS
+════════════════════════ */
+function showScreen(name) {
+  document.getElementById('screen-loading').style.display = name === 'loading' ? 'flex' : 'none'
+  document.getElementById('screen-error').style.display   = name === 'error'   ? 'flex' : 'none'
+  document.getElementById('screen-pick').classList.toggle ('active', name === 'pick')
+  document.getElementById('screen-pin').classList.toggle  ('active', name === 'pin')
+}
+
+function resetDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById(`dot-${i}`)
+    d.classList.remove('filled','error','success'); d.style.background = ''
+  }
+}
+
+function showError()    { document.getElementById('pin-error').classList.add('show') }
+function hideError()    { document.getElementById('pin-error').classList.remove('show') }
+function showPinLoading()  { document.getElementById('pin-loading').classList.add('show') }
+function hidePinLoading()  { document.getElementById('pin-loading').classList.remove('show') }
+
+function setPadDisabled(val) {
+  document.querySelectorAll('#pin-pad .pin-key').forEach(k => k.disabled = val)
+}
+
+// Clavier physique
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('screen-pin').classList.contains('active')) return
+  if (e.key >= '0' && e.key <= '9') pressKey(e.key)
+  if (e.key === 'Backspace') deleteLast()
+  if (e.key === 'Escape') goBack()
+})
+
+// Horloge
+function tick() {
+  const now  = new Date()
+  const h    = String(now.getHours()).padStart(2,'0')
+  const m    = String(now.getMinutes()).padStart(2,'0')
+  const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam']
+  document.getElementById('clock').textContent = `${days[now.getDay()]} · ${h}:${m}`
+}
+tick(); setInterval(tick, 15000)
+
+// Particules
+;(() => {
+  const colors = ['#5B6CFF','#A78BFA','#FF7A59','#34D399','#F472B6','#FBBF24']
+  const style  = document.createElement('style')
+  style.textContent = `@keyframes float {
+    0%   { transform:translateY(110vh) rotate(0deg); opacity:0; }
+    8%   { opacity:1; } 92% { opacity:0.5; }
+    100% { transform:translateY(-10vh) rotate(360deg); opacity:0; }
+  }`
+  document.head.appendChild(style)
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div')
+    const s = Math.random() * 4 + 1.5
+    p.style.cssText = `
+      position:absolute; border-radius:50%; pointer-events:none;
+      width:${s}px; height:${s}px; left:${Math.random()*100}%;
+      background:${colors[i % colors.length]};
+      opacity:${Math.random()*0.3+0.08};
+      animation: float ${Math.random()*18+14}s linear ${Math.random()*12}s infinite;
+    `
+    document.querySelector('.scene').appendChild(p)
+  }
+})()
+
+// Démarrage
+init()
+</script>
+</body>
+</html>
