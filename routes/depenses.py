@@ -1,7 +1,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from models import db, Depense
+# importe les outils Flask nécessaires
 
-depenses_bp = Blueprint('depenses', __name__)#blue print
+from models import db, Depense
+# importe la table Depense depuis models.py
+
+depenses_bp = Blueprint('depenses', __name__)
+# crée un "module" de routes indépendant
+# Blueprint = façon de découper l'app en morceaux
+
 
 @depenses_bp.route('/depenses')
 def liste_depenses():
@@ -10,9 +16,9 @@ def liste_depenses():
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 def ajouter_depense():
     if request.method == 'POST':
-        titre   = request.form['titre']
-        montant = float(request.form['montant'])
-        payeur  = request.form['payeur']
+        titre   = request.form['']
+        montant = float(request.form[''])
+        payeur  = request.form['']
         nouvelle = Depense(titre=titre, montant=montant, payeur=payeur)
         db.session.add(nouvelle)
         db.session.commit()
