@@ -4,6 +4,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coloc.db'
+
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@host/dbname'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -26,8 +28,3 @@ class Tache(db.Model):
     titre    = db.Column(db.String(100), nullable=False)
     assignee = db.Column(db.String(50), nullable=False)
     faite    = db.Column(db.Boolean, default=False)
-
-
-
-
-
