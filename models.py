@@ -1,16 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-<<<<<<< HEAD
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coloc.db'
-
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@host/dbname'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-=======
-db = SQLAlchemy()
->>>>>>> bc62c3aaa78593e30b5b254016e077ee60bffd75
+db = SQLAlchemy()  # Pas de app ici, juste db
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,16 +23,4 @@ class Tache(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titre = db.Column(db.String(100), nullable=False) # ex: CUISINE, MÉNAGE [cite: 61, 62]
     assignee = db.Column(db.String(50), nullable=False)
-<<<<<<< HEAD
     faite    = db.Column(db.Boolean, default=False)
-=======
-    faite = db.Column(db.Boolean, default=False) # L'état X ou DONE [cite: 66, 73]
-    score = db.Column(db.Integer, default=0) # Pour le "SCORE TOTAL" de votre maquette 
-
-class Reservation(db.Model): # Pour la page 7 de vos schémas [cite: 79, 80]
-    id = db.Column(db.Integer, primary_key=True)
-    salle = db.Column(db.String(50), nullable=False) # SALLE DE BAIN, SALON [cite: 80]
-    h_debut = db.Column(db.String(20), nullable=False)
-    h_fin = db.Column(db.String(20), nullable=False)
-    date = db.Column(db.String(20), nullable=False)
->>>>>>> bc62c3aaa78593e30b5b254016e077ee60bffd75
