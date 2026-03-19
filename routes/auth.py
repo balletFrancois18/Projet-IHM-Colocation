@@ -30,7 +30,7 @@ def login():
         if user and user.password == request.form['password']:
             session['user_id'] = user.id
             return redirect(url_for('index'))
-    return render_template('inscription.html')
+    return render_template('login.html')
 
 @auth_bp.route('/logout')
 def logout():

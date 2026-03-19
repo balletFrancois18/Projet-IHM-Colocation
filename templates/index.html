@@ -3,11 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bienvenue — ColocApp</title>
+  <title>CoLoc — Accueil</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-  <h1>Bonjour !</h1>
+
+<body class="index-page">
+  <nav>
+    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="#">Tâches</a>
+    <a href="#">Réservations</a>
+    <a href="#">Chat</a>
+    <a href="#">Bon plan</a>
+    <div class="nav-right">
+      <div class="nav-avatar">👤</div>
+      <button class="btn-profil">Profil</button>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- COLONNE GAUCHE -->
+    <div class="col-left">
+
+      <div class="card">
+        <div class="card-title">Annonces</div>
+        <div class="annonce-item"><div class="annonce-dot"></div><span>Réunion coloc samedi à 18h</span></div>
+        <div class="annonce-item"><div class="annonce-dot"></div><span>Plombier prévu mardi matin</span></div>
+        <div class="annonce-item"><div class="annonce-dot"></div><span>Penser à renouveler le bail</span></div>
+      </div>
+
+      <a href="#" class="btn-chat">Voir le chat</a>
+
+      <div class="card">
+        <div class="card-title" style="text-align:center">• Pot commun</div>
+        <div class="pot-total">
+          {% if depenses %}
+            {{ "%.2f"|format(depenses | sum(attribute='montant')) }} €
+          {% else %}
+            0 €
+          {% endif %}
+        </div>
+
+        {% if depenses %}
+          {% for depense in depenses %}
+          <div class="pot-ligne">
+            <div class="pot-label">
+              <span>{{ depense.titre }}</span>
+              <span>{{ "%.2f"|format(depense.montant) }} €</span>
+            </div>
+            <div class="pot-bar">
+              <div class="pot-bar-seg" style="width:33%; background:#e07c3a;"></div>
+              <div class="pot-bar-seg" style="width:33%; background:#7bafd4;"></div>
+              <div class="pot-bar-seg" style="width:34%; background:#4caf50;"></div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p style="text-align:center; color:#aaa; font-size:0.875rem;">Aucune dépense</p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div class="col-right">
+
+      <div class="card">
+        <div class="card-title" style="text-align:center">Planning</div>
+        <div class="planning-nav">
+          <button>&#8249;</button>
+          <span>Semaine en cours</span>
+          <button>&#8250;</button>
+        </div>
+        <table class="planning-grid">
+          <thead>
+            <tr>
+              <th>Heure</th>
+              <th>Lundi</th>
+              <th>Mardi</th>
+              <th>Mercredi</th>
+              <th>Jeudi</th>
+              <th>Vendredi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="heure">6h</td>
+              <td></td><td><div class="resa">Yoga</div></td>
+              <td></td><td></td><td></td>
+            </tr>
+            <tr>
+              <td class="heure">12h</td>
+              <td><div class="resa">Repas</div></td>
+              <td></td>
+              <td><div class="resa">Repas</div></td>
+              <td><div class="resa">Repas</div></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="heure">23h</td>
+              <td></td>
+              <td><div class="resa">Soirée</div></td>
+              <td></td><td></td>
+              <td><div class="resa">Soirée</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="planning-btns">
+          <button class="btn-planning">Voir mes tâches</button>
+          <button class="btn-planning">Voir mes réservations</button>
+        </div>
+
+      <div class="card">
+        <div class="card-title" style="text-align:center">Historique de présence</div>
+        {% if taches %}
+          {% set colocataires = taches | map(attribute='assignee') | unique | list %}
+          {% for coloc in colocataires %}
+          <div class="presence-item">
+            <div class="presence-avatar present">👤</div>
+            <div>
+              <div class="presence-nom">{{ coloc }}</div>
+              <div class="presence-statut">Présent</div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="presence-item">
+            <div class="presence-avatar present">👤</div>
+            <div><div class="presence-nom">Lucas</div><div class="presence-statut">Présent</div></div>
+          </div>
+          <div class="presence-item">
+            <div class="presence-avatar absent">👤</div>
+            <div><div class="presence-nom">Marie</div><div class="presence-statut">Absent</div></div>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </main>
+
 </body>
 </html>

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inscription — ColocApp</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
+<body class="auth-page">
   <div class="container">
     <div class="logo">
       <div class="logo-icon">🏠</div>
@@ -22,11 +22,11 @@
         <div class="row">
           <div class="field">
             <label for="prenom">Prénom</label>
-            <input type="text" id="prenom" name="prenom" placeholder="Marie" required>
+            <input type="text" id="prenom" name="prenom" placeholder="Prénom" required>
           </div>
           <div class="field">
             <label for="nom">Nom</label>
-            <input type="text" id="nom" name="nom" placeholder="Dupont" required>
+            <input type="text" id="nom" name="nom" placeholder="Nom" required>
           </div>
         </div>
         <div class="field">
@@ -37,11 +37,11 @@
           <label for="password">Mot de passe</label>
           <input type="password" id="password" name="password" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn" href="login.html">Créer mon compte</button>
+        <button type="submit" class="btn" href="{{ url_for('auth.login') }}">Créer mon compte</button>
       </form>
       <div class="link">
         Déjà un compte ?
-        <a href="login.html">Se connecter</a>
+        <a href="{{ url_for('auth.login') }}">Se connecter</a>
       </div>
     </div>
   </div>

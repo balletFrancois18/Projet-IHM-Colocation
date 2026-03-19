@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Connexion — ColocApp</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="auth-page">
   <div class="container">
     <div class="logo">
       <div class="logo-icon">🏠</div>
@@ -15,10 +15,11 @@
       <p>Gérez votre colocation simplement</p>
     </div>
     <div class="card">
-    <!-- ce code permet d'afficher un message qu'on a réussi à créer un compte dans la page de connexion -->
+    <!-- ce code permet d'afficher un message qu'on a réussi à créer un compte dans la page de connexion-->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
-        <div style="
+
+    <div style="
         background: #d4edda;
         color: #155724;
         border: 1px solid #c3e6cb;
@@ -44,7 +45,12 @@
       </form>
       <div class="link">
         Pas encore de compte ?
-        <a href="inscription.html">Créer un compte</a>
+        <a href="{{ url_for('auth.inscription') }}">Créer un compte</a>
+      </div>
+      <div class="link">
+        Mot de passe oublié ?
+        <a href="#">Réinitialiser</a>
+       </div>
       </div>
     </div>
   </div>
