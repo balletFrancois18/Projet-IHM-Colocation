@@ -3,6 +3,10 @@ from models import db, User
 
 auth_bp = Blueprint('auth', __name__)
 
+
+
+
+#stocker les mdp
 @auth_bp.route('/inscription', methods=['GET', 'POST'])
 def inscription():
     if request.method == 'POST':
@@ -24,7 +28,7 @@ def login():
         if user and user.password == request.form['password']:
             session['user_id'] = user.id
             return redirect(url_for('index'))
-    return render_template('login.html')
+    return render_template('inscription.html')
 
 @auth_bp.route('/logout')
 def logout():
