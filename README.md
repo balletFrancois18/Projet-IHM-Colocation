@@ -13,12 +13,10 @@ README
 
 ### Outils
 
-un projet Flask complet prêt à l’emploi,
 avec CRUD colocation,
 upload de fichiers,
 base PostgreSQL ou SQLite,
 pages HTML propres (Bootstrap),
-un guide de lancement local + production.
 
 Flask reste un standard pour les projets rapides et modulaires.
 
@@ -66,8 +64,5 @@ Tu affiches les données avec {{ ... }}
 Le design est propre dès le début
 Tu ajoutes quelques classes (card, btn, etc.)
 
-🔹 JavaScript → Pas obligatoire
-
-Le site fonctionne sans JS
 Tu peux en ajouter plus tard
 
