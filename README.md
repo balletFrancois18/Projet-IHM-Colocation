@@ -23,7 +23,7 @@ Projet-IHM-Colocation/
 ├── templates/
 │   ├── index.html       ✅ fait
 │   ├── login.html       ❌ à créer
-│   ├── inscription.html ❌ à créer
+│   ├── tache.html       ❌ à créer
 │   └── ajouter_depense.html ✅ fait
 ├── static/
 │   └── style.css        ✅ fait
