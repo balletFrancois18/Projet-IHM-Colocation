@@ -34,7 +34,7 @@ Projet-IHM-Colocation/
 # installations
 
 
-Vérifie les packages Flask et installés sont dans la liste
+Vérifie les packages Flask et Flask-SQLAlchemy installés sont dans la liste
 
 ```
 pip list
