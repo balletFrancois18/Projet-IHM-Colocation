@@ -57,6 +57,11 @@ python3 main.py
 Pour éviter de l'oublier, tu peux ajouter ça dans ton .bashrc :
 bashecho "alias coloc='cd ~/Downloads/Projet-IHM-Colocation-main2 && source venv/bin/activate'" >> ~/.bashrc
 
+
+ouvrir dans le navigateur
+http://localhost:5000
+
+
 # 1er test relance Flask 
 python3 main.py
 
