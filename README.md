@@ -40,10 +40,20 @@ Vérifie les packages Flask et Flask-SQLAlchemy installés sont dans la liste
 pip list
 ```
 
-## mettre en place l'environnement
+## Mise en place de l'environnement
 
 activer le venv à chaque nouveau terminal
-bashsource venv/bin/activate
+
+```
+source venv/bin/activate
+```
+
+Lancer Flask
+```
+python3 main.py
+```
+
+
 Pour éviter de l'oublier, tu peux ajouter ça dans ton .bashrc :
 bashecho "alias coloc='cd ~/Downloads/Projet-IHM-Colocation-main2 && source venv/bin/activate'" >> ~/.bashrc
 
