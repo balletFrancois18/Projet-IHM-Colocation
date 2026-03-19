@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from models import db, Depense
 
-depenses_bp = Blueprint('depenses', __name__)
+depenses_bp = Blueprint('depenses', __name__)#blue print
 
 @depenses_bp.route('/depenses')
 def liste_depenses():
@@ -17,4 +17,4 @@ def ajouter_depense():
         db.session.add(nouvelle)
         db.session.commit()
         return redirect(url_for('index'))
-    return render_template('ajouter_depense.html')
+    return render_template('depense.html')

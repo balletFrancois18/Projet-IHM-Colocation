@@ -6,6 +6,11 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+
+    <header>
+  <a href="index.html><img src="" class="material"></a>
+    </header>
+        <img src="home.png"> 
     <button class="wrapper">
       <h2>Montant Pot commun : 2800<</h2>
       <p></p>
@@ -19,12 +24,25 @@
 
 
     <script>
+    
+    const addTasks = document.querySelector(".add-tasks");
+    const list = document.querySelector(".tasks");
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
+    function addTask(event) {
+            event.preventDefault();
+            const text = this.querySelector("[name=task]").value; 
 
+            const newTask = {
+              text,
+              done: false,
+            };
 
-
+            tasks.push(newTask);
+            populateList(tasks, list);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            this.reset();
+          }
     </script>
-
-
   </body>
 </html>
