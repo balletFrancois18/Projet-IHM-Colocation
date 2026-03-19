@@ -4,6 +4,18 @@ Repos destiné aux travaux de groupes lié au Projet Collocation
 Lien de la schematisation du projet : https://excalidraw.com/#room=5efa464f2d8a11ad5eb2,8UC290wY-AdvZbpdzNEJew
 
 
+
+# organisation
+
+# Avant de toucher au CSS — toujours pull d'abord
+git pull origin main2
+
+# Après avoir ajouté tes styles
+git add static/style.css
+git commit -m "ajout styles taches et depenses"
+git push origin main2
+
+
 # Outils
 
 
