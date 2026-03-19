@@ -1,11 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-<<<<<<< HEAD
-db = SQLAlchemy()
-=======
-db = SQLAlchemy()  # Pas de app ici, juste db
->>>>>>> 78299fe58f3ee0f1efddeb4f7b746363413f3f44
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
