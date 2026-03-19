@@ -43,14 +43,10 @@
         </div>
         <button type="submit" class="btn">Se connecter</button>
       </form>
-      <div class="link">
-        Pas encore de compte ?
-        <a href="{{ url_for('auth.inscription') }}">Créer un compte</a>
-      </div>
-      <div class="link">
-        Mot de passe oublié ?
-        <a href="#">Réinitialiser</a>
-       </div>
+    <div class="link">
+     Pas encore de compte ? <a href="{{ url_for('auth.inscription') }}">Créer un compte</a><br>
+     <a href="{{ url_for('auth.reset_password') }}">Mot de passe oublié ?</a>
+    </div>
       </div>
     </div>
   </div>

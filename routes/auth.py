@@ -36,3 +36,14 @@ def login():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('auth.login'))
+
+@auth_bp.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        user = User.query.filter_by(email=request.form['email']).first()
+        if user:
+            user.password = request.form['new_password']
+            db.session.commit()
+            flash('Mot de passe réinitialisé avec succès ! Connectez-vous.', 'success')
+            return redirect(url_for('auth.login'))
+    return render_template('reset_password.html')
