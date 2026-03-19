@@ -9,16 +9,27 @@ Lien de la schematisation du projet : https://excalidraw.com/#room=5efa464f2d8a1
 ## plan
 
 
-coloc-app/
-├── main.py              ← point d'entrée, on y touche peu
-├── models.py            ← toutes les classes (Tache, Depense, User...)
+Projet-IHM-Colocation/
+├── main.py              ✅ fait
+├── models.py            ✅ fait
+├── requirements.txt     ✅ fait
+├── Procfile             ✅ fait
+├── .gitignore           ✅ fait
 ├── routes/
-│   ├── taches.py        ← routes liées aux tâches
-│   ├── depenses.py      ← routes liées aux dépenses
-│   └── auth.py          ← routes login/inscription
+│   ├── __init__.py      ✅ fait
+│   ├── taches.py        ✅ fait
+│   ├── depenses.py      ✅ fait
+│   └── auth.py          ✅ fait
 ├── templates/
+│   ├── index.html       ✅ fait
+│   ├── login.html       ❌ à créer
+│   ├── inscription.html ❌ à créer
+│   └── ajouter_depense.html ✅ fait
 ├── static/
-└── coloc.db
+│   └── style.css        ✅ fait
+└── coloc.db             ✅ auto-généré
+
+
 
 # installations
 
