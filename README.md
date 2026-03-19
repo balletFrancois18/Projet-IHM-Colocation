@@ -34,8 +34,28 @@ Projet-IHM-Colocation/
 # installations
 
 
-Vérifie les packages installés sont dans la liste
+Vérifie les packages Flask et installés sont dans la liste
 
 ```
 pip list
 ```
+
+## mettre en place l'environnement
+
+activer le venv à chaque nouveau terminal
+bashsource venv/bin/activate
+Pour éviter de l'oublier, tu peux ajouter ça dans ton .bashrc :
+bashecho "alias coloc='cd ~/Downloads/Projet-IHM-Colocation-main2 && source venv/bin/activate'" >> ~/.bashrc
+
+# test relance Flask — il recrée tout proprement
+python3 main.py
+
+
+source ~/.bashrc
+
+
+
+
+
+
+
