@@ -18,16 +18,12 @@ Pour apprendre, éviter les complications → SQLite
 déployer proprement en multi-utilisateurs → PostgreSQL
 
 
-flask
-Simple
-Facile à comprendre
-Aucun framework front compliqué
-Gestion de fichiers super simple
+flask, gestion de fichiers super simple
 Peut évoluer vers PostgreSQL
 
 Base de données
 
-Commencez avec SQLitePassez à PostgreSQL quand vous déployez en ligne
+SQLite, Passez à PostgreSQL quand vous déployez en ligne
 
 # plan
 
