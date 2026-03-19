@@ -4,9 +4,32 @@ Repos destiné aux travaux de groupes lié au Projet Collocation
 Lien de la schematisation du projet : https://excalidraw.com/#room=5efa464f2d8a11ad5eb2,8UC290wY-AdvZbpdzNEJew
 
 
+# Outils
 
 
-## plan
+pages HTML propres (Bootstrap),
+
+base PostgreSQL ou SQLite,
+Avec Flask, tu peux commencer SQLite, puis passer en PostgreSQL sans changer ton code, seulement ta chaîne de connexion.
+
+
+Flask reste un standard pour les projets rapides et modulaires.
+Pour apprendre, éviter les complications → SQLite
+déployer proprement en multi-utilisateurs → PostgreSQL
+
+
+flask
+Simple
+Facile à comprendre
+Aucun framework front compliqué
+Gestion de fichiers super simple
+Peut évoluer vers PostgreSQL
+
+Base de données
+
+Commencez avec SQLitePassez à PostgreSQL quand vous déployez en ligne
+
+# plan
 
 
 Projet-IHM-Colocation/
