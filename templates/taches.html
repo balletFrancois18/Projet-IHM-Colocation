@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <title>Task Scheduler</title>
 </head>
 
@@ -58,20 +60,21 @@
                 cursor: pointer;
             }
         </style>
-
     <header>
         <h1>Tâches</h1>
+         <a href="index.html"><i class="material-icons">home</i></a> 
+        <img src="home.png"> 
     </header>
     <main>
         <div class="task-form">
             <input type="text" id="task" placeholder="Enter task...">
             <select id="priority">
-                <option value="top">Top Priority</option>
-                <option value="middle">Middle Priority</option>
-                <option value="low">Less Priority</option>
+                <option value="top">Priorité haute</option>
+                <option value="middle">Priorité moyenne</option>
+                <option value="low">Priorité basse</option>
             </select>
             <input type="date" id="deadline">
-            <button id="add-task">Add Task</button>
+            <button id="add-task">ajouter une tâche</button>
         </div>
         <div class="task-list" id="task-list">
             <!-- Tasks will be added here dynamically -->
