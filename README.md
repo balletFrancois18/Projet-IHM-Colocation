@@ -47,7 +47,7 @@ bashsource venv/bin/activate
 Pour éviter de l'oublier, tu peux ajouter ça dans ton .bashrc :
 bashecho "alias coloc='cd ~/Downloads/Projet-IHM-Colocation-main2 && source venv/bin/activate'" >> ~/.bashrc
 
-# test relance Flask — il recrée tout proprement
+# 1er test relance Flask 
 python3 main.py
 
 
