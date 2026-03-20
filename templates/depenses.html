@@ -2,14 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Dépenses</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: #F6F8FC; }
-
+    body { font-family: sans-serif; background: #F6F8FC; }
     .navbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 32px; background: white;
@@ -18,66 +15,54 @@
     .nav-logo { font-size: 22px; font-weight: 800; }
     .nav-logo span { color: #5B6CFF; }
     .nav-links { display: flex; gap: 24px; }
-    .nav-links a { text-decoration: none; color: #6B7280; font-weight: 500; font-size: 14px; }
+    .nav-links a { text-decoration: none; color: #6B7280; font-size: 14px; }
     .nav-links a:hover { color: #5B6CFF; }
-    .nav-right { display: flex; align-items: center; gap: 12px; }
     .btn-profil {
       padding: 8px 16px; background: #5B6CFF; color: white;
-      border: none; border-radius: 10px; cursor: pointer; font-size: 13px;
+      border: none; border-radius: 10px; cursor: pointer;
     }
     .btn-logout {
       padding: 8px 16px; background: white; color: #6B7280;
       border: 1px solid #E5E7EB; border-radius: 10px;
-      cursor: pointer; font-size: 13px; text-decoration: none;
+      text-decoration: none; font-size: 13px;
     }
-
-    .container { max-width: 900px; margin: 40px auto; padding: 0 24px; }
-
-    /* Pot commun */
+    .container { max-width: 860px; margin: 40px auto; padding: 0 24px; }
     .pot-commun {
-      text-align: center; font-size: 20px; font-weight: 700;
-      margin-bottom: 32px; color: #111827;
+      text-align: center; font-size: 22px; font-weight: 700;
+      margin-bottom: 32px;
     }
     .pot-commun span { color: #5B6CFF; }
-
-    /* Card catégorie */
-    .categorie-card {
-      background: white; border-radius: 16px;
-      padding: 20px 24px; margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    .card {
+      background: white; border-radius: 16px; padding: 20px 24px;
+      margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
-    .categorie-header {
+    .card-header {
       display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 12px;
+      justify-content: space-between; margin-bottom: 10px;
     }
-    .categorie-titre { font-size: 14px; font-weight: 600; color: #374151; }
-
-    /* Barre de répartition colorée */
-    .barre-repartition {
+    .card-titre { font-size: 14px; font-weight: 600; color: #374151; }
+    .barre {
       display: flex; height: 14px; border-radius: 20px;
       overflow: hidden; flex: 1; margin: 0 16px;
     }
-    .barre-segment { height: 100%; }
-
-    /* Boutons action */
-    .categorie-actions { display: flex; gap: 8px; }
+    .barre-segment { height: 100%; transition: width 0.5s ease; }
+    .card-actions { display: flex; gap: 8px; }
     .btn-action {
       width: 32px; height: 32px; border-radius: 50%;
       border: 1.5px solid #E5E7EB; background: white;
-      display: flex; align-items: center; justify-content: center;
       cursor: pointer; font-size: 14px; color: #6B7280;
-      transition: all 0.2s;
     }
     .btn-action:hover { border-color: #5B6CFF; color: #5B6CFF; }
-
-    /* Champ courses vide */
-    .courses-input {
-      width: 60%; padding: 10px 14px;
-      border: 1.5px solid #E5E7EB; border-radius: 10px;
-      font-size: 13px; color: #6B7280; background: white;
+    .legende {
+      display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap;
     }
-
-    /* Modal ajout/modification */
+    .legende-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: #6B7280;
+    }
+    .legende-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
     .modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.3); z-index: 100;
@@ -87,109 +72,128 @@
     .modal {
       background: white; border-radius: 16px;
       padding: 28px; width: 360px;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
     }
-    .modal-titre { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: #374151; }
+    .modal-titre { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
     .modal-input {
       width: 100%; padding: 10px 14px;
       border: 1.5px solid #E5E7EB; border-radius: 10px;
       font-size: 13px; margin-bottom: 12px;
     }
-    .modal-input:focus { outline: none; border-color: #5B6CFF; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
     .btn-valider {
       padding: 8px 18px; background: #5B6CFF; color: white;
-      border: none; border-radius: 10px; cursor: pointer; font-size: 13px;
+      border: none; border-radius: 10px; cursor: pointer;
     }
     .btn-annuler {
       padding: 8px 18px; background: white; color: #6B7280;
-      border: 1.5px solid #E5E7EB; border-radius: 10px;
-      cursor: pointer; font-size: 13px;
+      border: 1.5px solid #E5E7EB; border-radius: 10px; cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  
-
-<!-- Navbar -->
 <nav class="navbar">
   <div class="nav-logo">Co<span>Loc</span></div>
   <div class="nav-links">
-    <a href="{{ url_for('index') }}">Accueil</a>
-    <a href="{{ url_for('taches.liste_taches') }}">Tâches</a>
-    <a href="{{ url_for('depenses.liste_depenses') }}">Dépenses</a>
+    <a href="{{ url_for('index') }}">🏠 Accueil</a>
+    <a href="{{ url_for('taches.liste_taches') }}">🧹 Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}">💸 Dépenses</a>
   </div>
-  <div class="nav-right">
-    <div>👤</div>
+  <div style="display:flex;align-items:center;gap:12px">
     <button class="btn-profil">Profil</button>
     <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
   </div>
 </nav>
 
-
 <div class="container">
 
-  <!-- Pot commun -->
+  <!-- Pot commun total -->
   <div class="pot-commun">
     Montant Pot Commun : <span>{{ total }} €</span>
   </div>
 
-  <!-- Répartition loyer -->
-  <div class="categorie-card">
-    <div class="categorie-header">
-      <span class="categorie-titre">Répartition loyer</span>
-      <div class="barre-repartition">
-        <div class="barre-segment" style="width:40%;background:#F59E0B"></div>
-        <div class="barre-segment" style="width:35%;background:#5B6CFF"></div>
-        <div class="barre-segment" style="width:25%;background:#34D399"></div>
+  <!-- Barre globale de répartition -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-titre">Répartition globale</span>
+      <button class="btn-action" onclick="ouvrirModal()">＋</button>
+    </div>
+    <div class="barre">
+      {% for b in barres %}
+        <div class="barre-segment"
+             style="width:{{ b.pourcentage }}%;background:{{ b.couleur }}">
+        </div>
+      {% endfor %}
+    </div>
+    <!-- Légende avec nom + montant + couleur -->
+    <div class="legende">
+      {% for b in barres %}
+      <div class="legende-item">
+        <div class="legende-dot" style="background:{{ b.couleur }}"></div>
+        <span>{{ b.nom }} — {{ b.montant }} € ({{ b.pourcentage }}%)</span>
       </div>
-      <div class="categorie-actions">
-        <button class="btn-action" onclick="ouvrirModal('modifier')">✏️</button>
-        <button class="btn-action" onclick="ouvrirModal('ajouter')">＋</button>
-      </div>
+      {% endfor %}
     </div>
   </div>
 
-
+  <!-- Liste des dépenses -->
   {% for depense in depenses %}
-<div class="categorie-card">
-  <div class="categorie-header">
-    <span class="categorie-titre">{{ depense.titre }}</span>
-    <div class="categorie-actions">
-      <span style="font-size:13px;font-weight:600;color:#5B6CFF;margin-right:8px">
-        {{ depense.montant }} €
-      </span>
-
-      <!-- Bouton modifier — ouvre le modal avec les données pré-remplies -->
-      <button class="btn-action"
-        onclick="ouvrirModalModifier({{ depense.id }}, '{{ depense.titre }}', {{ depense.montant }}, '{{ depense.payeur }}')">
-        ✏️
-      </button>
-
-      <!-- Bouton supprimer -->
-      <a href="{{ url_for('depenses.supprimer_depense', id=depense.id) }}"
-         class="btn-action"
-         onclick="return confirm('Supprimer cette dépense ?')">
-        ✕
-      </a>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-titre">{{ depense.titre }}</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:13px;font-weight:700;color:#5B6CFF">
+          {{ depense.montant }} €
+        </span>
+        <div class="card-actions">
+          <button class="btn-action"
+            onclick="ouvrirModalModifier(
+              {{ depense.id }},
+              '{{ depense.titre }}',
+              {{ depense.montant }},
+              '{{ depense.payeur }}')">✏️
+          </button>
+          <a href="{{ url_for('depenses.supprimer_depense', id=depense.id) }}"
+             class="btn-action"
+             onclick="return confirm('Supprimer ?')">✕</a>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#6B7280">
+      Payé par <strong>{{ depense.payeur }}</strong>
     </div>
   </div>
-  <div style="font-size:12px;color:#6B7280;margin-top:4px">
-    Payé par <strong>{{ depense.payeur }}</strong>
+  {% endfor %}
+
+  {% if depenses|length == 0 %}
+  <div style="text-align:center;padding:40px;color:#6B7280">
+    Aucune dépense. <br><br>
+    <button class="btn-valider" onclick="ouvrirModal()">＋ Ajouter</button>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Modal ajouter / modifier -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-titre" id="modal-titre">Ajouter une dépense</div>
+    <form method="POST" id="modal-form"
+          action="{{ url_for('depenses.ajouter_depense') }}">
+      <input type="text"   id="input-titre"   name="titre"
+             class="modal-input" placeholder="Ex: Loyer, Courses..." required>
+      <input type="number" id="input-montant" name="montant"
+             class="modal-input" placeholder="Montant en €"
+             step="0.01" required>
+      <input type="text"   id="input-payeur"  name="payeur"
+             class="modal-input" placeholder="Qui a payé ?" required>
+      <div class="modal-actions">
+        <button type="button" class="btn-annuler"
+                onclick="fermerModal()">Annuler</button>
+        <button type="submit" class="btn-valider">Valider</button>
+      </div>
+    </form>
   </div>
 </div>
-{% endfor %}
-
-
-
-
-<form method="POST" id="modal-form">
-  <input type="text"   id="input-titre"   name="titre"   class="modal-input" placeholder="Titre" required>
-  <input type="number" id="input-montant" name="montant" class="modal-input" placeholder="Montant €" step="0.01" required>
-  <input type="text"   id="input-payeur"  name="payeur"  class="modal-input" placeholder="Qui a payé ?" required>
-  <div class="modal-actions">
-    <button type="button" class="btn-annuler" onclick="fermerModal()">Annuler</button>
-    <button type="submit" class="btn-valider">✓ Valider</button>
-  </div>
-</form>
+</body>
+</html>
