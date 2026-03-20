@@ -11,7 +11,8 @@
 <body class="index-page">
   <nav>
     <div class="nav-logo">Co<span>Loc</span></div>
-    <a href="#">Tâches</a>
+    <a href="{{ url_for('taches') }}" class="btn-logout">Tâches</a>
+    <a href="{{ url_for('depenses') }}" class="btn-logout">Dépenses</a>
     <a href="#">Réservations</a>
     <a href="#">Chat</a>
     <a href="#">Bon plan</a>
@@ -114,7 +115,7 @@
         </table>
       </div>
       <div class="planning-btns">
-          <button class="btn-planning">Voir mes tâches</button>
+          <button class="btn-planning">Voir mes tâches</button> href
           <button class="btn-planning">Voir mes réservations</button>
         </div>
 
