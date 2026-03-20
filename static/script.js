@@ -1,8 +1,13 @@
 
 
+/* 
+ global
+ */
 
+/* 
+ fichier depense
 
-# fichier depense
+ */
 
 function ouvrirModalModifier(id, titre, montant, payeur) {
   document.getElementById('modal-titre').textContent = 'Modifier une charge';
