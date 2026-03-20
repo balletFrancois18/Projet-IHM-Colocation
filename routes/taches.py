@@ -12,4 +12,4 @@ def cocher_tache(id):
     tache = Tache.query.get_or_404(id)
     tache.faite = not tache.faite
     db.session.commit()
-    return render_template('taches.html', depenses=Depense.query.all()) #sortie
+    return render_template('taches.html', taches=taches.query.all()) #sortie
