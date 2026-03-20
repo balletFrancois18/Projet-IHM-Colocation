@@ -15,7 +15,16 @@
       <h1>ColocApp</h1>
       <p>Gérez votre colocation simplement</p>
     </div>
-    <div class="card">
+      <div class="card">
+      <!--affichage du message d'erreur si le mail est déjà utilisé-->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash-{{ category }}">
+        {% if category == 'error' %}❌{% else %}✅{% endif %}
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endwith %}
       <h2>Créer un compte</h2>
       <p class="subtitle">Rejoignez votre colocation en quelques secondes</p>
       <form method="POST">

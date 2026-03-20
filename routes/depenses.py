@@ -9,17 +9,48 @@ depenses_bp = Blueprint('depenses', __name__)
 # Blueprint = façon de découper l'app en morceaux
 
 
-@depenses_bp.route('/depenses') #lit toutes les dépenses dans la BDD et calcule le total
+# Couleur fixe par personne
+couleurs = {
+    'Banu':    '#5B6CFF',
+    'Eoghan':    '#FF7A59',
+    'Francois': '#34D399',
+    'Loucia': '#34D399',
+    'Nassim':    '#A78BFA',
+}
+
+
+
+@depenses_bp.route('/depenses')
 def liste_depenses():
     depenses = Depense.query.all()
-    total = sum(d.montant for d in depenses)
-    return render_template('depenses.html', depenses=depenses, total=total)
+    total    = sum(d.montant for d in depenses)
 
+    # Calcule combien chaque personne a dépensé
+    par_personne = {}
+    for d in depenses:
+        if d.payeur not in par_personne:
+            par_personne[d.payeur] = 0
+        par_personne[d.payeur] += d.montant
 
- #affiche le formulaire d'ajout de dépense et la liste des dépenses existantes
+    # Calcule le pourcentage de chaque personne
+    barres = []
+    for personne, montant in par_personne.items():
+        pourcentage = (montant / total * 100) if total > 0 else 0
+        barres.append({
+            'nom':         personne,
+            'montant':     montant,
+            'pourcentage': round(pourcentage, 1),
+            'couleur':     couleurs.get(personne, '#888888')
+        })
+
+    return render_template('depenses.html',
+                           depenses=depenses,
+                           total=total,
+                           barres=barres)
+
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 def ajouter_depense():
-    if request.method == 'POST': #enregistre dans la BDD et redirige vers la liste des dépenses
+    if request.method == 'POST':
         titre   = request.form['titre']
         montant = float(request.form['montant'])
         payeur  = request.form['payeur']
@@ -27,8 +58,9 @@ def ajouter_depense():
         db.session.add(nouvelle)
         db.session.commit()
         return redirect(url_for('depenses.liste_depenses'))
-    return render_template('depenses.html', depenses=Depense.query.all(), total=0) #sortie
-
+    depenses = Depense.query.all()
+    total    = sum(d.montant for d in depenses)
+    return render_template('depenses.html', depenses=depenses, total=total, barres=[])
 
 @depenses_bp.route('/depenses/supprimer/<int:id>')
 def supprimer_depense(id):
@@ -37,12 +69,9 @@ def supprimer_depense(id):
     db.session.commit()
     return redirect(url_for('depenses.liste_depenses'))
 
-
-#ajouter les routes d'actions
-# Modifier une dépense
 @depenses_bp.route('/depenses/modifier/<int:id>', methods=['POST'])
 def modifier_depense(id):
-    depense = Depense.query.get_or_404(id)
+    depense         = Depense.query.get_or_404(id)
     depense.titre   = request.form['titre']
     depense.montant = float(request.form['montant'])
     depense.payeur  = request.form['payeur']
