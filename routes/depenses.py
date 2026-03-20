@@ -1,4 +1,10 @@
-COULEURS = {
+from flask import Blueprint, render_template, request, redirect, url_for
+from models import db, Depense
+from routes.auth import login_required
+
+depenses_bp = Blueprint('depenses', __name__)
+
+CCOULEURS = {
     'Banu':     '#5B6CFF',
     'Eoghan':   '#FF7A59',
     'Francois': '#34D399',
