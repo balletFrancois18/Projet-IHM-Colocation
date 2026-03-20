@@ -6,241 +6,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Dépenses</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --primary: #5B6CFF;
-      --bg: #F6F8FC;
-      --surface: #fff;
-      --border: #E5E7EB;
-      --text: #111827;
-      --muted: #6B7280;
-      --radius: 16px;
-      --shadow: 0 4px 20px rgba(0,0,0,0.07);
-    }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    /* NAVBAR */
-    .navbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 32px; background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 50;
-    }
-    .nav-logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
-    .nav-logo span { color: var(--primary); }
-    .nav-links { display: flex; gap: 24px; }
-    .nav-links a {
-      text-decoration: none; color: var(--muted);
-      font-weight: 500; font-size: 14px; transition: color 0.2s;
-    }
-    .nav-links a:hover, .nav-links a.active { color: var(--primary); }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
-    .btn-sm {
-      padding: 8px 16px; border-radius: 10px; font-size: 13px;
-      font-weight: 600; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-ghost { background: white; color: var(--muted); border: 1.5px solid var(--border); text-decoration: none; display: inline-flex; align-items: center; }
-    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
-
-    /* CONTAINER */
-    .container { max-width: 860px; margin: 36px auto; padding: 0 24px; }
-
-    /* POT COMMUN */
-    .pot-header {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--surface); border-radius: var(--radius);
-      padding: 20px 28px; margin-bottom: 24px;
-      box-shadow: var(--shadow);
-    }
-    .pot-label { font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
-    .pot-montant {
-      font-family: 'Syne', sans-serif; font-size: 28px;
-      font-weight: 800; color: var(--primary);
-    }
-    .btn-edit-pot {
-      background: var(--bg); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 8px 14px;
-      font-size: 12px; color: var(--muted); cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-weight: 600;
-      transition: all 0.2s;
-    }
-    .btn-edit-pot:hover { border-color: var(--primary); color: var(--primary); }
-
-    /* CATEGORIE CARD */
-    .categorie-card {
-      background: var(--surface); border-radius: var(--radius);
-      padding: 22px 26px; margin-bottom: 14px;
-      box-shadow: var(--shadow); border: 1.5px solid transparent;
-      transition: border-color 0.2s;
-    }
-    .categorie-card:hover { border-color: rgba(91,108,255,0.15); }
-
-    .cat-header {
-      display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 16px;
-    }
-    .cat-titre {
-      font-family: 'Syne', sans-serif;
-      font-size: 15px; font-weight: 700;
-    }
-    .cat-actions { display: flex; gap: 8px; }
-    .btn-round {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 1.5px solid var(--border); background: white;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 14px; color: var(--muted);
-      transition: all 0.2s;
-    }
-    .btn-round:hover { border-color: var(--primary); color: var(--primary); background: #EEF2FF; }
-
-    /* BARRE DE RÉPARTITION */
-    .barre-wrap { position: relative; margin-bottom: 8px; }
-    .barre {
-      display: flex; height: 18px; border-radius: 20px;
-      overflow: visible; background: var(--border);
-      position: relative;
-    }
-    .barre-segment {
-      height: 100%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
-      position: relative; cursor: pointer;
-    }
-    .barre-segment:first-child { border-radius: 20px 0 0 20px; }
-    .barre-segment:last-child { border-radius: 0 20px 20px 0; }
-    .barre-segment:only-child { border-radius: 20px; }
-
-    /* Tooltip au survol */
-    .barre-segment .tooltip {
-      position: absolute; bottom: calc(100% + 8px);
-      left: 50%; transform: translateX(-50%);
-      background: #1F2937; color: white;
-      padding: 5px 10px; border-radius: 8px;
-      font-size: 12px; font-weight: 600; white-space: nowrap;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s;
-      z-index: 10;
-    }
-    .barre-segment .tooltip::after {
-      content: ''; position: absolute; top: 100%; left: 50%;
-      transform: translateX(-50%);
-      border: 5px solid transparent;
-      border-top-color: #1F2937;
-    }
-    .barre-segment:hover .tooltip { opacity: 1; }
-
-    /* Légende */
-    .barre-legende {
-      display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px;
-    }
-    .legende-item {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 12px; color: var(--muted);
-    }
-    .legende-dot {
-      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-    }
-    .legende-nom { font-weight: 600; color: var(--text); }
-
-    /* Champ courses */
-    .courses-row {
-      display: flex; gap: 10px; align-items: center; margin-top: 4px;
-    }
-    .courses-input {
-      flex: 1; padding: 10px 14px;
-      border: 1.5px solid var(--border); border-radius: 10px;
-      font-size: 13px; font-family: 'DM Sans', sans-serif;
-      transition: border-color 0.2s;
-    }
-    .courses-input:focus { outline: none; border-color: var(--primary); }
-
-    /* MODAL */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.35); z-index: 200;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal {
-      background: white; border-radius: 20px;
-      padding: 28px; width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
-      animation: slideUp 0.25s ease-out;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .modal-titre {
-      font-family: 'Syne', sans-serif;
-      font-size: 18px; font-weight: 700; margin-bottom: 20px;
-    }
-    .field-group { margin-bottom: 14px; }
-    .field-label {
-      font-size: 12px; font-weight: 600; color: var(--muted);
-      margin-bottom: 5px; display: block; text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .field-input {
-      width: 100%; padding: 11px 14px;
-      border: 1.5px solid var(--border); border-radius: 10px;
-      font-size: 13px; font-family: 'DM Sans', sans-serif;
-      transition: border-color 0.2s;
-    }
-    .field-input:focus { outline: none; border-color: var(--primary); }
-    .modal-actions {
-      display: flex; justify-content: flex-end;
-      gap: 10px; margin-top: 20px;
-    }
-    .btn-valider {
-      padding: 10px 22px; background: var(--primary); color: white;
-      border: none; border-radius: 10px; cursor: pointer;
-      font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-    .btn-valider:hover { background: #4455EE; transform: scale(1.02); }
-    .btn-annuler {
-      padding: 10px 18px; background: white; color: var(--muted);
-      border: 1.5px solid var(--border); border-radius: 10px;
-      cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-    .btn-annuler:hover { border-color: #EF4444; color: #EF4444; }
-
-    /* Modal pot commun */
-    .pot-input {
-      width: 100%; padding: 14px; font-size: 24px; font-weight: 700;
-      text-align: center; border: 2px solid var(--border);
-      border-radius: 12px; font-family: 'Syne', sans-serif;
-      color: var(--primary); transition: border-color 0.2s;
-    }
-    .pot-input:focus { outline: none; border-color: var(--primary); }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="nav-logo">Co<span>Loc</span></div>
-  <div class="nav-links">
-    <a href="/">🏠 Accueil</a>
-    <a href="/taches">🧹 Tâches</a>
-    <a href="/depenses" class="active">💸 Dépenses</a>
-  </div>
-  <div class="nav-right">
-    <span>👤</span>
-    <button class="btn-sm btn-primary">Profil</button>
-    <a href="/logout" class="btn-sm btn-ghost">Déconnexion</a>
-  </div>
-</nav>
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+    <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link" style="background:rgba(255,255,255,0.15);>Dépenses</a>
+    <a href="#" class="nav-link">Réservations</a>
+    <a href="#" class="nav-link">Chat</a>
+    <div class="nav-right">
+      {% if session.get('user_id') %}
+        <div class="nav-avatar">👤</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
+      {% endif %}
+    </div>
+  </nav>
 
 <div class="container">
 
