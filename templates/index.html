@@ -80,7 +80,6 @@
         <div class="card-head">
           <div class="card-title">Pot commun</div>
           {% if session.get('user_id') %}
-            <a href="{{ url_for('depenses.ajouter_depense') }}" class="card-btn">+ Ajouter</a>
           {% endif %}
         </div>
         <div class="pot-total">
@@ -158,12 +157,12 @@
           </tbody>
         </table>
         <div class="planning-btns">
-          <a href="{{ url_for('auth.taches') }}" class="btn-planning">Voir mes tâches</a>
+          <a href="{{url_for('taches.liste_taches')}}" class="btn-planning">Voir mes tâches</a>
           <a href="{{ url_for('auth.reservations') }}" class="btn-planning">Voir mes réservations</a>
         </div>
       </div>
 
-      <!-- Tâches + Dépenses + Présence -->
+      <!-- Tâches-->
       <div class="bottom-grid" style="margin:0; padding:0;">
 
         <div class="card-dash">
@@ -190,11 +189,12 @@
           {% endif %}
         </div>
 
+        <!--dépenses-->
         <div class="card-dash">
           <div class="card-head">
             <div class="card-title">Dépenses récentes</div>
             {% if session.get('user_id') %}
-              <a href="{{ url_for('depenses.ajouter_depense') }}" class="card-btn">+ Ajouter</a>
+             <a href="{{ url_for('depenses.liste_depenses') }}" class="card-btn">+ Ajouter</a>
             {% endif %}
           </div>
           {% if depenses %}
@@ -215,6 +215,7 @@
           {% endif %}
         </div>
 
+        <!--Historique de présence-->
         <div class="right-col">
           <div class="card-dash">
             <div class="card-head">
