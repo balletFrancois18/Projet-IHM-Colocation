@@ -101,6 +101,9 @@ bashecho "alias coloc='cd ~/Downloads/Projet-IHM-Colocation-main2 && source venv
 ouvrir dans le navigateur
 http://localhost:5000
 
+```
+kill $(lsof -t -i:5000)
+```
 
 # 1er test relance Flask 
 python3 main.py
