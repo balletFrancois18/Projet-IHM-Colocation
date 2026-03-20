@@ -4,11 +4,13 @@ import sqlite3
 import hashlib
 import os
 
-app = Flask(__name__, static_folder='front')
-app.secret_key = 'coloc-voltaire-secret-2026'  # change si tu veux
+app = Flask(__name__)
+app.secret_key = 'coloc-voltaire-secret-2026'
 CORS(app, supports_credentials=True)
 
-DB = 'coloc.db'
+BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
+FRONT_DIR = os.path.join(BASE_DIR, 'front')
+DB        = os.path.join(BASE_DIR, 'coloc.db')
 
 # ══════════════════════════════════════
 # INIT BASE DE DONNÉES
@@ -60,11 +62,11 @@ def init_db():
 # ══════════════════════════════════════
 @app.route('/')
 def index():
-    return send_from_directory('front', 'login.html')
+    return send_from_directory(FRONT_DIR, 'login.html')
 
 @app.route('/<path:filename>')
 def static_files(filename):
-    return send_from_directory('front', filename)
+    return send_from_directory(FRONT_DIR, filename)
 
 # ══════════════════════════════════════
 # ROUTES API — USERS
@@ -136,5 +138,5 @@ def me():
 # ══════════════════════════════════════
 if __name__ == '__main__':
     init_db()
-    print('🏡 CoLoc API lancée sur http://163.173.113.178:5000')
+    print('🏡 CoLoc API lancée sur http://127.0.0.1:5000')
     app.run(host='0.0.0.0', port=5000, debug=True)
