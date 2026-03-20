@@ -247,6 +247,17 @@ nav a:hover { text-decoration: underline; }
   font-size: 1.1rem;
 }
 
+.btn-menu {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 0.4rem 1.2rem;
+  border-radius: 4%;
+  font-weight: 900;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
 .btn-profil {
   background: #f5c842;
   color: var(--text);
