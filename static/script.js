@@ -96,3 +96,35 @@ function changerSemaine(delta) {
 
 // Attend que le DOM soit prêt
 document.addEventListener('DOMContentLoaded', afficherSemaine);
+
+
+//tâches
+  function ouvrirModalDepense(type) {
+    document.getElementById('modal-titre').textContent = 'Ajouter une charge';
+    document.getElementById('modal-form').action = '/depenses/ajouter';
+    document.getElementById('input-titre').value   = '';
+    document.getElementById('input-montant').value = '';
+    document.getElementById('input-payeur').value  = '';
+    document.getElementById('modal').classList.add('active');
+  }
+
+    function fermerModal() {
+      document.getElementById('modal-overlay').classList.remove('active');
+    }
+
+    function fermerModalOverlay(e) {
+      if (e.target === document.getElementById('modal-overlay')) fermerModal();
+    }
+
+    // Filtres
+    function filtrer(statut, btn) {
+      document.querySelectorAll('.filtre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tache-card').forEach(card => {
+        if (statut === 'tous' || card.dataset.statut === statut) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }

@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from models import db, Depense
+from routes.auth import login_required
 
 depenses_bp = Blueprint('depenses', __name__)
 
@@ -12,6 +13,7 @@ COULEURS = {
 }
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
+@login_required
 def ajouter_depense():
     if request.method == 'POST':
         titre     = request.form['titre']
