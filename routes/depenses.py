@@ -28,3 +28,23 @@ def ajouter_depense():
         db.session.commit()
         return redirect(url_for('depenses.liste_depenses'))
     return render_template('depenses.html', depenses=Depense.query.all(), total=0) #sortie
+
+
+@depenses_bp.route('/depenses/supprimer/<int:id>')
+def supprimer_depense(id):
+    depense = Depense.query.get_or_404(id)
+    db.session.delete(depense)
+    db.session.commit()
+    return redirect(url_for('depenses.liste_depenses'))
+
+
+#ajouter les routes d'actions
+# Modifier une dépense
+@depenses_bp.route('/depenses/modifier/<int:id>', methods=['POST'])
+def modifier_depense(id):
+    depense = Depense.query.get_or_404(id)
+    depense.titre   = request.form['titre']
+    depense.montant = float(request.form['montant'])
+    depense.payeur  = request.form['payeur']
+    db.session.commit()
+    return redirect(url_for('depenses.liste_depenses'))

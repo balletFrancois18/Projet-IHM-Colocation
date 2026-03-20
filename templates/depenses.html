@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Dépenses</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'DM Sans', sans-serif; background: #F6F8FC; }
@@ -109,13 +110,15 @@
 </head>
 <body>
 
+  
+
 <!-- Navbar -->
 <nav class="navbar">
   <div class="nav-logo">Co<span>Loc</span></div>
   <div class="nav-links">
-    <a href="{{ url_for('index') }}">🏠 Accueil</a>
-    <a href="{{ url_for('taches.liste_taches') }}">🧹 Tâches</a>
-    <a href="{{ url_for('depenses.liste_depenses') }}">💸 Dépenses</a>
+    <a href="{{ url_for('index') }}">Accueil</a>
+    <a href="{{ url_for('taches.liste_taches') }}">Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}">Dépenses</a>
   </div>
   <div class="nav-right">
     <div>👤</div>
@@ -124,7 +127,7 @@
   </div>
 </nav>
 
-<!-- Contenu -->
+
 <div class="container">
 
   <!-- Pot commun -->
@@ -148,63 +151,45 @@
     </div>
   </div>
 
-  <!-- Liste des dépenses depuis la BDD -->
+
   {% for depense in depenses %}
-  <div class="categorie-card">
-    <div class="categorie-header">
-      <span class="categorie-titre">{{ depense.titre }}</span>
-      <div class="barre-repartition">
-        <div class="barre-segment" style="width:50%;background:#F59E0B"></div>
-        <div class="barre-segment" style="width:30%;background:#5B6CFF"></div>
-        <div class="barre-segment" style="width:20%;background:#34D399"></div>
-      </div>
-      <div class="categorie-actions">
-        <span style="font-size:13px;font-weight:600;color:#5B6CFF;margin-right:8px">
-          {{ depense.montant }} €
-        </span>
-        <button class="btn-action" onclick="ouvrirModal('modifier')">✏️</button>
-        <button class="btn-action">＋</button>
-      </div>
-    </div>
-    <div style="font-size:12px;color:#6B7280;margin-top:4px">
-      Payé par <strong>{{ depense.payeur }}</strong>
+<div class="categorie-card">
+  <div class="categorie-header">
+    <span class="categorie-titre">{{ depense.titre }}</span>
+    <div class="categorie-actions">
+      <span style="font-size:13px;font-weight:600;color:#5B6CFF;margin-right:8px">
+        {{ depense.montant }} €
+      </span>
+
+      <!-- Bouton modifier — ouvre le modal avec les données pré-remplies -->
+      <button class="btn-action"
+        onclick="ouvrirModalModifier({{ depense.id }}, '{{ depense.titre }}', {{ depense.montant }}, '{{ depense.payeur }}')">
+        ✏️
+      </button>
+
+      <!-- Bouton supprimer -->
+      <a href="{{ url_for('depenses.supprimer_depense', id=depense.id) }}"
+         class="btn-action"
+         onclick="return confirm('Supprimer cette dépense ?')">
+        ✕
+      </a>
     </div>
   </div>
-  {% endfor %}
-
-  {% if depenses|length == 0 %}
-  <div style="text-align:center;color:#6B7280;padding:40px">
-    Aucune dépense pour l'instant.
-    <br><br>
-    <button class="btn-profil" onclick="ouvrirModal('ajouter')">
-      ＋ Ajouter une dépense
-    </button>
+  <div style="font-size:12px;color:#6B7280;margin-top:4px">
+    Payé par <strong>{{ depense.payeur }}</strong>
   </div>
-  {% endif %}
-
-  <!-- Courses — champ vide comme dans la maquette -->
-  <div class="categorie-card">
-    <div class="categorie-header">
-      <span class="categorie-titre">Courses</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <input type="text" class="courses-input" placeholder="Ajouter un article...">
-      <div class="categorie-actions">
-        <button class="btn-action">Modifier</button>
-        <button class="btn-action">＋</button>
-      </div>
-    </div>
-  </div>
-
 </div>
+{% endfor %}
 
-<!-- Modal -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <div class="modal-titre" id="modal-titre">Ajouter une charge</div>
-    <form method="POST" action="{{ url_for('depenses.ajouter_depense') }}">
-      <input type="text"   name="titre"   class="modal-input" placeholder="Titre ex: Loyer" required>
-      <input type="number" name="montant" class="modal-input" placeholder="Montant en €" step="0.01" required>
-      <input type="text"   name="payeur"  class="modal-input" placeholder="Qui a payé ?" required>
-      <div class="modal-actions">
-        <button type="button" class="btn-annuler" onclick="fermerModal()">✕ Annuler</button>
+
+
+
+<form method="POST" id="modal-form">
+  <input type="text"   id="input-titre"   name="titre"   class="modal-input" placeholder="Titre" required>
+  <input type="number" id="input-montant" name="montant" class="modal-input" placeholder="Montant €" step="0.01" required>
+  <input type="text"   id="input-payeur"  name="payeur"  class="modal-input" placeholder="Qui a payé ?" required>
+  <div class="modal-actions">
+    <button type="button" class="btn-annuler" onclick="fermerModal()">Annuler</button>
+    <button type="submit" class="btn-valider">✓ Valider</button>
+  </div>
+</form>
