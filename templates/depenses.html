@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>CoLoc — Dépenses</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='depenses.css') }}">
 </head>
 <body>
@@ -17,118 +16,152 @@
     <a href="{{ url_for('depenses.liste_depenses') }}" class="active">💸 Dépenses</a>
   </div>
   <div class="nav-right">
-    <button class="btn-sm btn-primary">Profil</button>
     <a href="{{ url_for('auth.logout') }}" class="btn-sm btn-ghost">Déconnexion</a>
   </div>
 </nav>
 
 <div class="container">
 
-  <!-- Pot commun -->
+  <!-- Pot commun — total automatique -->
   <div class="pot-header">
     <div>
-      <div class="pot-label">Montant Pot Commun</div>
+      <div class="pot-label">Montant Pot Commun total</div>
       <div class="pot-montant">{{ total }} €</div>
     </div>
-    <button class="btn-edit-pot"
-      onclick="ouvrirModalAjouter()">
-      ＋ Ajouter dépense
+    <button class="btn-edit-pot" onclick="ouvrirModalAjouter()">
+      ＋ Ajouter une dépense
     </button>
   </div>
 
-  <!-- Barre globale par personne -->
+  <!-- Loyer -->
   <div class="categorie-card">
     <div class="cat-header">
-      <span class="cat-titre">📊 Répartition globale</span>
+      <span class="cat-titre">🏠 Répartition loyer</span>
+      <span class="cat-total">{{ par_categorie.loyer.total }} €</span>
     </div>
+    {% if par_categorie.loyer.barres %}
     <div class="barre">
-      {% for b in barres %}
+      {% for b in par_categorie.loyer.barres %}
       <div class="barre-segment"
-           style="width:{{ b.pourcentage }}%; background:{{ b.couleur }}"
-           data-nom="{{ b.nom }}"
-           data-montant="{{ b.montant }}">
+           style="width:{{ b.pourcentage }}%;background:{{ b.couleur }}">
         <div class="tooltip">{{ b.nom }} — {{ b.montant }} €</div>
       </div>
       {% endfor %}
     </div>
     <div class="barre-legende">
-      {% for b in barres %}
+      {% for b in par_categorie.loyer.barres %}
       <div class="legende-item">
         <div class="legende-dot" style="background:{{ b.couleur }}"></div>
         <span class="legende-nom">{{ b.nom }}</span>
-        <span>{{ b.montant }} € ({{ b.pourcentage }}%)</span>
+        <span>{{ b.montant }} €</span>
       </div>
       {% endfor %}
     </div>
+    {% else %}
+    <div class="empty-state">Aucune dépense loyer</div>
+    {% endif %}
   </div>
 
-  <!-- Liste des dépenses -->
+  <!-- Activité principale -->
   <div class="categorie-card">
     <div class="cat-header">
-      <span class="cat-titre">💸 Toutes les dépenses</span>
+      <span class="cat-titre">⚡ Activité principale</span>
+      <span class="cat-total">{{ par_categorie.activite.total }} €</span>
     </div>
-    {% for depense in depenses %}
-    <div class="depense-row">
-      <div class="depense-couleur"
-           style="background:{{ couleurs.get(depense.payeur, '#888') }}">
+    {% if par_categorie.activite.barres %}
+    <div class="barre">
+      {% for b in par_categorie.activite.barres %}
+      <div class="barre-segment"
+           style="width:{{ b.pourcentage }}%;background:{{ b.couleur }}">
+        <div class="tooltip">{{ b.nom }} — {{ b.montant }} €</div>
       </div>
-      <div class="depense-info">
-        <div class="depense-titre">{{ depense.titre }}</div>
-        <div class="depense-meta">
-          Payé par
-          <strong style="color:{{ couleurs.get(depense.payeur, '#888') }}">
-            {{ depense.payeur }}
-          </strong>
-        </div>
-      </div>
-      <div class="depense-montant">{{ depense.montant }} €</div>
-      <div class="depense-actions">
-        <button class="btn-round"
-          onclick="ouvrirModalModifier(
-            {{ depense.id }},
-            '{{ depense.titre }}',
-            {{ depense.montant }},
-            '{{ depense.payeur }}'
-          )">✏️</button>
-        <a href="{{ url_for('depenses.supprimer_depense', id=depense.id) }}"
-           class="btn-round"
-           onclick="return confirm('Supprimer ?')">✕</a>
-      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-    {% if depenses|length == 0 %}
-    <div class="empty-state">
-      Aucune dépense — clique sur ＋ pour commencer !
+    <div class="barre-legende">
+      {% for b in par_categorie.activite.barres %}
+      <div class="legende-item">
+        <div class="legende-dot" style="background:{{ b.couleur }}"></div>
+        <span class="legende-nom">{{ b.nom }}</span>
+        <span>{{ b.montant }} €</span>
+      </div>
+      {% endfor %}
     </div>
+    {% else %}
+    <div class="empty-state">Aucune dépense activité</div>
+    {% endif %}
+  </div>
+
+  <!-- Courses — plusieurs payeurs possibles -->
+  <div class="categorie-card">
+    <div class="cat-header">
+      <span class="cat-titre">🛒 Courses</span>
+      <span class="cat-total">{{ par_categorie.courses.total }} €</span>
+    </div>
+    {% if par_categorie.courses.barres %}
+    <div class="barre">
+      {% for b in par_categorie.courses.barres %}
+      <div class="barre-segment"
+           style="width:{{ b.pourcentage }}%;background:{{ b.couleur }}">
+        <div class="tooltip">{{ b.nom }} — {{ b.montant }} €</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="barre-legende">
+      {% for b in par_categorie.courses.barres %}
+      <div class="legende-item">
+        <div class="legende-dot" style="background:{{ b.couleur }}"></div>
+        <span class="legende-nom">{{ b.nom }}</span>
+        <span>{{ b.montant }} €</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">Aucune dépense courses</div>
     {% endif %}
   </div>
 
 </div>
 
-<!-- Modal ajouter -->
+<!-- Modal ajouter — plusieurs payeurs -->
 <div class="modal-overlay" id="modal-ajouter">
   <div class="modal">
     <div class="modal-titre">Ajouter une dépense</div>
-    <form method="POST"
-          action="{{ url_for('depenses.ajouter_depense') }}">
+    <form method="POST" action="{{ url_for('depenses.ajouter_depense') }}">
+
       <div class="field-group">
         <label class="field-label">Titre</label>
-        <input type="text" name="titre"
-               class="field-input" placeholder="ex: Courses Monoprix" required>
+        <input type="text" name="titre" class="field-input"
+               placeholder="ex: Courses Monoprix" required>
       </div>
+
       <div class="field-group">
-        <label class="field-label">Montant (€)</label>
-        <input type="number" name="montant"
-               class="field-input" placeholder="ex: 50" step="0.01" min="0" required>
-      </div>
-      <div class="field-group">
-        <label class="field-label">Qui a payé ?</label>
-        <select name="payeur" class="field-input">
-          {% for nom in couleurs.keys() %}
-          <option value="{{ nom }}">{{ nom }}</option>
-          {% endfor %}
+        <label class="field-label">Catégorie</label>
+        <select name="categorie" class="field-input">
+          <option value="loyer">🏠 Loyer</option>
+          <option value="activite">⚡ Activité principale</option>
+          <option value="courses" selected>🛒 Courses</option>
+          <option value="autres">📦 Autres</option>
         </select>
       </div>
+
+      <!-- Payeurs multiples -->
+      <div class="field-label" style="margin-bottom:8px">
+        Qui a payé et combien ?
+      </div>
+      <div id="payeurs-liste">
+        {% for nom in couleurs.keys() %}
+        <div class="payeur-row">
+          <div class="payeur-dot"
+               style="background:{{ couleurs[nom] }}"></div>
+          <span class="payeur-nom">{{ nom }}</span>
+          <input type="hidden" name="payeurs" value="{{ nom }}">
+          <input type="number" name="montants_payeurs"
+                 class="payeur-input" placeholder="0 €"
+                 step="0.01" min="0" value="0">
+        </div>
+        {% endfor %}
+      </div>
+
       <div class="modal-actions">
         <button type="button" class="btn-annuler"
                 onclick="fermerModal('modal-ajouter')">✕ Annuler</button>
@@ -138,42 +171,10 @@
   </div>
 </div>
 
-<!-- Modal modifier -->
-<div class="modal-overlay" id="modal-modifier">
-  <div class="modal">
-    <div class="modal-titre">Modifier la dépense</div>
-    <form method="POST" id="form-modifier">
-      <div class="field-group">
-        <label class="field-label">Titre</label>
-        <input type="text" name="titre"
-               id="modifier-titre" class="field-input" required>
-      </div>
-      <div class="field-group">
-        <label class="field-label">Montant (€)</label>
-        <input type="number" name="montant"
-               id="modifier-montant" class="field-input" step="0.01" min="0" required>
-      </div>
-      <div class="field-group">
-        <label class="field-label">Qui a payé ?</label>
-        <select name="payeur" id="modifier-payeur" class="field-input">
-          {% for nom in couleurs.keys() %}
-          <option value="{{ nom }}">{{ nom }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-annuler"
-                onclick="fermerModal('modal-modifier')">✕ Annuler</button>
-        <button type="submit" class="btn-valider">✓ Sauvegarder</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Passe les couleurs Python vers JS -->
- <script>
+<script>
   const COULEURS = {{ couleurs | tojson }};
 </script>
 <script src="{{ url_for('static', filename='js/depenses.js') }}"></script>
+
 </body>
 </html>

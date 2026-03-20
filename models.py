@@ -26,4 +26,5 @@ class Depense(db.Model):
     montant  = db.Column(db.Float, nullable=False)
     payeur   = db.Column(db.String(50), nullable=False)
     date     = db.Column(db.DateTime, default=datetime.utcnow)
+    categorie = db.Column(db.String(50), default='autres')  # ← nouveau
     user_id  = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # ← ajout
