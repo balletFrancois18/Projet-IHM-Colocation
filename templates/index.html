@@ -11,19 +11,20 @@
 <body class="index-page">
   <nav>
     <div class="nav-logo">Co<span>Loc</span></div>
-    <a href="{{ url_for('taches.liste_taches') }}" class="btn-logout">Tâches</a>
-    <a href="{{ url_for('depenses.liste_depenses') }}" class="btn-logout">Dépenses</a>
-    <a href="#">Réservations</a>
-    <a href="#">Chat</a>
-    <a href="#">Bon plan</a>
+    <a href="{{ url_for('taches.liste_taches') }}" class="btn-menu">Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}" class="btn-menu">Dépenses</a>
+    <a href="#" class="btn-menu">Réservations</a>
+    <a href="#" class="btn-menu">Chat</a>
+    <a href="#" class="btn-menu">Bon plan</a>
     <div class="nav-right">
-      <div class="nav-avatar">👤</div>
-      <button class="btn-profil">Profil</button>
+    <div class="nav-avatar">👤</div>
+    {% if session.get('user_id') %}
       <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
-      </div>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="btn-profil">Se connecter</a>
+    {% endif %}
     </div>
   </nav>
-
   <main>
 
     <!-- COLONNE GAUCHE -->
