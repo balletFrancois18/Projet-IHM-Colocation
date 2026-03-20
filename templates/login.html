@@ -15,21 +15,21 @@
       <p>Gérez votre colocation simplement</p>
     </div>
     <div class="card">
-    <!-- ce code permet d'afficher un message qu'on a réussi à créer un compte dans la page de connexion-->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-
+      <!-- Affichage des messages flash -->
+   {% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
     <div style="
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-        ">{{ message }}</div>
-    {% endfor %}
-    {% endwith %}
+      background: {% if category == 'error' %}#f8d7da{% else %}#d4edda{% endif %};
+      color: {% if category == 'error' %}#721c24{% else %}#155724{% endif %};
+      border: 1px solid {% if category == 'error' %}#f5c6cb{% else %}#c3e6cb{% endif %};
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    ">{% if category == 'error' %}❌{% else %}✅{% endif %} {{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
       <h2>Bon retour !</h2>
       <p class="subtitle">Connectez-vous à votre espace coloc</p>
       <form method="POST">

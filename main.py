@@ -13,11 +13,12 @@ app.secret_key = 'changeme'
 app.config['MAIL_SERVER']        = 'smtp.gmail.com'
 app.config['MAIL_PORT']          = 587
 app.config['MAIL_USE_TLS']       = True
-app.config['MAIL_USERNAME']      = 'ton.email@gmail.com'  # ← ton Gmail
-app.config['MAIL_PASSWORD']      = 'abcdefghijklmnop'     # ← le code 16 caractères
-app.config['MAIL_DEFAULT_SENDER'] = 'ton.email@gmail.com'
+app.config['MAIL_USERNAME']      = 'banumathey5@gmail.com'  #email de l'expéditeur
+app.config['MAIL_PASSWORD']      = 'zawp jcid nyoq purk' #mot de passe d'application
+app.config['MAIL_DEFAULT_SENDER'] = 'banumathey5@gmail.com'
 
 mail = Mail(app)
+
 db.init_app(app)
 
 app.register_blueprint(taches_bp)
