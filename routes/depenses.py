@@ -4,7 +4,7 @@ from routes.auth import login_required
 
 depenses_bp = Blueprint('depenses', __name__)
 
-CCOULEURS = {
+couleurs = {
     'Banu':     '#5B6CFF',
     'Eoghan':   '#FF7A59',
     'Francois': '#34D399',
@@ -41,7 +41,7 @@ def liste_depenses():
                 'nom':         personne,
                 'montant':     montant,
                 'pourcentage': round(pct, 1),
-                'couleur':     COULEURS.get(personne, '#888888')
+                'couleur':     couleurs.get(personne, '#888888')
             })
 
         par_categorie[cat] = {
@@ -53,7 +53,7 @@ def liste_depenses():
     return render_template('depenses.html',
                            par_categorie=par_categorie,
                            total=total,
-                           couleurs=COULEURS,
+                           couleurs=couleurs,
                            categories=CATEGORIES)
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
@@ -84,7 +84,7 @@ def ajouter_depense():
     return render_template('depenses.html',
                            par_categorie={},
                            total=0,
-                           couleurs=COULEURS,
+                           couleurs=couleurs,
                            categories=CATEGORIES)
 
 @depenses_bp.route('/depenses/supprimer/<int:id>')
