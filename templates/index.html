@@ -3,52 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CoLoc — Accueil</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>CoLoc — Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 <body class="index-page">
+
+  <!-- NAVBAR EN HAUT -->
   <nav>
     <div class="nav-logo">Co<span>Loc</span></div>
-    <a href="{{ url_for('taches.liste_taches') }}" class="btn-menu">Tâches</a>
-    <a href="{{ url_for('depenses.liste_depenses') }}" class="btn-menu">Dépenses</a>
-    <a href="#" class="btn-menu">Réservations</a>
-    <a href="#" class="btn-menu">Chat</a>
-    <a href="#" class="btn-menu">Bon plan</a>
+    <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
+    <a href="#" class="nav-link">Réservations</a>
+    <a href="#" class="nav-link">Chat</a>
+    <a href="#" class="nav-link">Bon plan</a>
     <div class="nav-right">
-    <div class="nav-avatar">👤</div>
-    {% if session.get('user_id') %}
-      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
-    {% else %}
-      <a href="{{ url_for('auth.login') }}" class="btn-profil">Se connecter</a>
-    {% endif %}
+      {% if session.get('user_id') %}
+        <div class="nav-avatar">👤</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
+      {% endif %}
     </div>
   </nav>
-  <main>
+
+   <!-- EN-TÊTE PAGE -->
+  <div class="page-header">
+    <div class="page-title">
+      {% if session.get('user_id') %}Bonjour :){% else %}Dashboard{% endif %}
+    </div>
+    <div class="page-sub">Vue d'ensemble de votre colocation</div>
+  </div>
+  <!-- GRILLE PRINCIPALE -->
+  <div class="main-grid" style="grid-template-columns: 320px 1fr;">
+    
 
     <!-- COLONNE GAUCHE -->
-    <div class="col-left">
+    <div style="display:flex; flex-direction:column; gap:1rem;">
 
-      <div class="card">
-        <div class="card-title">Annonces</div>
-        <div class="annonce-item"><div class="annonce-dot"></div><span>Réunion coloc samedi à 18h</span></div>
-        <div class="annonce-item"><div class="annonce-dot"></div><span>Plombier prévu mardi matin</span></div>
-        <div class="annonce-item"><div class="annonce-dot"></div><span>Penser à renouveler le bail</span></div>
+      <!-- Annonces -->
+      <div class="card-dash">
+        <div class="card-head">
+          <div class="card-title">Annonces</div>
+          <span style="font-size:0.75rem; background:var(--blue); color:white; padding:0.2rem 0.6rem; border-radius:20px; font-weight:600;">3</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.6rem;">
+          <div class="notif-item notif-urgent">
+            <div class="notif-body">
+              <div class="notif-title">Réunion coloc samedi à 18h</div>
+              <div class="notif-sub">Il y a 2 heures</div>
+            </div>
+            <span class="notif-badge urgent">Urgent</span>
+          </div>
+          <div class="notif-item notif-info">
+            <div class="notif-body">
+              <div class="notif-title">Plombier prévu mardi matin</div>
+              <div class="notif-sub">Il y a 1 jour</div>
+            </div>
+            <span class="notif-badge info">Info</span>
+          </div>
+          <div class="notif-item notif-rappel">
+            <div class="notif-body">
+              <div class="notif-title">Penser à renouveler le bail</div>
+              <div class="notif-sub">Il y a 3 jours</div>
+            </div>
+            <span class="notif-badge rappel">Rappel</span>
+          </div>
+        </div>
       </div>
 
+      <!-- Chat -->
       <a href="#" class="btn-chat">Voir le chat</a>
 
-      <div class="card">
-        <div class="card-title" style="text-align:center">• Pot commun</div>
-        <div class="pot-total">
-          {% if depenses %}
-            {{ "%.2f"|format(depenses | sum(attribute='montant')) }} €
-          {% else %}
-            0 €
+      <!-- Pot commun -->
+      <div class="card-dash">
+        <div class="card-head">
+          <div class="card-title">Pot commun</div>
+          {% if session.get('user_id') %}
+            <a href="{{ url_for('depenses.ajouter_depense') }}" class="card-btn">+ Ajouter</a>
           {% endif %}
         </div>
-
+        <div class="pot-total">
+          {% if depenses %}{{ "%.2f"|format(depenses | sum(attribute='montant')) }} €
+          {% else %}0 €{% endif %}
+        </div>
         {% if depenses %}
           {% for depense in depenses %}
           <div class="pot-ligne">
@@ -57,96 +95,155 @@
               <span>{{ "%.2f"|format(depense.montant) }} €</span>
             </div>
             <div class="pot-bar">
-              <div class="pot-bar-seg" style="width:33%; background:#e07c3a;"></div>
-              <div class="pot-bar-seg" style="width:33%; background:#7bafd4;"></div>
-              <div class="pot-bar-seg" style="width:34%; background:#4caf50;"></div>
+              <div class="pot-bar-seg" style="width:33%; background:#f59e0b;"></div>
+              <div class="pot-bar-seg" style="width:34%; background:var(--blue);"></div>
+              <div class="pot-bar-seg" style="width:33%; background:#10b981;"></div>
             </div>
           </div>
           {% endfor %}
         {% else %}
-          <p style="text-align:center; color:#aaa; font-size:0.875rem;">Aucune dépense</p>
+          <p style="text-align:center;color:var(--muted);font-size:0.85rem;padding:1rem 0;">Aucune dépense</p>
         {% endif %}
       </div>
 
     </div>
 
     <!-- COLONNE DROITE -->
-    <div class="col-right">
+    <div style="display:flex; flex-direction:column; gap:1rem;">
 
-      <div class="card">
-        <div class="card-title" style="text-align:center">Planning</div>
-        <div class="planning-nav">
-          <button>&#8249;</button>
-          <span>Semaine en cours</span>
-          <button>&#8250;</button>
+      <!-- Planning -->
+      <div class="card-dash">
+        <div class="card-head">
+          <div class="card-title">Planning</div>
         </div>
-        <table class="planning-grid">
+        <div class="planning-nav">
+          <button onclick="changerSemaine(-1)">&#8249;</button>
+          <span id="semaine-label">Chargement...</span>
+          <button onclick="changerSemaine(1)">&#8250;</button>
+        </div>
+        <table class="planning-grid" id="planning-table">
           <thead>
             <tr>
-              <th>Heure</th>
-              <th>Lundi</th>
-              <th>Mardi</th>
-              <th>Mercredi</th>
-              <th>Jeudi</th>
-              <th>Vendredi</th>
+              <th>H.</th>
+              <th id="jour-0"></th><th id="jour-1"></th>
+              <th id="jour-2"></th><th id="jour-3"></th>
+              <th id="jour-4"></th><th id="jour-5"></th><th id="jour-6"></th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="heure">6h</td>
-              <td></td><td><div class="resa">Yoga</div></td>
-              <td></td><td></td><td></td>
+              <td id="cell-0-6"></td><td id="cell-1-6"></td>
+              <td id="cell-2-6"></td><td id="cell-3-6"></td>
+              <td id="cell-4-6"></td><td id="cell-5-6"></td><td id="cell-6-6"></td>
             </tr>
             <tr>
               <td class="heure">12h</td>
-              <td><div class="resa">Repas</div></td>
-              <td></td>
-              <td><div class="resa">Repas</div></td>
-              <td><div class="resa">Repas</div></td>
-              <td></td>
+              <td id="cell-0-12"></td><td id="cell-1-12"></td>
+              <td id="cell-2-12"></td><td id="cell-3-12"></td>
+              <td id="cell-4-12"></td><td id="cell-5-12"></td><td id="cell-6-12"></td>
+            </tr>
+            <tr>
+              <td class="heure">18h</td>
+              <td id="cell-0-18"></td><td id="cell-1-18"></td>
+              <td id="cell-2-18"></td><td id="cell-3-18"></td>
+              <td id="cell-4-18"></td><td id="cell-5-18"></td><td id="cell-6-18"></td>
             </tr>
             <tr>
               <td class="heure">23h</td>
-              <td></td>
-              <td><div class="resa">Soirée</div></td>
-              <td></td><td></td>
-              <td><div class="resa">Soirée</div></td>
+              <td id="cell-0-23"></td><td id="cell-1-23"></td>
+              <td id="cell-2-23"></td><td id="cell-3-23"></td>
+              <td id="cell-4-23"></td><td id="cell-5-23"></td><td id="cell-6-23"></td>
             </tr>
           </tbody>
         </table>
-      </div>
-      <div class="planning-btns">
-          <a href="{{ url_for('auth.taches') }}" class="btn-planning">Voir mes tâches</a> 
+        <div class="planning-btns">
+          <a href="{{ url_for('auth.taches') }}" class="btn-planning">Voir mes tâches</a>
           <a href="{{ url_for('auth.reservations') }}" class="btn-planning">Voir mes réservations</a>
         </div>
-
-      <div class="card">
-        <div class="card-title" style="text-align:center">Historique de présence</div>
-        {% if taches %}
-          {% set colocataires = taches | map(attribute='assignee') | unique | list %}
-          {% for coloc in colocataires %}
-          <div class="presence-item">
-            <div class="presence-avatar present">👤</div>
-            <div>
-              <div class="presence-nom">{{ coloc }}</div>
-              <div class="presence-statut">Présent</div>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="presence-item">
-            <div class="presence-avatar present">👤</div>
-            <div><div class="presence-nom">Lucas</div><div class="presence-statut">Présent</div></div>
-          </div>
-          <div class="presence-item">
-            <div class="presence-avatar absent">👤</div>
-            <div><div class="presence-nom">Marie</div><div class="presence-statut">Absent</div></div>
-          </div>
-        {% endif %}
       </div>
 
-    </div>
-  </main>
+      <!-- Tâches + Dépenses + Présence -->
+      <div class="bottom-grid" style="margin:0; padding:0;">
 
+        <div class="card-dash">
+          <div class="card-head">
+            <div class="card-title">Tâches récentes</div>
+            <a href="{{ url_for('taches.liste_taches') }}" class="card-btn">Voir tout →</a>
+          </div>
+          {% if taches %}
+            {% for tache in taches[:5] %}
+            <div class="task-row">
+              <a href="{{ url_for('taches.cocher_tache', id=tache.id) }}" style="display:contents;">
+                <div class="task-check {% if tache.faite %}done{% endif %}">
+                  {% if tache.faite %}✓{% endif %}
+                </div>
+              </a>
+              <span class="task-label {% if tache.faite %}done{% endif %}">{{ tache.titre }}</span>
+              <span class="task-chip {% if tache.faite %}chip-done{% else %}chip-todo{% endif %}">
+                {% if tache.faite %}Fait{% else %}À faire{% endif %}
+              </span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p style="color:var(--muted);font-size:0.85rem;padding:1rem 0;text-align:center;">Aucune tâche</p>
+          {% endif %}
+        </div>
+
+        <div class="card-dash">
+          <div class="card-head">
+            <div class="card-title">Dépenses récentes</div>
+            {% if session.get('user_id') %}
+              <a href="{{ url_for('depenses.ajouter_depense') }}" class="card-btn">+ Ajouter</a>
+            {% endif %}
+          </div>
+          {% if depenses %}
+            {% for depense in depenses[:4] %}
+            <div class="dep-row">
+              <div class="dep-left">
+                <div class="dep-ico">💳</div>
+                <div>
+                  <div class="dep-name">{{ depense.titre }}</div>
+                  <div class="dep-who">Payé par {{ depense.payeur }}</div>
+                </div>
+              </div>
+              <div class="dep-price">{{ "%.2f"|format(depense.montant) }} €</div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p style="color:var(--muted);font-size:0.85rem;padding:1rem 0;text-align:center;">Aucune dépense</p>
+          {% endif %}
+        </div>
+
+        <div class="right-col">
+          <div class="card-dash">
+            <div class="card-head">
+              <div class="card-title">Historique de présence</div>
+            </div>
+            {% if taches %}
+              {% set colocataires = taches | map(attribute='assignee') | unique | list %}
+              {% for coloc in colocataires %}
+              <div class="pres-row">
+                <div class="pres-av on">{{ coloc[0] | upper }}</div>
+                <div>
+                  <div class="pres-name">{{ coloc }}</div>
+                  <div class="pres-stat"><span class="dot" style="background:#10b981;"></span> Présent</div>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="pres-row">
+                <div class="pres-av on">L</div>
+                <div><div class="pres-name">Lucas</div><div class="pres-stat"><span class="dot" style="background:#10b981;"></span> Présent</div></div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

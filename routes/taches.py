@@ -7,6 +7,7 @@ taches_bp = Blueprint('taches', __name__)
 def liste_taches():
     return redirect(url_for('taches.liste_taches'))
 
+
 @taches_bp.route('/taches/<int:id>/cocher')
 def cocher_tache(id):
     tache = Tache.query.get_or_404(id)
