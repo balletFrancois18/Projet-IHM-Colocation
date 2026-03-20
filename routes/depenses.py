@@ -27,4 +27,4 @@ def ajouter_depense():
         db.session.add(nouvelle)
         db.session.commit()
         return redirect(url_for('depenses.liste_depenses'))
-    return render_template('depenses.html', depenses=Depense.query.all(), total=0)
+    return render_template('depenses.html', depenses=Depense.query.all(), total=0) #sortie
