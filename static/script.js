@@ -1,29 +1,37 @@
-function ouvrirModalAjouter() {
-    document.getElementById('modal-ajouter').classList.add('active');
+// Met à jour le montant d'une personne dans une catégorie
+function majMontant(input) {
+    const membre   = input.dataset.membre;
+    const cat      = input.dataset.cat;
+    const montant  = parseFloat(input.value) || 0;
+
+    fetch('/depenses/maj', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+            payeur:    membre,
+            categorie: cat,
+            montant:   montant
+        })
+    })
+    .then(r => r.json())
+    .then(() => {
+        // Recharge la page pour mettre à jour les barres
+        location.reload();
+    });
 }
 
-function ouvrirModalModifier(id, titre, montant, payeur) {
-    document.getElementById('modifier-titre').value   = titre;
-    document.getElementById('modifier-montant').value = montant;
-    document.getElementById('modifier-payeur').value  = payeur;
-    document.getElementById('form-modifier').action   = '/depenses/modifier/' + id;
-    document.getElementById('modal-modifier').classList.add('active');
+function ouvrirModalTotal() {
+    const total = document.getElementById('affichage-total').textContent;
+    document.getElementById('total-actuel').textContent = total;
+    document.getElementById('modal-total').classList.add('active');
 }
 
 function fermerModal(id) {
     document.getElementById(id).classList.remove('active');
 }
 
-document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
-    overlay.addEventListener('click', function(e) {
+document.querySelectorAll('.modal-overlay').forEach(function(o) {
+    o.addEventListener('click', function(e) {
         if (e.target === this) this.classList.remove('active');
     });
-});
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
-            m.classList.remove('active');
-        });
-    }
 });
