@@ -171,10 +171,9 @@
 </div>
 
 <!-- Passe les couleurs Python vers JS -->
-<script>
+ <script>
   const COULEURS = {{ couleurs | tojson }};
 </script>
-<script src="{{ url_for('static', filename='depenses.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/depenses.js') }}"></script>
 </body>
 </html>

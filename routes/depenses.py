@@ -12,6 +12,16 @@ depenses_bp = Blueprint('depenses', __name__)
 # Blueprint = façon de découper l'app en morceaux
 
 
+# Couleur fixe par personne
+couleurs = {
+    'Banu':    '#5B6CFF',
+    'Eoghan':    '#FF7A59',
+    'Francois': '#34D399',
+    'Loucia': '#34D399',
+    'Nassim':    '#A78BFA',
+}
+
+
 
 @depenses_bp.route('/depenses')
 def liste_depenses():
