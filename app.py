@@ -34,18 +34,28 @@ def init_db():
             color    TEXT NOT NULL,
             role     TEXT DEFAULT 'coloc',
             created  DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
+        )''')
+
+    # Table depenses — avec categorie, statut, nb_parts
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS depenses (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            montant     REAL NOT NULL,
+            description TEXT,
+            categorie   TEXT DEFAULT 'Autre',
+            statut      TEXT DEFAULT 'pending',
+            nb_parts    INTEGER DEFAULT 4,
+            date        DATETIME DEFAULT CURRENT_TIMESTAMP,
+            user_id     INTEGER,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )''')
 
     # Insertion des colocataires (ignoré si déjà existant)
     colocataires = [
-        ('Eoghan',  'eoghan@coloc.fr',  '1111', '#5B6CFF', 'coloc'),
-        ('François','francois@coloc.fr', '2222', '#FF7A59', 'coloc'),
-        ('Nassim',  'nassim@coloc.fr',  '3333', '#34D399', 'admin'),
-        ('Loucia',  'loucia@coloc.fr',  '4444', '#F472B6', 'coloc'),
-        ('Banu',    'banu@coloc.fr',    '5555', '#FBBF24', 'coloc'),
+        ('Eoghan',   'eoghan@coloc.fr',   '1111', '#5B6CFF', 'coloc'),
+        ('François', 'francois@coloc.fr', '2222', '#FF7A59', 'admin'),
+        ('Nassim',   'nassim@coloc.fr',   '3333', '#34D399', 'admin'),
     ]
-
     for name, email, pin, color, role in colocataires:
         pin_hash = hashlib.sha256(pin.encode()).hexdigest()
         c.execute('''
@@ -53,9 +63,13 @@ def init_db():
             VALUES (?, ?, ?, ?, ?)
         ''', (name, email, pin_hash, color, role))
 
+    # Données de démo si la table depenses est vide
+
+
     conn.commit()
     conn.close()
     print('✅ Base de données initialisée')
+
 
 # ══════════════════════════════════════
 # ROUTES STATIQUES (sert le front)
@@ -68,6 +82,7 @@ def index():
 def static_files(filename):
     return send_from_directory(FRONT_DIR, filename)
 
+
 # ══════════════════════════════════════
 # ROUTES API — USERS
 # ══════════════════════════════════════
@@ -77,17 +92,154 @@ def static_files(filename):
 def get_users():
     conn = get_db()
     users = conn.execute(
-        'SELECT id, name, email, color, role FROM users ORDER BY name'
+        'SELECT id, name, email, color, role FROM users ORDER BY id'
     ).fetchall()
     conn.close()
     return jsonify([dict(u) for u in users])
 
+# GET /api/names — liste tous les noms d'utilisateurs
+@app.route('/api/names', methods=['GET'])
+def get_user_names():
+    conn = get_db()
+    names = [row['name'] for row in conn.execute('SELECT name FROM users').fetchall()]
+    conn.close()
+    return jsonify(names)
+
+
+# ══════════════════════════════════════
+# ROUTES API — DÉPENSES
+# ══════════════════════════════════════
+
+# GET /api/depenses — toutes les dépenses avec infos user
+@app.route('/api/depenses', methods=['GET'])
+def get_depenses():
+    conn = get_db()
+    rows = conn.execute('''
+        SELECT d.id, d.montant, d.description, d.categorie, d.statut,
+               d.nb_parts, d.date, u.name, u.color, u.id as user_id
+        FROM depenses d
+        LEFT JOIN users u ON d.user_id = u.id
+        ORDER BY d.date DESC
+    ''').fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
+# POST /api/depenses — ajouter une dépense
+@app.route('/api/depenses', methods=['POST'])
+def add_depense():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    data = request.get_json()
+    montant     = data.get('montant')
+    description = data.get('description', '')
+    categorie   = data.get('categorie', 'Autre')
+    nb_parts    = data.get('nb_parts', 4)
+    # user_id_override : permet de choisir qui a payé depuis la modale
+    user_id = data.get('user_id_override', session['user_id'])
+
+    if not montant:
+        return jsonify({'error': 'Montant requis'}), 400
+
+    conn = get_db()
+    conn.execute('''
+        INSERT INTO depenses (montant, description, categorie, nb_parts, user_id)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (montant, description, categorie, nb_parts, user_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True}), 201
+
+# GET /api/soldes — calcule le solde net de chaque colocataire
+@app.route('/api/soldes', methods=['GET'])
+def get_soldes():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+
+    conn = get_db()
+    users    = conn.execute('SELECT id, name, color FROM users ORDER BY id').fetchall()
+    depenses = conn.execute('''
+        SELECT montant, nb_parts, user_id FROM depenses WHERE statut != 'paid'
+    ''').fetchall()
+    conn.close()
+
+    # Solde net par personne :
+    # +X = les autres lui doivent de l'argent (il a avancé)
+    # -X = il doit de l'argent aux autres
+    soldes = {u['id']: {'name': u['name'], 'color': u['color'], 'solde': 0.0} for u in users}
+    for dep in depenses:
+        if dep['user_id'] is None:
+            continue
+        part = dep['montant'] / dep['nb_parts']
+        for uid in soldes:
+            if uid == dep['user_id']:
+                soldes[uid]['solde'] += dep['montant'] - part  # récupère les parts des autres
+            else:
+                soldes[uid]['solde'] -= part                   # doit sa part
+
+    return jsonify(list(soldes.values()))
+
+# GET /api/remboursements — liste les remboursements suggérés (qui doit à qui)
+@app.route('/api/remboursements', methods=['GET'])
+def get_remboursements():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+
+    conn = get_db()
+    users    = conn.execute('SELECT id, name, color FROM users ORDER BY id').fetchall()
+    depenses = conn.execute('''
+        SELECT montant, nb_parts, user_id FROM depenses WHERE statut != 'paid'
+    ''').fetchall()
+    conn.close()
+
+    # Même calcul que /api/soldes
+    soldes = {u['id']: {'id': u['id'], 'name': u['name'], 'color': u['color'], 'solde': 0.0} for u in users}
+    for dep in depenses:
+        if dep['user_id'] is None:
+            continue
+        part = dep['montant'] / dep['nb_parts']
+        for uid in soldes:
+            if uid == dep['user_id']:
+                soldes[uid]['solde'] += dep['montant'] - part
+            else:
+                soldes[uid]['solde'] -= part
+
+    # Algorithme de simplification des dettes
+    debiteurs  = sorted([s for s in soldes.values() if s['solde'] < -0.01], key=lambda x: x['solde'])
+    creanciers = sorted([s for s in soldes.values() if s['solde'] > 0.01],  key=lambda x: -x['solde'])
+
+    remboursements = []
+    i, j = 0, 0
+    debiteurs  = [dict(d) for d in debiteurs]
+    creanciers = [dict(c) for c in creanciers]
+
+    while i < len(debiteurs) and j < len(creanciers):
+        montant = min(-debiteurs[i]['solde'], creanciers[j]['solde'])
+        if montant > 0.01:
+            remboursements.append({
+                'de':      debiteurs[i]['name'],
+                'de_color': debiteurs[i]['color'],
+                'a':       creanciers[j]['name'],
+                'a_color':  creanciers[j]['color'],
+                'montant': round(montant, 2),
+            })
+        debiteurs[i]['solde']  += montant
+        creanciers[j]['solde'] -= montant
+        if abs(debiteurs[i]['solde'])  < 0.01: i += 1
+        if abs(creanciers[j]['solde']) < 0.01: j += 1
+
+    return jsonify(remboursements)
+
+
+# ══════════════════════════════════════
+# ROUTES API — AUTH
+# ══════════════════════════════════════
+
 # POST /api/login — vérifie le PIN et ouvre la session
 @app.route('/api/login', methods=['POST'])
 def login():
-    data     = request.get_json()
-    email    = data.get('email', '').strip().lower()
-    pin      = data.get('pin', '').strip()
+    data  = request.get_json()
+    email = data.get('email', '').strip().lower()
+    pin   = data.get('pin', '').strip()
 
     if not email or not pin:
         return jsonify({'error': 'Email et PIN requis'}), 400
@@ -104,16 +256,13 @@ def login():
     if not user:
         return jsonify({'error': 'PIN incorrect'}), 401
 
-    # Ouvre la session Flask
     session['user_id']    = user['id']
     session['user_name']  = user['name']
     session['user_email'] = user['email']
     session['user_role']  = user['role']
+    session['user_color'] = user['color']
 
-    return jsonify({
-        'success': True,
-        'user': dict(user)
-    })
+    return jsonify({'success': True, 'user': dict(user)})
 
 # POST /api/logout — ferme la session
 @app.route('/api/logout', methods=['POST'])
@@ -121,17 +270,24 @@ def logout():
     session.clear()
     return jsonify({'success': True})
 
-# GET /api/me — retourne le user connecté
+# GET /api/me — retourne le user connecté (avec color)
 @app.route('/api/me', methods=['GET'])
 def me():
     if 'user_id' not in session:
         return jsonify({'error': 'Non connecté'}), 401
-    return jsonify({
-        'id':    session['user_id'],
-        'name':  session['user_name'],
-        'email': session['user_email'],
-        'role':  session['user_role'],
-    })
+
+    conn = get_db()
+    user = conn.execute(
+        'SELECT id, name, email, color, role FROM users WHERE id=?',
+        (session['user_id'],)
+    ).fetchone()
+    conn.close()
+
+    if not user:
+        return jsonify({'error': 'Utilisateur introuvable'}), 404
+
+    return jsonify(dict(user))
+
 
 # ══════════════════════════════════════
 # LANCEMENT
