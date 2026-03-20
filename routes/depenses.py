@@ -64,7 +64,11 @@ def ajouter_depense():
         return redirect(url_for('depenses.liste_depenses'))
     depenses = Depense.query.all()
     total    = sum(d.montant for d in depenses)
-    return render_template('depenses.html', depenses=depenses, total=total, barres=[])
+    return render_template('depenses.html',
+                       depenses=depenses,
+                       total=total,
+                       barres=barres,
+                       couleurs=couleurs) 
 
 @depenses_bp.route('/depenses/supprimer/<int:id>')
 def supprimer_depense(id):
