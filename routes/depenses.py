@@ -11,7 +11,7 @@ depenses_bp = Blueprint('depenses', __name__)
 
 @depenses_bp.route('/depenses')
 def liste_depenses():
-    return redirect(url_for('liste_depenses.html'))
+    return redirect(url_for('depenses.html'))
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 def ajouter_depense():
