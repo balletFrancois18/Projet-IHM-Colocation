@@ -2,6 +2,7 @@ from flask import Blueprint, flash, render_template, request, redirect, url_for,
 from flask_mail import Message
 from models import db, User
 import secrets
+from functools import wraps
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -40,6 +41,16 @@ def login():
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('auth.login'))
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Connectez-vous pour accéder à cette page.', 'error')
+            return redirect(url_for('auth.login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @auth_bp.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
