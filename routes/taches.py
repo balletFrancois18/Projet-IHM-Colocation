@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, render_template
+from flask import Blueprint, redirect, url_for, render_template, request
 from models import db, Tache
 
 taches_bp = Blueprint('taches', __name__)
@@ -13,4 +13,13 @@ def cocher_tache(id):
     tache = Tache.query.get_or_404(id)
     tache.faite = not tache.faite
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('taches.liste_taches'))
+
+@taches_bp.route('/taches/ajouter', methods=['POST'])
+def ajouter_tache():
+    titre    = request.form['titre']
+    assignee = request.form['assignee']
+    nouvelle = Tache(titre=titre, assignee=assignee, faite=False)
+    db.session.add(nouvelle)
+    db.session.commit()
+    return redirect(url_for('taches.liste_taches'))
