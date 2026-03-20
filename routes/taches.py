@@ -1,5 +1,6 @@
 from flask import Blueprint, redirect, url_for, render_template, request
 from models import db, Tache
+from routes.auth import login_required
 
 taches_bp = Blueprint('taches', __name__)
 
@@ -9,6 +10,7 @@ def liste_taches():
     return render_template('taches.html', taches=taches)
 
 @taches_bp.route('/taches/<int:id>/cocher')
+@login_required
 def cocher_tache(id):
     tache = Tache.query.get_or_404(id)
     tache.faite = not tache.faite
@@ -16,6 +18,7 @@ def cocher_tache(id):
     return redirect(url_for('taches.liste_taches'))
 
 @taches_bp.route('/taches/ajouter', methods=['POST'])
+@login_required
 def ajouter_tache():
     titre    = request.form['titre']
     assignee = request.form['assignee']
