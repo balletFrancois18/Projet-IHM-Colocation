@@ -22,5 +22,5 @@ def ajouter_depense():
         nouvelle = Depense(titre=titre, montant=montant, payeur=payeur)
         db.session.add(nouvelle)
         db.session.commit()
-        return redirect(url_for('index'))
-    return render_template('depenses.html')
+        return redirect(url_for('depenses.liste_depenses'))
+    return render_template('ajouter_depenses.html')

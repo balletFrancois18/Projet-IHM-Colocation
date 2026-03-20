@@ -12,4 +12,4 @@ def cocher_tache(id):
     tache = Tache.query.get_or_404(id)
     tache.faite = not tache.faite
     db.session.commit()
-    return redirect(url_for('taches.html'))
+    return redirect(url_for('ajouter_taches.html'))
