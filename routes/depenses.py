@@ -1,41 +1,28 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-# importe les outils Flask nécessaires
-
 from models import db, Depense
-# importe la table Depense depuis models.py
-
 from routes.auth import login_required
-# importe le décorateur de protection de route depuis auth.py
 
 depenses_bp = Blueprint('depenses', __name__)
-# crée un "module" de routes indépendant
-# Blueprint = façon de découper l'app en morceaux
 
-
-# Couleur fixe par personne
-couleurs = {
-    'Banu':    '#5B6CFF',
-    'Eoghan':    '#FF7A59',
+COULEURS = {
+    'Banu':     '#5B6CFF',
+    'Eoghan':   '#FF7A59',
     'Francois': '#34D399',
-    'Loucia': '#34D399',
-    'Nassim':    '#A78BFA',
+    'Loucia':   '#A78BFA',
+    'Nassim':   '#F59E0B',
 }
-
-
 
 @depenses_bp.route('/depenses')
 def liste_depenses():
     depenses = Depense.query.all()
     total    = sum(d.montant for d in depenses)
 
-    # Calcule combien chaque personne a dépensé
     par_personne = {}
     for d in depenses:
         if d.payeur not in par_personne:
             par_personne[d.payeur] = 0
         par_personne[d.payeur] += d.montant
 
-    # Calcule le pourcentage de chaque personne
     barres = []
     for personne, montant in par_personne.items():
         pourcentage = (montant / total * 100) if total > 0 else 0
@@ -43,13 +30,14 @@ def liste_depenses():
             'nom':         personne,
             'montant':     montant,
             'pourcentage': round(pourcentage, 1),
-            'couleur':     couleurs.get(personne, '#888888')
+            'couleur':     COULEURS.get(personne, '#888888')
         })
 
     return render_template('depenses.html',
                            depenses=depenses,
                            total=total,
-                           barres=barres)
+                           barres=barres,
+                           couleurs=COULEURS)
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 @login_required
@@ -65,10 +53,10 @@ def ajouter_depense():
     depenses = Depense.query.all()
     total    = sum(d.montant for d in depenses)
     return render_template('depenses.html',
-                       depenses=depenses,
-                       total=total,
-                       barres=barres,
-                       couleurs=couleurs) 
+                           depenses=depenses,
+                           total=total,
+                           barres=[],
+                           couleurs=COULEURS)
 
 @depenses_bp.route('/depenses/supprimer/<int:id>')
 def supprimer_depense(id):
