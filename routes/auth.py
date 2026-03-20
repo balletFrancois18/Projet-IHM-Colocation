@@ -8,6 +8,12 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/inscription', methods=['GET', 'POST'])
 def inscription():
     if request.method == 'POST':
+        # Vérifie si l'email existe déjà
+        existant = User.query.filter_by(email=request.form['email']).first()
+        if existant:
+            flash('Cet email est déjà utilisé.', 'error')
+            return render_template('inscription.html')
+        
         nouveau = User(
             nom      = request.form['nom'],
             prenom   = request.form['prenom'],
