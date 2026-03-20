@@ -2,93 +2,227 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Dépenses</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <script src="{{ url_for('static', filename='script.js') }}"></script></head>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background: #F6F8FC; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #5B6CFF;
+      --bg: #F6F8FC;
+      --surface: #fff;
+      --border: #E5E7EB;
+      --text: #111827;
+      --muted: #6B7280;
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
     .navbar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 32px; background: white;
-      border-bottom: 1px solid #E5E7EB;
+      padding: 16px 32px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 50;
     }
-    .nav-logo { font-size: 22px; font-weight: 800; }
-    .nav-logo span { color: #5B6CFF; }
+    .nav-logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+    .nav-logo span { color: var(--primary); }
     .nav-links { display: flex; gap: 24px; }
-    .nav-links a { text-decoration: none; color: #6B7280; font-size: 14px; }
-    .nav-links a:hover { color: #5B6CFF; }
-    .btn-profil {
-      padding: 8px 16px; background: #5B6CFF; color: white;
-      border: none; border-radius: 10px; cursor: pointer;
+    .nav-links a {
+      text-decoration: none; color: var(--muted);
+      font-weight: 500; font-size: 14px; transition: color 0.2s;
     }
-    .btn-logout {
-      padding: 8px 16px; background: white; color: #6B7280;
-      border: 1px solid #E5E7EB; border-radius: 10px;
-      text-decoration: none; font-size: 13px;
+    .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .btn-sm {
+      padding: 8px 16px; border-radius: 10px; font-size: 13px;
+      font-weight: 600; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
     }
-    .container { max-width: 860px; margin: 40px auto; padding: 0 24px; }
-    .pot-commun {
-      text-align: center; font-size: 22px; font-weight: 700;
-      margin-bottom: 32px;
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-ghost { background: white; color: var(--muted); border: 1.5px solid var(--border); text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* CONTAINER */
+    .container { max-width: 860px; margin: 36px auto; padding: 0 24px; }
+
+    /* POT COMMUN */
+    .pot-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border-radius: var(--radius);
+      padding: 20px 28px; margin-bottom: 24px;
+      box-shadow: var(--shadow);
     }
-    .pot-commun span { color: #5B6CFF; }
-    .card {
-      background: white; border-radius: 16px; padding: 20px 24px;
-      margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    .pot-label { font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+    .pot-montant {
+      font-family: 'Syne', sans-serif; font-size: 28px;
+      font-weight: 800; color: var(--primary);
     }
-    .card-header {
+    .btn-edit-pot {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 8px 14px;
+      font-size: 12px; color: var(--muted); cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-edit-pot:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* CATEGORIE CARD */
+    .categorie-card {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 22px 26px; margin-bottom: 14px;
+      box-shadow: var(--shadow); border: 1.5px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .categorie-card:hover { border-color: rgba(91,108,255,0.15); }
+
+    .cat-header {
       display: flex; align-items: center;
-      justify-content: space-between; margin-bottom: 10px;
+      justify-content: space-between; margin-bottom: 16px;
     }
-    .card-titre { font-size: 14px; font-weight: 600; color: #374151; }
-    .barre {
-      display: flex; height: 14px; border-radius: 20px;
-      overflow: hidden; flex: 1; margin: 0 16px;
+    .cat-titre {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px; font-weight: 700;
     }
-    .barre-segment { height: 100%; transition: width 0.5s ease; }
-    .card-actions { display: flex; gap: 8px; }
-    .btn-action {
+    .cat-actions { display: flex; gap: 8px; }
+    .btn-round {
       width: 32px; height: 32px; border-radius: 50%;
-      border: 1.5px solid #E5E7EB; background: white;
-      cursor: pointer; font-size: 14px; color: #6B7280;
+      border: 1.5px solid var(--border); background: white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; color: var(--muted);
+      transition: all 0.2s;
     }
-    .btn-action:hover { border-color: #5B6CFF; color: #5B6CFF; }
-    .legende {
-      display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap;
+    .btn-round:hover { border-color: var(--primary); color: var(--primary); background: #EEF2FF; }
+
+    /* BARRE DE RÉPARTITION */
+    .barre-wrap { position: relative; margin-bottom: 8px; }
+    .barre {
+      display: flex; height: 18px; border-radius: 20px;
+      overflow: visible; background: var(--border);
+      position: relative;
+    }
+    .barre-segment {
+      height: 100%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+      position: relative; cursor: pointer;
+    }
+    .barre-segment:first-child { border-radius: 20px 0 0 20px; }
+    .barre-segment:last-child { border-radius: 0 20px 20px 0; }
+    .barre-segment:only-child { border-radius: 20px; }
+
+    /* Tooltip au survol */
+    .barre-segment .tooltip {
+      position: absolute; bottom: calc(100% + 8px);
+      left: 50%; transform: translateX(-50%);
+      background: #1F2937; color: white;
+      padding: 5px 10px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 10;
+    }
+    .barre-segment .tooltip::after {
+      content: ''; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #1F2937;
+    }
+    .barre-segment:hover .tooltip { opacity: 1; }
+
+    /* Légende */
+    .barre-legende {
+      display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px;
     }
     .legende-item {
       display: flex; align-items: center; gap: 6px;
-      font-size: 12px; color: #6B7280;
+      font-size: 12px; color: var(--muted);
     }
     .legende-dot {
-      width: 10px; height: 10px; border-radius: 50%;
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
     }
+    .legende-nom { font-weight: 600; color: var(--text); }
+
+    /* Champ courses */
+    .courses-row {
+      display: flex; gap: 10px; align-items: center; margin-top: 4px;
+    }
+    .courses-input {
+      flex: 1; padding: 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s;
+    }
+    .courses-input:focus { outline: none; border-color: var(--primary); }
+
+    /* MODAL */
     .modal-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.3); z-index: 100;
+      background: rgba(0,0,0,0.35); z-index: 200;
       align-items: center; justify-content: center;
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: white; border-radius: 16px;
-      padding: 28px; width: 360px;
+      background: white; border-radius: 20px;
+      padding: 28px; width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      animation: slideUp 0.25s ease-out;
     }
-    .modal-titre { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
-    .modal-input {
-      width: 100%; padding: 10px 14px;
-      border: 1.5px solid #E5E7EB; border-radius: 10px;
-      font-size: 13px; margin-bottom: 12px;
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
     }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .modal-titre {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px; font-weight: 700; margin-bottom: 20px;
+    }
+    .field-group { margin-bottom: 14px; }
+    .field-label {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      margin-bottom: 5px; display: block; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .field-input {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s;
+    }
+    .field-input:focus { outline: none; border-color: var(--primary); }
+    .modal-actions {
+      display: flex; justify-content: flex-end;
+      gap: 10px; margin-top: 20px;
+    }
     .btn-valider {
-      padding: 8px 18px; background: #5B6CFF; color: white;
+      padding: 10px 22px; background: var(--primary); color: white;
       border: none; border-radius: 10px; cursor: pointer;
+      font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
     }
+    .btn-valider:hover { background: #4455EE; transform: scale(1.02); }
     .btn-annuler {
-      padding: 8px 18px; background: white; color: #6B7280;
-      border: 1.5px solid #E5E7EB; border-radius: 10px; cursor: pointer;
+      padding: 10px 18px; background: white; color: var(--muted);
+      border: 1.5px solid var(--border); border-radius: 10px;
+      cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
     }
+    .btn-annuler:hover { border-color: #EF4444; color: #EF4444; }
+
+    /* Modal pot commun */
+    .pot-input {
+      width: 100%; padding: 14px; font-size: 24px; font-weight: 700;
+      text-align: center; border: 2px solid var(--border);
+      border-radius: 12px; font-family: 'Syne', sans-serif;
+      color: var(--primary); transition: border-color 0.2s;
+    }
+    .pot-input:focus { outline: none; border-color: var(--primary); }
   </style>
 </head>
 <body>
@@ -98,102 +232,111 @@
   <div class="nav-links">
     <a href="{{ url_for('index') }}">🏠 Accueil</a>
     <a href="{{ url_for('taches.liste_taches') }}">🧹 Tâches</a>
-    <a href="{{ url_for('depenses.liste_depenses') }}">💸 Dépenses</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}" class="active">💸 Dépenses</a>
   </div>
-  <div style="display:flex;align-items:center;gap:12px">
-    <button class="btn-profil">Profil</button>
-    <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+  <div class="nav-right">
+    <span>👤</span>
+    <button class="btn-sm btn-primary">Profil</button>
+    <a href="{{ url_for('auth.logout') }}" class="btn-sm btn-ghost">Déconnexion</a>
   </div>
 </nav>
 
 <div class="container">
 
-  <!-- Pot commun total -->
-  <div class="pot-commun">
-    Montant Pot Commun : <span>{{ total }} €</span>
+  <!-- Pot commun -->
+  <div class="pot-header">
+    <div>
+      <div class="pot-label">Montant Pot Commun</div>
+      <div class="pot-montant" id="affichage-total">{{ total }} €</div>
+    </div>
+    <button class="btn-edit-pot" onclick="ouvrirModalPot()">✏️ Modifier</button>
   </div>
 
-  <!-- Barre globale de répartition -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-titre">Répartition globale</span>
-      <button class="btn-action" onclick="ouvrirModal()">＋</button>
-    </div>
-    <div class="barre">
-      {% for b in barres %}
-        <div class="barre-segment"
-             style="width:{{ b.pourcentage }}%;background:{{ b.couleur }}">
-        </div>
-      {% endfor %}
-    </div>
-    <!-- Légende avec nom + montant + couleur -->
-    <div class="legende">
-      {% for b in barres %}
-      <div class="legende-item">
-        <div class="legende-dot" style="background:{{ b.couleur }}"></div>
-        <span>{{ b.nom }} — {{ b.montant }} € ({{ b.pourcentage }}%)</span>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- Liste des dépenses -->
-  {% for depense in depenses %}
-  <div class="card">
-    <div class="card-header">
-      <span class="card-titre">{{ depense.titre }}</span>
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:13px;font-weight:700;color:#5B6CFF">
-          {{ depense.montant }} €
-        </span>
-        <div class="card-actions">
-          <button class="btn-action"
-            onclick="ouvrirModalModifier(
-              {{ depense.id }},
-              '{{ depense.titre }}',
-              {{ depense.montant }},
-              '{{ depense.payeur }}')">✏️
-          </button>
-          <a href="{{ url_for('depenses.supprimer_depense', id=depense.id) }}"
-             class="btn-action"
-             onclick="return confirm('Supprimer ?')">✕</a>
-        </div>
+  <!-- Répartition loyer -->
+  <div class="categorie-card" id="cat-loyer">
+    <div class="cat-header">
+      <span class="cat-titre">🏠 Répartition loyer</span>
+      <div class="cat-actions">
+        <button class="btn-round" onclick="ouvrirModalModifier('loyer')" title="Modifier">✏️</button>
+        <button class="btn-round" onclick="ouvrirModalAjouter('loyer')" title="Ajouter">＋</button>
       </div>
     </div>
-    <div style="font-size:12px;color:#6B7280">
-      Payé par <strong>{{ depense.payeur }}</strong>
+    <div class="barre-wrap">
+      <div class="barre" id="barre-loyer"></div>
     </div>
+    <div class="barre-legende" id="legende-loyer"></div>
   </div>
-  {% endfor %}
 
-  {% if depenses|length == 0 %}
-  <div style="text-align:center;padding:40px;color:#6B7280">
-    Aucune dépense. <br><br>
-    <button class="btn-valider" onclick="ouvrirModal()">＋ Ajouter</button>
+  <!-- Activité principale -->
+  <div class="categorie-card" id="cat-activite">
+    <div class="cat-header">
+      <span class="cat-titre">⚡ Activité principale</span>
+      <div class="cat-actions">
+        <button class="btn-round" onclick="ouvrirModalModifier('activite')" title="Modifier">✏️</button>
+        <button class="btn-round" onclick="ouvrirModalAjouter('activite')" title="Ajouter">＋</button>
+      </div>
+    </div>
+    <div class="barre-wrap">
+      <div class="barre" id="barre-activite"></div>
+    </div>
+    <div class="barre-legende" id="legende-activite"></div>
   </div>
-  {% endif %}
+
+  <!-- Courses -->
+  <div class="categorie-card" id="cat-courses">
+    <div class="cat-header">
+      <span class="cat-titre">🛒 Courses</span>
+      <div class="cat-actions">
+        <button class="btn-round" onclick="ouvrirModalModifier('courses')" title="Modifier">✏️</button>
+        <button class="btn-round" onclick="ouvrirModalAjouter('courses')" title="Ajouter">＋</button>
+      </div>
+    </div>
+    <div class="barre-wrap">
+      <div class="barre" id="barre-courses"></div>
+    </div>
+    <div class="barre-legende" id="legende-courses"></div>
+    <div class="courses-row" style="margin-top:14px">
+      <input type="text" class="courses-input" id="input-courses" placeholder="Ajouter un article...">
+      <button class="btn-sm btn-primary" onclick="ajouterArticle()">＋</button>
+    </div>
+    <div id="liste-articles" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
+  </div>
 
 </div>
 
-<!-- Modal ajouter / modifier -->
-<div class="modal-overlay" id="modal">
+<!-- Modal ajouter/modifier participant -->
+<div class="modal-overlay" id="modal-participant">
   <div class="modal">
-    <div class="modal-titre" id="modal-titre">Ajouter une dépense</div>
-    <form method="POST" id="modal-form"
-          action="{{ url_for('depenses.ajouter_depense') }}">
-      <input type="text"   id="input-titre"   name="titre"
-             class="modal-input" placeholder="Ex: Loyer, Courses..." required>
-      <input type="number" id="input-montant" name="montant"
-             class="modal-input" placeholder="Montant en €"
-             step="0.01" required>
-      <input type="text"   id="input-payeur"  name="payeur"
-             class="modal-input" placeholder="Qui a payé ?" required>
-      <div class="modal-actions">
-        <button type="button" class="btn-annuler"
-                onclick="fermerModal()">Annuler</button>
-        <button type="submit" class="btn-valider">Valider</button>
-      </div>
-    </form>
+    <div class="modal-titre" id="modal-titre-participant">Ajouter un participant</div>
+    <input type="hidden" id="modal-categorie">
+    <input type="hidden" id="modal-index-modifier" value="-1">
+    <div class="field-group">
+      <label class="field-label">Nom</label>
+      <input type="text" class="field-input" id="input-nom" placeholder="ex: Dorian">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Montant (€)</label>
+      <input type="number" class="field-input" id="input-montant" placeholder="ex: 20" step="0.01" min="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-annuler" onclick="fermerModal('modal-participant')">✕ Annuler</button>
+      <button class="btn-valider" onclick="validerParticipant()">✓ Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal modifier pot commun -->
+<div class="modal-overlay" id="modal-pot">
+  <div class="modal">
+    <div class="modal-titre">Modifier le pot commun</div>
+    <div class="field-group">
+      <label class="field-label">Montant total (€)</label>
+      <input type="number" class="pot-input" id="input-pot" placeholder="2800" step="0.01" min="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-annuler" onclick="fermerModal('modal-pot')">✕ Annuler</button>
+      <button class="btn-valider" onclick="validerPot()">✓ Valider</button>
+    </div>
   </div>
 </div>
 </body>
