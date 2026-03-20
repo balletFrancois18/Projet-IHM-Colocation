@@ -4,6 +4,9 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from models import db, Depense
 # importe la table Depense depuis models.py
 
+from routes.auth import login_required
+# importe le décorateur de protection de route depuis auth.py
+
 depenses_bp = Blueprint('depenses', __name__)
 # crée un "module" de routes indépendant
 # Blueprint = façon de découper l'app en morceaux
@@ -49,6 +52,7 @@ def liste_depenses():
                            barres=barres)
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
+@login_required
 def ajouter_depense():
     if request.method == 'POST':
         titre   = request.form['titre']
