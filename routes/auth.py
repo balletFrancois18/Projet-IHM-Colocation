@@ -84,3 +84,8 @@ def nouveau_mot_de_passe(token):
             flash('Mot de passe modifié avec succès ! Connectez-vous.', 'success')
             return redirect(url_for('auth.login'))
     return render_template('new_password.html', token=token)
+
+
+@auth_bp.route('/reservations')
+def reservations():
+    return render_template('reservations.html')
