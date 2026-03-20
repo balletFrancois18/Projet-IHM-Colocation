@@ -4,7 +4,7 @@ from routes.auth import login_required
 
 depenses_bp = Blueprint('depenses', __name__)
 
-couleurs = {
+COULEURS = {
     'Banu':     '#5B6CFF',
     'Eoghan':   '#FF7A59',
     'Francois': '#34D399',
@@ -12,84 +12,64 @@ couleurs = {
     'Nassim':   '#F59E0B',
 }
 
-CATEGORIES = ['loyer', 'activite', 'courses', 'autres']
-
 @depenses_bp.route('/depenses')
 def liste_depenses():
     depenses = Depense.query.all()
+    total    = sum(d.montant for d in depenses)
 
-    # Total global = somme de TOUTES les dépenses
-    total = sum(d.montant for d in depenses)
+    par_personne = {}
+    for d in depenses:
+        if d.payeur not in par_personne:
+            par_personne[d.payeur] = 0
+        par_personne[d.payeur] += d.montant
 
-    # Regrouper par catégorie
-    par_categorie = {}
-    for cat in CATEGORIES:
-        deps_cat = [d for d in depenses if d.categorie == cat]
-        total_cat = sum(d.montant for d in deps_cat)
-
-        # Barres par personne dans cette catégorie
-        par_personne = {}
-        for d in deps_cat:
-            if d.payeur not in par_personne:
-                par_personne[d.payeur] = 0
-            par_personne[d.payeur] += d.montant
-
-        barres = []
-        for personne, montant in par_personne.items():
-            pct = (montant / total_cat * 100) if total_cat > 0 else 0
-            barres.append({
-                'nom':         personne,
-                'montant':     montant,
-                'pourcentage': round(pct, 1),
-                'couleur':     couleurs.get(personne, '#888888')
-            })
-
-        par_categorie[cat] = {
-            'depenses': deps_cat,
-            'total':    total_cat,
-            'barres':   barres
-        }
+    barres = []
+    for personne, montant in par_personne.items():
+        pourcentage = (montant / total * 100) if total > 0 else 0
+        barres.append({
+            'nom':         personne,
+            'montant':     montant,
+            'pourcentage': round(pourcentage, 1),
+            'couleur':     COULEURS.get(personne, '#888888')
+        })
 
     return render_template('depenses.html',
-                           par_categorie=par_categorie,
+                           depenses=depenses,
                            total=total,
-                           couleurs=couleurs,
-                           categories=CATEGORIES)
+                           barres=barres,
+                           couleurs=COULEURS)
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 @login_required
 def ajouter_depense():
     if request.method == 'POST':
-        titre     = request.form['titre']
-        montant   = float(request.form['montant'])
-        categorie = request.form['categorie']
-
-        # Plusieurs payeurs séparés par virgule
-        payeurs  = request.form.getlist('payeurs')
-        montants = request.form.getlist('montants_payeurs')
-
-        for i, payeur in enumerate(payeurs):
-            if payeur and montants[i]:
-                nouvelle = Depense(
-                    titre     = titre,
-                    montant   = float(montants[i]),
-                    payeur    = payeur,
-                    categorie = categorie
-                )
-                db.session.add(nouvelle)
-
+        titre   = request.form['titre']
+        montant = float(request.form['montant'])
+        payeur  = request.form['payeur']
+        nouvelle = Depense(titre=titre, montant=montant, payeur=payeur)
+        db.session.add(nouvelle)
         db.session.commit()
         return redirect(url_for('depenses.liste_depenses'))
-
+    depenses = Depense.query.all()
+    total    = sum(d.montant for d in depenses)
     return render_template('depenses.html',
-                           par_categorie={},
-                           total=0,
-                           couleurs=couleurs,
-                           categories=CATEGORIES)
+                           depenses=depenses,
+                           total=total,
+                           barres=[],
+                           couleurs=COULEURS)
 
 @depenses_bp.route('/depenses/supprimer/<int:id>')
 def supprimer_depense(id):
     depense = Depense.query.get_or_404(id)
     db.session.delete(depense)
+    db.session.commit()
+    return redirect(url_for('depenses.liste_depenses'))
+
+@depenses_bp.route('/depenses/modifier/<int:id>', methods=['POST'])
+def modifier_depense(id):
+    depense         = Depense.query.get_or_404(id)
+    depense.titre   = request.form['titre']
+    depense.montant = float(request.form['montant'])
+    depense.payeur  = request.form['payeur']
     db.session.commit()
     return redirect(url_for('depenses.liste_depenses'))
