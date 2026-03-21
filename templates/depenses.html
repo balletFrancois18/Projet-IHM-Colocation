@@ -6,32 +6,48 @@
   <title>CoLoc — Dépenses</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='depenses.css') }}">
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='depenses.css') }}"> -->
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="nav-logo">Co<span>Loc</span></div>
-  <div class="nav-links">
-    <a href="/">🏠 Accueil</a>
-    <a href="/taches">🧹 Tâches</a>
-    <a href="/depenses" class="active">💸 Dépenses</a>
-  </div>
-  <div class="nav-right">
-    <span>👤</span>
-    <button class="btn-sm btn-primary">Profil</button>
-    <a href="/logout" class="btn-sm btn-ghost">Déconnexion</a>
-  </div>
-</nav>
+ <!-- NAVBAR EN HAUT -->
+  <nav>
+    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
+    <a href="#" class="nav-link">Réservations</a>
+    <a href="#" class="nav-link">Chat</a>
+    <a href="#" class="nav-link">Bon plan</a>
+    <div class="nav-right">
+      {% if session.get('user_id') %}
+        <div class="nav-avatar">👤</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
+      {% endif %}
+    </div>
+  </nav>
 
+  
 <div class="container">
 
+<div style="text-align:center;margin-bottom:24px">
+  <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#111827">
+    Dépenses
+  </div>
+  <div style="font-size:13px;color:#6B7280;margin-top:4px">
+    {{ total }} € dépensés sur {{ pot_total }} €
+  </div>
+  <button onclick="ouvrirModalNouvelleCategorie()"
+          style="margin-top:14px;padding:10px 20px;background:#5B6CFF;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+    ＋ Ajouter une catégorie
+  </button>
+</div>
 <!-- Pot commun -->
 <div class="pot-header">
   <div>
     <div class="pot-label">Montant Pot Commun</div>
     <div class="pot-montant">{{ pot_total }} €</div>
-        <button class="btn-edit-pot" onclick="ouvrirModalPot()">✏️ Modifier</button>
   </div>
   <div>
     <div class="pot-label">Dépensé</div>
@@ -52,7 +68,6 @@
       <span class="cat-titre">🏠 Répartition loyer</span>
       <div class="cat-actions">
         <button class="btn-round" onclick="ouvrirModalModifier('loyer')" title="Modifier">✏️</button>
-        <button class="btn-round" onclick="ouvrirModalAjouter('loyer')" title="Ajouter">＋</button>
       </div>
     </div>
     <div class="barre-wrap">
@@ -67,7 +82,6 @@
       <span class="cat-titre">⚡ Activité principale</span>
       <div class="cat-actions">
         <button class="btn-round" onclick="ouvrirModalModifier('activite')" title="Modifier">✏️</button>
-        <button class="btn-round" onclick="ouvrirModalAjouter('activite')" title="Ajouter">＋</button>
       </div>
     </div>
     <div class="barre-wrap">
@@ -82,7 +96,6 @@
       <span class="cat-titre">🛒 Courses</span>
       <div class="cat-actions">
         <button class="btn-round" onclick="ouvrirModalModifier('courses')" title="Modifier">✏️</button>
-        <button class="btn-round" onclick="ouvrirModalAjouter('courses')" title="Ajouter">＋</button>
       </div>
     </div>
     <div class="barre-wrap">
@@ -91,7 +104,7 @@
     <div class="barre-legende" id="legende-courses"></div>
     <div class="courses-row" style="margin-top:14px">
       <input type="text" class="courses-input" id="input-courses" placeholder="Ajouter un article...">
-      <button class="btn-sm btn-primary" onclick="ajouterArticle()">＋</button>
+      <!-- <button class="btn-sm btn-primary" onclick="ajouterArticle()">＋</button> -->
     </div>
     <div id="liste-articles" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
   </div>
@@ -104,10 +117,19 @@
     <div class="modal-titre" id="modal-titre-participant">Ajouter un participant</div>
     <input type="hidden" id="modal-categorie">
     <input type="hidden" id="modal-index-modifier" value="-1">
+    <!-- APRÈS -->
     <div class="field-group">
-      <label class="field-label">Nom</label>
-      <input type="text" class="field-input" id="input-nom" placeholder="ex: Dorian">
+      <label class="field-label">Qui paie ?</label>
+      <select class="field-input" id="input-nom">
+        {% for nom, couleur in couleurs.items() %}
+        <option value="{{ nom }}">{{ nom }}</option>
+        {% endfor %}
+      </select>
     </div>
+
+
+
+
     <div class="field-group">
       <label class="field-label">Montant (€)</label>
       <input type="number" class="field-input" id="input-montant" placeholder="ex: 20" step="0.01" min="0">
@@ -130,6 +152,25 @@
     <div class="modal-actions">
       <button class="btn-annuler" onclick="fermerModal('modal-pot')">✕ Annuler</button>
       <button class="btn-valider" onclick="validerPot()">✓ Valider</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal nouvelle catégorie -->
+<div class="modal-overlay" id="modal-categorie-nouvelle">
+  <div class="modal">
+    <div class="modal-titre">Nouvelle catégorie</div>
+    <div class="field-group">
+      <label class="field-label">Nom de la catégorie</label>
+      <input type="text" class="field-input" id="input-nouvelle-cat"
+             placeholder="ex: Activité scolaire">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-annuler"
+              onclick="fermerModal('modal-categorie-nouvelle')">Annuler</button>
+      <button class="btn-valider"
+              onclick="ajouterNouvelleCategorie()">✓ Créer</button>
     </div>
   </div>
 </div>
@@ -225,19 +266,45 @@ function ouvrirModalModifier(categorie) {
   ouvrirModalAjouter(categorie);
 }
 
+
+
+
+
+
+
+
+
+
+
 function validerParticipant() {
   const categorie = document.getElementById('modal-categorie').value;
   const nom       = document.getElementById('input-nom').value.trim();
   const montant   = parseFloat(document.getElementById('input-montant').value);
-  if (!nom || isNaN(montant)) { alert('Remplis le nom et le montant !'); return; }
+  
+  if (!nom || isNaN(montant)) { 
+    alert('Remplis le nom et le montant !'); 
+    return; 
+  }
 
-  // Envoie vers Flask
-  fetch('/depenses/ajouter', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `titre=${nom}&montant=${montant}&payeur=${nom}&categorie=${categorie}`
-  }).then(() => location.reload());
+  // Crée un vrai formulaire et le soumet
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/depenses/ajouter';
+
+  const fields = { titre: nom, montant: montant, payeur: nom, categorie: categorie };
+  
+  Object.entries(fields).forEach(([key, val]) => {
+    const input = document.createElement('input');
+    input.type  = 'hidden';
+    input.name  = key;
+    input.value = val;
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit(); // ← soumet vraiment le formulaire → Flask recharge la page
 }
+
 
 function ouvrirModalPot() {
   document.getElementById('modal-pot').classList.add('active');
@@ -280,6 +347,45 @@ document.getElementById('input-courses').addEventListener('keydown', e => {
 
 // Init
 ['loyer', 'activite', 'courses'].forEach(rendreBarre);
+
+
+function ouvrirModalNouvelleCategorie() {
+  document.getElementById('input-nouvelle-cat').value = '';
+  document.getElementById('modal-categorie-nouvelle').classList.add('active');
+}
+
+function ajouterNouvelleCategorie() {
+  const nom = document.getElementById('input-nouvelle-cat').value.trim();
+  if (!nom) { alert('Donne un nom à la catégorie !'); return; }
+
+  // Crée la carte visuellement
+  const container = document.querySelector('.container');
+  const card = document.createElement('div');
+  card.className = 'categorie-card';
+  const id = nom.toLowerCase().replace(/\s+/g, '-');
+  card.innerHTML = `
+    <div class="cat-header">
+      <span class="cat-titre">📌 ${nom}</span>
+      <div class="cat-actions">
+        <button class="btn-round" onclick="ouvrirModalModifier('${id}')" title="Modifier">✏️</button>
+      </div>
+    </div>
+    <div class="barre-wrap">
+      <div class="barre" id="barre-${id}"
+           style="background:#E5E7EB;height:18px;border-radius:20px"></div>
+    </div>
+    <div class="barre-legende" id="legende-${id}">
+      <span style="font-size:12px;color:#9CA3AF">Aucune dépense</span>
+    </div>
+  `;
+
+  // Ajoute la catégorie dans les données JS
+  categories[id] = { participants: [] };
+
+  container.appendChild(card);
+  fermerModal('modal-categorie-nouvelle');
+}
+
 </script>
 </body>
 </html>

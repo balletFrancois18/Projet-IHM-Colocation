@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from models import db, Depense
+from flask import Blueprint, render_template, request, redirect, url_for, session
+from models import db, Depense, User
 from routes.auth import login_required
 
 depenses_bp = Blueprint('depenses', __name__)
 
-POT_TOTAL = 2800  # ← tout en haut, avant les routes
+POT_TOTAL = 2800
 
 COULEURS = {
     'Banu':     '#F59E0B',
@@ -34,9 +34,20 @@ def ajouter_depense():
         montant   = float(request.form['montant'])
         payeur    = request.form['payeur']
         categorie = request.form.get('categorie', 'courses')
-        nouvelle  = Depense(titre=titre, montant=montant,
-                            payeur=payeur, categorie=categorie)
-        db.session.add(nouvelle)
+
+        existante = Depense.query.filter(
+            db.func.lower(Depense.payeur) == payeur.lower(),
+            Depense.categorie == categorie
+        ).first()
+
+        if existante:
+            existante.montant = montant
+            existante.payeur  = payeur
+        else:
+            nouvelle = Depense(titre=titre, montant=montant,
+                               payeur=payeur, categorie=categorie)
+            db.session.add(nouvelle)
+
         db.session.commit()
         return redirect(url_for('depenses.liste_depenses'))
     return redirect(url_for('depenses.liste_depenses'))

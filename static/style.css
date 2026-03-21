@@ -28,7 +28,7 @@ body.auth-page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--text);
 }
 
@@ -883,6 +883,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 
 /*Dépenses*/
 
+
 .user-badge {
   font-size: 13px; font-weight: 600;
   color: #5B6CFF; background: #EEF2FF;
@@ -919,7 +920,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
   border: none; border-radius: 14px;
   font-size: 15px; font-weight: 700;
   cursor: pointer; margin-top: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: '', sans-serif;
   transition: background 0.2s;
 }
 .btn-sauvegarder:hover { background: #4455EE; }
@@ -997,4 +998,3 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
     .btn-valider { padding: 9px 20px; background: #5B6CFF; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
     .btn-annuler { padding: 9px 16px; background: white; color: #6B7280; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; }
-  
