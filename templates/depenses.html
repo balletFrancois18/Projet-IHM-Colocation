@@ -1,33 +1,28 @@
-
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Dépenses</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='depenses.css') }}">
 </head>
 <body>
 
-  <!-- NAVBAR -->
-  <nav>
-    <div class="nav-logo">Co<span>Loc</span></div>
-    <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
-    <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
-    <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link" style="background:rgba(255,255,255,0.15);>Dépenses</a>
-    <a href="#" class="nav-link">Réservations</a>
-    <a href="#" class="nav-link">Chat</a>
-    <div class="nav-right">
-      {% if session.get('user_id') %}
-        <div class="nav-avatar">👤</div>
-        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
-      {% else %}
-        <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
-      {% endif %}
-    </div>
-  </nav>
+<nav class="navbar">
+  <div class="nav-logo">Co<span>Loc</span></div>
+  <div class="nav-links">
+    <a href="/">🏠 Accueil</a>
+    <a href="/taches">🧹 Tâches</a>
+    <a href="/depenses" class="active">💸 Dépenses</a>
+  </div>
+  <div class="nav-right">
+    <span>👤</span>
+    <button class="btn-sm btn-primary">Profil</button>
+    <a href="/logout" class="btn-sm btn-ghost">Déconnexion</a>
+  </div>
+</nav>
 
 <div class="container">
 
