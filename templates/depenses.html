@@ -26,15 +26,26 @@
 
 <div class="container">
 
-  <!-- Pot commun -->
-  <div class="pot-header">
-    <div>
-      <div class="pot-label">Montant Pot Commun</div>
-      <div class="pot-montant" id="affichage-total">186.99 €</div>
-    </div>
-    <button class="btn-edit-pot" onclick="ouvrirModalPot()">✏️ Modifier</button>
+<!-- Pot commun -->
+<div class="pot-header">
+  <div>
+    <div class="pot-label">Montant Pot Commun</div>
+    <div class="pot-montant">{{ pot_total }} €</div>
+        <button class="btn-edit-pot" onclick="ouvrirModalPot()">✏️ Modifier</button>
   </div>
-
+  <div>
+    <div class="pot-label">Dépensé</div>
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#FF7A59">
+      {{ total }} €
+    </div>
+  </div>
+  <div>
+    <div class="pot-label">Reste</div>
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#34D399">
+      {{ reste }} €
+    </div>
+  </div>
+</div>
   <!-- Répartition loyer -->
   <div class="categorie-card" id="cat-loyer">
     <div class="cat-header">

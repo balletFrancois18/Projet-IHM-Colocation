@@ -30,14 +30,16 @@ def ajouter_depense():
                            total=0,
                            couleurs=COULEURS)
 
+POT_TOTAL = 2800  # montant fixe du pot commun
 
 @depenses_bp.route('/depenses')
 def liste_depenses():
     depenses = Depense.query.all()
-    total    = sum(d.montant for d in depenses)  # ← recalcule tout
+    total_depenses = sum(d.montant for d in depenses)
+    reste = POT_TOTAL - total_depenses  # ← ce qui reste
     return render_template('depenses.html',
                            depenses=depenses,
-                           total=total,
+                           total=total_depenses,
+                           reste=reste,
+                           pot_total=POT_TOTAL,
                            couleurs=COULEURS)
-
-
