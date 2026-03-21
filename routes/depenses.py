@@ -4,6 +4,8 @@ from routes.auth import login_required
 
 depenses_bp = Blueprint('depenses', __name__)
 
+POT_TOTAL = 2800  # ← tout en haut, avant les routes
+
 COULEURS = {
     'Banu':     '#F59E0B',
     'Eoghan':   '#5B6CFF',
@@ -11,6 +13,18 @@ COULEURS = {
     'Loucia':   '#A78BFA',
     'Nassim':   '#FF7A59',
 }
+
+@depenses_bp.route('/depenses')
+def liste_depenses():
+    depenses       = Depense.query.all()
+    total_depenses = sum(d.montant for d in depenses)
+    reste          = POT_TOTAL - total_depenses
+    return render_template('depenses.html',
+                           depenses=depenses,
+                           total=total_depenses,
+                           reste=reste,
+                           pot_total=POT_TOTAL,
+                           couleurs=COULEURS)
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 @login_required
@@ -24,22 +38,5 @@ def ajouter_depense():
                             payeur=payeur, categorie=categorie)
         db.session.add(nouvelle)
         db.session.commit()
-        return redirect(url_for('depenses.liste_depenses'))  # ← redirige vers liste
-    return render_template('depenses.html',
-                           depenses=Depense.query.all(),
-                           total=0,
-                           couleurs=COULEURS)
-
-POT_TOTAL = 2800  # montant fixe du pot commun
-
-@depenses_bp.route('/depenses')
-def liste_depenses():
-    depenses = Depense.query.all()
-    total_depenses = sum(d.montant for d in depenses)
-    reste = POT_TOTAL - total_depenses  # ← ce qui reste
-    return render_template('depenses.html',
-                           depenses=depenses,
-                           total=total_depenses,
-                           reste=reste,
-                           pot_total=POT_TOTAL,
-                           couleurs=COULEURS)
+        return redirect(url_for('depenses.liste_depenses'))
+    return redirect(url_for('depenses.liste_depenses'))
