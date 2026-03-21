@@ -356,34 +356,20 @@ function ouvrirModalNouvelleCategorie() {
 
 function ajouterNouvelleCategorie() {
   const nom = document.getElementById('input-nouvelle-cat').value.trim();
-  if (!nom) { alert('Donne un nom à la catégorie !'); return; }
+  if (!nom) { alert('Donne un nom !'); return; }
 
-  // Crée la carte visuellement
-  const container = document.querySelector('.container');
-  const card = document.createElement('div');
-  card.className = 'categorie-card';
-  const id = nom.toLowerCase().replace(/\s+/g, '-');
-  card.innerHTML = `
-    <div class="cat-header">
-      <span class="cat-titre">📌 ${nom}</span>
-      <div class="cat-actions">
-        <button class="btn-round" onclick="ouvrirModalModifier('${id}')" title="Modifier">✏️</button>
-      </div>
-    </div>
-    <div class="barre-wrap">
-      <div class="barre" id="barre-${id}"
-           style="background:#E5E7EB;height:18px;border-radius:20px"></div>
-    </div>
-    <div class="barre-legende" id="legende-${id}">
-      <span style="font-size:12px;color:#9CA3AF">Aucune dépense</span>
-    </div>
-  `;
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/depenses/categorie/ajouter';
 
-  // Ajoute la catégorie dans les données JS
-  categories[id] = { participants: [] };
+  const input = document.createElement('input');
+  input.type  = 'hidden';
+  input.name  = 'categorie';
+  input.value = nom.toLowerCase().replace(/\s+/g, '-');
+  form.appendChild(input);
 
-  container.appendChild(card);
-  fermerModal('modal-categorie-nouvelle');
+  document.body.appendChild(form);
+  form.submit();
 }
 
 </script>

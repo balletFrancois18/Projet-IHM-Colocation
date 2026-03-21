@@ -51,3 +51,21 @@ def ajouter_depense():
         db.session.commit()
         return redirect(url_for('depenses.liste_depenses'))
     return redirect(url_for('depenses.liste_depenses'))
+
+
+@depenses_bp.route('/depenses/categorie/ajouter', methods=['POST'])
+def ajouter_categorie():
+    categorie = request.form.get('categorie')
+    # Crée une dépense vide pour "marquer" la catégorie
+    if categorie:
+        existe = Depense.query.filter_by(categorie=categorie).first()
+        if not existe:
+            placeholder = Depense(
+                titre     = categorie,
+                montant   = 0,
+                payeur    = 'none',
+                categorie = categorie
+            )
+            db.session.add(placeholder)
+            db.session.commit()
+    return redirect(url_for('depenses.liste_depenses'))
