@@ -14,17 +14,29 @@ COULEURS = {
     'Nassim':   '#FF7A59',
 }
 
+# Catégories de base toujours présentes
+CATEGORIES_BASE = ['loyer', 'activite', 'courses']
+
 @depenses_bp.route('/depenses')
 def liste_depenses():
     depenses       = Depense.query.all()
-    total_depenses = sum(d.montant for d in depenses)
-    reste          = POT_TOTAL - total_depenses
+    # Filtre les dépenses réelles (exclut les placeholders montant=0 payeur=none)
+    depenses_reelles = [d for d in depenses if d.payeur != 'none']
+    total_depenses   = sum(d.montant for d in depenses_reelles)
+    reste            = POT_TOTAL - total_depenses
+
+    # Récupère les catégories dynamiques depuis la BDD
+    toutes_cats = {d.categorie for d in depenses}
+    cats_extra  = [c for c in toutes_cats if c not in CATEGORIES_BASE]
+
     return render_template('depenses.html',
-                           depenses=depenses,
+                           depenses=depenses_reelles,
                            total=total_depenses,
                            reste=reste,
                            pot_total=POT_TOTAL,
-                           couleurs=COULEURS)
+                           couleurs=COULEURS,
+                           cats_extra=cats_extra)
+
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 @login_required
@@ -53,10 +65,35 @@ def ajouter_depense():
     return redirect(url_for('depenses.liste_depenses'))
 
 
+# @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
+# @login_required
+# def ajouter_depense():
+#     if request.method == 'POST':
+#         titre     = request.form['titre']
+#         montant   = float(request.form['montant'])
+#         payeur    = request.form['payeur']
+#         categorie = request.form.get('categorie', 'courses')
+
+#         existante = Depense.query.filter(
+#             db.func.lower(Depense.payeur) == payeur.lower(),
+#             Depense.categorie == categorie
+#         ).first()
+
+#         if existante:
+#             existante.montant = montant
+#             existante.payeur  = payeur
+#         else:
+#             nouvelle = Depense(titre=titre, montant=montant,
+#                                payeur=payeur, categorie=categorie)
+#             db.session.add(nouvelle)
+
+#         db.session.commit()
+#         return redirect(url_for('depenses.liste_depenses'))
+#     return redirect(url_for('depenses.liste_depenses'))
+
 @depenses_bp.route('/depenses/categorie/ajouter', methods=['POST'])
 def ajouter_categorie():
     categorie = request.form.get('categorie')
-    # Crée une dépense vide pour "marquer" la catégorie
     if categorie:
         existe = Depense.query.filter_by(categorie=categorie).first()
         if not existe:
@@ -68,4 +105,12 @@ def ajouter_categorie():
             )
             db.session.add(placeholder)
             db.session.commit()
+    return redirect(url_for('depenses.liste_depenses'))
+
+
+
+@depenses_bp.route('/depenses/supprimer-categorie/<categorie>', methods=['POST'])
+def supprimer_categorie(categorie):
+    Depense.query.filter_by(categorie=categorie).delete()
+    db.session.commit()
     return redirect(url_for('depenses.liste_depenses'))
