@@ -27,6 +27,187 @@
 //   document.getElementById('modal').classList.add('active');
 // }
 
+const donneesFlask = [
+  {% for d in depenses %}
+  { payeur: "{{ d.payeur }}", montant: {{ d.montant }}, categorie: "{{ d.categorie }}" }{% if not loop.last %},{% endif %}
+  {% endfor %}
+];
+
+const COULEURS_MAP = {{ couleurs | tojson }};
+
+const categories = {
+  loyer:    { participants: [] },
+  activite: { participants: [] },
+  courses:  { participants: [] }
+};
+
+{% for cat in cats_extra %}
+categories['{{ cat }}'] = { participants: [] };
+{% endfor %}
+
+donneesFlask.forEach(d => {
+  const cat = d.categorie || 'courses';
+  if (categories[cat]) {
+    categories[cat].participants.push({
+      nom:     d.payeur,
+      montant: d.montant,
+      couleur: COULEURS_MAP[d.payeur] || '#888888'
+    });
+  }
+});
+
+function rendreBarre(categorie) {
+  const data    = categories[categorie];
+  const barre   = document.getElementById('barre-' + categorie);
+  const legende = document.getElementById('legende-' + categorie);
+  if (!barre || !legende) return;
+
+  const total = data.participants.reduce((s, p) => s + p.montant, 0);
+  barre.innerHTML   = '';
+  legende.innerHTML = '';
+
+  if (total === 0) {
+    barre.style.background = '#E5E7EB';
+    legende.innerHTML = '<span style="font-size:12px;color:#9CA3AF">Aucune dépense</span>';
+    return;
+  }
+
+  barre.style.background = 'transparent';
+
+  data.participants.forEach((p, i) => {
+    const pct = (p.montant / total * 100).toFixed(1);
+    const seg = document.createElement('div');
+    seg.className        = 'barre-segment';
+    seg.style.width      = pct + '%';
+    seg.style.background = p.couleur;
+    if (i === 0) seg.style.borderRadius = '20px 0 0 20px';
+    if (i === data.participants.length - 1) seg.style.borderRadius = '0 20px 20px 0';
+    if (data.participants.length === 1) seg.style.borderRadius = '20px';
+
+    const tip = document.createElement('div');
+    tip.className   = 'tooltip';
+    tip.textContent = p.nom + ' — ' + p.montant + ' €';
+    seg.appendChild(tip);
+    barre.appendChild(seg);
+
+    const item = document.createElement('div');
+    item.className = 'legende-item';
+    item.innerHTML = `
+      <div class="legende-dot" style="background:${p.couleur}"></div>
+      <span class="legende-nom">${p.nom}</span>
+      <span>${p.montant} €</span>
+    `;
+    legende.appendChild(item);
+  });
+}
+
+function ouvrirModalAjouter(categorie) {
+  document.getElementById('modal-titre-participant').textContent = 'Ajouter';
+  document.getElementById('modal-categorie').value = categorie;
+  document.getElementById('input-montant').value   = '';
+  document.getElementById('modal-participant').classList.add('active');
+}
+
+function ouvrirModalModifier(categorie) {
+  ouvrirModalAjouter(categorie);
+}
+
+function validerParticipant() {
+  const categorie = document.getElementById('modal-categorie').value;
+  const nom       = document.getElementById('input-nom').value;
+  const montant   = parseFloat(document.getElementById('input-montant').value);
+
+  if (!nom || isNaN(montant)) {
+    alert('Remplis le nom et le montant !');
+    return;
+  }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/depenses/ajouter';
+
+  [['titre', nom], ['montant', montant], ['payeur', nom], ['categorie', categorie]].forEach(([k, v]) => {
+    const i = document.createElement('input');
+    i.type = 'hidden'; i.name = k; i.value = v;
+    form.appendChild(i);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function supprimerCategorie(categorie) {
+  if (!confirm('Supprimer toutes les dépenses de "' + categorie + '" ?')) return;
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/depenses/supprimer-categorie/' + categorie;
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function ouvrirModalPot() {
+  document.getElementById('modal-pot').classList.add('active');
+}
+
+function validerPot() {
+  fermerModal('modal-pot');
+}
+
+function fermerModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape')
+    document.querySelectorAll('.modal-overlay.active')
+      .forEach(m => m.classList.remove('active'));
+});
+
+document.getElementById('input-courses').addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  const val = this.value.trim();
+  if (!val) return;
+  const tag = document.createElement('span');
+  tag.style.cssText = 'background:#EEF2FF;color:#5B6CFF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
+  tag.innerHTML = val + ' <span style="cursor:pointer;opacity:0.6" onclick="this.parentElement.remove()">✕</span>';
+  document.getElementById('liste-articles').appendChild(tag);
+  this.value = '';
+});
+
+function ouvrirModalNouvelleCategorie() {
+  document.getElementById('input-nouvelle-cat').value = '';
+  document.getElementById('modal-categorie-nouvelle').classList.add('active');
+}
+
+function ajouterNouvelleCategorie() {
+  const nom = document.getElementById('input-nouvelle-cat').value.trim();
+  if (!nom) { alert('Donne un nom !'); return; }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/depenses/categorie/ajouter';
+
+  const input = document.createElement('input');
+  input.type  = 'hidden';
+  input.name  = 'categorie';
+  input.value = nom.toLowerCase().replace(/\s+/g, '-');
+  form.appendChild(input);
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+['loyer', 'activite', 'courses'].forEach(rendreBarre);
+{% for cat in cats_extra %}
+rendreBarre('{{ cat }}');
+{% endfor %}
 
 /*calendrier*/
   const evenements = [
