@@ -25,3 +25,7 @@ class Tache(db.Model):
     assignee = db.Column(db.String(50), nullable=False)
     faite    = db.Column(db.Boolean, default=False)
     user_id  = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+
+
+
+    
