@@ -14,9 +14,11 @@ COULEURS = {
     'Nassim':   '#FF7A59',
 }
 
+
 # Catégories de base toujours présentes
 CATEGORIES_BASE = ['loyer', 'activite', 'courses']
 
+#SQL / base de données classique (ORM type SQLAlchemy)
 @depenses_bp.route('/depenses')
 def liste_depenses():
     depenses       = Depense.query.all()

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -30,82 +31,133 @@
   <!-- CONTENU -->
   <div style="max-width:1200px; margin:0 auto; padding:2rem; display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start;">
 
-    <!-- En-tête -->
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
-      <div>
-        <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Tâches</h1>
-        <p style="font-size:0.85rem; color:var(--muted); margin-top:0.2rem;">
-          {{ taches | selectattr('faite') | list | length }} / {{ taches | length }} tâches complétées
-        </p>
-      </div>
-      {% if session.get('user_id') %}
+    <div>
+      <!-- En-tête -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+        <div>
+          <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Tâches</h1>
+          <p style="font-size:0.85rem; color:var(--muted); margin-top:0.2rem;">
+            {{ taches | selectattr('faite') | list | length }} / {{ taches | length }} tâches complétées
+          </p>
+        </div>
         <button onclick="ouvrirModal()" class="btn-action-primary">+ Ajouter une tâche</button>
-      {% endif %}
-    </div>
+      </div>
 
-    <!-- Filtres -->
-    <div class="filtres">
-      <button class="filtre-btn active" onclick="filtrer('tous', this)">Toutes ({{ taches | length }})</button>
-      <button class="filtre-btn" onclick="filtrer('todo', this)">À faire ({{ taches | rejectattr('faite') | list | length }})</button>
-      <button class="filtre-btn" onclick="filtrer('fait', this)">Fait ({{ taches | selectattr('faite') | list | length }})</button>
-    </div>
+      <!-- Filtres -->
+      <div class="filtres">
+        <button class="filtre-btn active" onclick="filtrer('tous', this)">Toutes ({{ taches | length }})</button>
+        <button class="filtre-btn" onclick="filtrer('todo', this)">À faire ({{ taches | rejectattr('faite') | list | length }})</button>
+        <button class="filtre-btn" onclick="filtrer('fait', this)">Fait ({{ taches | selectattr('faite') | list | length }})</button>
+      </div>
 
-    <!-- Liste tâches -->
-    <div id="liste-taches">
-      {% if taches %}
-        {% for tache in taches %}
-        <div class="tache-card" data-statut="{{ 'fait' if tache.faite else 'todo' }}">
-          <a href="{{ url_for('taches.cocher_tache', id=tache.id) }}" class="tache-check {% if tache.faite %}done{% endif %}">
-            {% if tache.faite %}✓{% endif %}
-          </a>
-          <div class="tache-info">
-            <div class="tache-titre {% if tache.faite %}done{% endif %}">{{ tache.titre }}</div>
-            <div class="tache-assignee">👤 {{ tache.assignee }}</div>
+      <!-- Liste tâches -->
+      <div id="liste-taches">
+        {% if taches %}
+          {% for tache in taches %}
+          <div class="tache-card" data-statut="{{ 'fait' if tache.faite else 'todo' }}">
+            <a href="{{ url_for('taches.cocher_tache', id=tache.id) }}" class="tache-check {% if tache.faite %}done{% endif %}">
+              {% if tache.faite %}✓{% endif %}
+            </a>
+            <div class="tache-info">
+              <div class="tache-titre {% if tache.faite %}done{% endif %}">{{ tache.titre }}</div>
+              <div class="tache-assignee">👤 {{ tache.assignee }}</div>
+            </div>
+            <span class="tache-badge {% if tache.faite %}badge-done{% else %}badge-todo{% endif %}">
+              {% if tache.faite %}Fait{% else %}À faire{% endif %}
+            </span>
           </div>
-          <span class="tache-badge {% if tache.faite %}badge-done{% else %}badge-todo{% endif %}">
-            {% if tache.faite %}Fait{% else %}À faire{% endif %}
-          </span>
-        </div>
-        {% endfor %}
-      {% else %}
-        <div class="empty">
-          <div class="empty-icon">📋</div>
-          <div class="empty-text">Aucune tâche pour l'instant</div>
-        </div>
-      {% endif %}
+          {% endfor %}
+        {% else %}
+          <div class="empty">
+            <div class="empty-icon">📋</div>
+            <div class="empty-text">Aucune tâche pour l'instant</div>
+          </div>
+        {% endif %}
+      </div>
     </div>
 
-  <!-- Contribution -->
+    <!-- Contribution -->
     <div class="card-dash" style="margin-top:1.5rem;">
       <div class="card-head">
         <div class="card-title">📊 Contribution totale</div>
       </div>
-     
-  {% if taches %}
-  {% set total_global = taches | length %}
-  {% set colocataires = taches | map(attribute='assignee') | unique | list %}
-  {% set couleurs = ['#ef4444', '#3b82f6', '#f59e0b', '#10b981'] %}
-
-  {% for coloc in colocataires %}
-    {% set faites = taches | selectattr('assignee', 'equalto', coloc) | selectattr('faite') | list | length %}
-    {% set pct = ((faites / total_global) * 100) | int if total_global > 0 else 0 %}
-
-    <div style="margin-bottom:1rem;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-        <div style="display:flex; align-items:center; gap:0.6rem;">
-          <div class="pres-av on" style="background:{{ couleurs[loop.index0 % 4] }}; width:28px; height:28px; font-size:0.72rem;">
-            {{ coloc[0] | upper }}
+      {% if taches %}
+        {% set total_global = taches | length %}
+        {% set colocataires = taches | map(attribute='assignee') | unique | list %}
+        {% set couleurs = ['#ef4444', '#3b82f6', '#f59e0b', '#10b981'] %}
+        {% for coloc in colocataires %}
+          {% set faites = taches | selectattr('assignee', 'equalto', coloc) | selectattr('faite') | list | length %}
+          {% set pct = ((faites / total_global) * 100) | int if total_global > 0 else 0 %}
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <div class="pres-av on" style="background:{{ couleurs[loop.index0 % 4] }}; width:28px; height:28px; font-size:0.72rem;">
+                  {{ coloc[0] | upper }}
+                </div>
+                <span style="font-size:0.875rem; font-weight:600; color:var(--text);">{{ coloc }}</span>
+              </div>
+              <span style="font-size:0.78rem; color:var(--muted);">{{ faites }}/{{ total_global }} — {{ pct }}%</span>
+            </div>
+            <div style="height:10px; background:var(--border); border-radius:6px; overflow:hidden;">
+              <div style="height:100%; width:{{ pct }}%; background:{{ couleurs[loop.index0 % 4] }}; border-radius:6px; transition:width 0.6s ease;"></div>
+            </div>
           </div>
-          <span style="font-size:0.875rem; font-weight:600; color:var(--text);">{{ coloc }}</span>
-        </div>
-        <span style="font-size:0.78rem; color:var(--muted);">{{ faites }}/{{ total_global }} — {{ pct }}%</span>
-      </div>
-      <div style="height:10px; background:var(--border); border-radius:6px; overflow:hidden;">
-        <div style="height:100%; width:{{ pct }}%; background:{{ couleurs[loop.index0 % 4] }}; border-radius:6px; transition:width 0.6s ease;"></div>
-      </div>
+        {% endfor %}
+      {% endif %}
     </div>
-  {% endfor %}
-{% endif %}
-</div>
+
+  </div>
+
+  <!-- Modal ajouter tâche -->
+  <div id="modal-overlay"
+       onclick="fermerModalOverlay(event)"
+       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:200; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:16px; padding:28px; width:360px; box-shadow:0 16px 48px rgba(0,0,0,0.15);">
+      <div style="font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:18px;">Ajouter une tâche</div>
+      <form method="POST" action="{{ url_for('taches.ajouter_tache') }}">
+        <div class="field-group">
+          <label class="field-label">Titre</label>
+          <input type="text" name="titre" class="field-input" placeholder="ex: Passer l'aspirateur" required>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Assigné à</label>
+          <input type="text" name="assignee" class="field-input" placeholder="ex: Lucas">
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+          <button type="button" class="btn-annuler" onclick="fermerModal()">✕ Annuler</button>
+          <button type="submit" class="btn-valider">✓ Valider</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- <script>
+    function ouvrirModal() {
+      const overlay = document.getElementById('modal-overlay');
+      if (overlay) overlay.style.display = 'flex';
+    }
+
+    function fermerModal() {
+      const overlay = document.getElementById('modal-overlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    function fermerModalOverlay(e) {
+      if (e.target === document.getElementById('modal-overlay')) fermerModal();
+    }
+
+    function filtrer(statut, btn) {
+      document.querySelectorAll('.filtre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.tache-card').forEach(card => {
+        card.style.display = (statut === 'tous' || card.dataset.statut === statut) ? 'flex' : 'none';
+      });
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') fermerModal();
+    });
+  </script> -->
+
 </body>
 </html>
