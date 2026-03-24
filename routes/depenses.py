@@ -66,33 +66,6 @@ def ajouter_depense():
         return redirect(url_for('depenses.liste_depenses'))
     return redirect(url_for('depenses.liste_depenses'))
 
-
-# @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
-# @login_required
-# def ajouter_depense():
-#     if request.method == 'POST':
-#         titre     = request.form['titre']
-#         montant   = float(request.form['montant'])
-#         payeur    = request.form['payeur']
-#         categorie = request.form.get('categorie', 'courses')
-
-#         existante = Depense.query.filter(
-#             db.func.lower(Depense.payeur) == payeur.lower(),
-#             Depense.categorie == categorie
-#         ).first()
-
-#         if existante:
-#             existante.montant = montant
-#             existante.payeur  = payeur
-#         else:
-#             nouvelle = Depense(titre=titre, montant=montant,
-#                                payeur=payeur, categorie=categorie)
-#             db.session.add(nouvelle)
-
-#         db.session.commit()
-#         return redirect(url_for('depenses.liste_depenses'))
-#     return redirect(url_for('depenses.liste_depenses'))
-
 @depenses_bp.route('/depenses/categorie/ajouter', methods=['POST'])
 def ajouter_categorie():
     categorie = request.form.get('categorie')

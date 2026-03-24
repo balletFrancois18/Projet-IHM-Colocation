@@ -26,3 +26,13 @@ def ajouter_tache():
     db.session.add(nouvelle)
     db.session.commit()
     return redirect(url_for('taches.liste_taches'))
+
+
+#AJOUT FONCTIONNALITE SUPPRIMER TACHE
+@taches_bp.route('/taches/<int:id>/supprimer', methods=['POST'])
+@login_required
+def supprimer_tache(id):
+    tache = Tache.query.get_or_404(id)
+    db.session.delete(tache)
+    db.session.commit()
+    return redirect(url_for('taches.liste_taches'))

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,7 +6,6 @@
   <title>CoLoc — Tâches</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<script src="{{ url_for('static', filename='script.js') }}"></script>
 <body class="index-page">
 
   <!-- NAVBAR -->
@@ -28,21 +26,23 @@
     </div>
   </nav>
 
-  <!-- CONTENU -->
-  <div style="max-width:1200px; margin:0 auto; padding:2rem; display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start;">
+  <!-- EN-TÊTE — en dehors du grid -->
+  <div style="max-width:1000px; margin:0 auto; padding:2rem 2rem 0 2rem;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Tâches</h1>
+        <p style="font-size:0.85rem; color:var(--muted); margin-top:0.2rem;">
+          {{ taches | selectattr('faite') | list | length }} / {{ taches | length }} tâches complétées
+        </p>
+      </div>
+      <button onclick="ouvrirModal()" class="btn-action-primary">+ Ajouter une tâche</button>
+    </div>
+  </div>
+
+  <!-- GRID — filtres + liste à gauche, contribution à droite -->
+  <div style="max-width:1000px; margin:0 auto; padding:0 2rem 2rem 2rem; display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start;">
 
     <div>
-      <!-- En-tête -->
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
-        <div>
-          <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Tâches</h1>
-          <p style="font-size:0.85rem; color:var(--muted); margin-top:0.2rem;">
-            {{ taches | selectattr('faite') | list | length }} / {{ taches | length }} tâches complétées
-          </p>
-        </div>
-        <button onclick="ouvrirModal()" class="btn-action-primary">+ Ajouter une tâche</button>
-      </div>
-
       <!-- Filtres -->
       <div class="filtres">
         <button class="filtre-btn active" onclick="filtrer('tous', this)">Toutes ({{ taches | length }})</button>
@@ -65,6 +65,15 @@
             <span class="tache-badge {% if tache.faite %}badge-done{% else %}badge-todo{% endif %}">
               {% if tache.faite %}Fait{% else %}À faire{% endif %}
             </span>
+
+            <!-- <button class="btn-round" onclick="supprimerCategorie('loyer')" title="Supprimer" style="color:#EF4444">X</button> -->
+
+            <form method="POST" action="{{ url_for('taches.supprimer_tache', id=tache.id) }}" style="margin:0">
+              <button type="submit"
+                      onclick="return confirm('Supprimer cette tâche ?')"
+                      title="Supprimer"
+                      style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:4px 6px;border-radius:6px;line-height:1;transition:color 0.15s;">✕</button>
+            </form>
           </div>
           {% endfor %}
         {% else %}
@@ -77,7 +86,7 @@
     </div>
 
     <!-- Contribution -->
-    <div class="card-dash" style="margin-top:1.5rem;">
+    <div class="card-dash">
       <div class="card-head">
         <div class="card-title">📊 Contribution totale</div>
       </div>
@@ -103,6 +112,8 @@
             </div>
           </div>
         {% endfor %}
+      {% else %}
+        <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem 0;">Aucune tâche</p>
       {% endif %}
     </div>
 
@@ -131,33 +142,6 @@
     </div>
   </div>
 
-  <!-- <script>
-    function ouvrirModal() {
-      const overlay = document.getElementById('modal-overlay');
-      if (overlay) overlay.style.display = 'flex';
-    }
-
-    function fermerModal() {
-      const overlay = document.getElementById('modal-overlay');
-      if (overlay) overlay.style.display = 'none';
-    }
-
-    function fermerModalOverlay(e) {
-      if (e.target === document.getElementById('modal-overlay')) fermerModal();
-    }
-
-    function filtrer(statut, btn) {
-      document.querySelectorAll('.filtre-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.tache-card').forEach(card => {
-        card.style.display = (statut === 'tous' || card.dataset.statut === statut) ? 'flex' : 'none';
-      });
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') fermerModal();
-    });
-  </script> -->
-
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

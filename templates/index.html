@@ -14,6 +14,7 @@
     <div class="nav-logo">Co<span>Loc</span></div>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
+    <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
     <a href="#" class="nav-link">Réservations</a>
     <a href="#" class="nav-link">Chat</a>
     <a href="#" class="nav-link">Bon plan</a>
@@ -78,9 +79,8 @@
       <!-- Pot commun -->
       <div class="card-dash">
         <div class="card-head">
-          <div class="card-title">Pot commun</div>
-          {% if session.get('user_id') %}
-          {% endif %}
+        <div class="card-title">Tâches récentes</div>
+          <a href="{{ url_for('taches.liste_taches') }}" class="card-btn">Voir tout →</a>
         </div>
         <div class="pot-total">
           {% if depenses %}{{ "%.2f"|format(depenses | sum(attribute='montant')) }} €
