@@ -25,30 +25,6 @@ Base de données
 
 SQLite, Passez à PostgreSQL quand vous déployez en ligne
 
-# plan
-
-
-Projet-IHM-Colocation/
-├── main.py              ✅ fait
-├── models.py            ✅ fait
-├── requirements.txt     ✅ fait
-├── Procfile             ✅ fait
-├── .gitignore           ✅ fait
-├── routes/
-│   ├── __init__.py      ✅ fait
-│   ├── taches.py        ✅ fait
-│   ├── depenses.py      ✅ fait
-│   └── auth.py          ✅ fait
-├── templates/
-│   ├── index.html       ✅ fait
-│   ├── login.html       
-│   ├── tache.html       
-│   └── ajouter_depense.html 
-├── static/
-│   └── style.css        
-└── coloc.db             
-
-
 
 # installations
 
