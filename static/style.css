@@ -206,7 +206,7 @@ body.index-page {
 }
 
 nav {
-  background: var(--blue);
+  background: #2b4d97;
   display: flex;
   align-items: center;
   padding: 0 2rem;
@@ -251,7 +251,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 
 .nav-avatar {
   width: 34px; height: 34px;
-  background: var(--blue-dark);
+  background: white;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   color: white; font-size: 1rem;
@@ -295,7 +295,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
   gap: 0.5rem;
   width: 100%;
   padding: 0.75rem;
-  background: var(--blue);
+  background: #2b4d97;
   color: white;
   border-radius: 10px;
   font-size: 0.9rem;
@@ -334,7 +334,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 .btn-action-primary {
   display: inline-flex; align-items: center; gap: 0.4rem;
   padding: 0.5rem 1.1rem;
-  background: var(--blue); color: white;
+  background: #2b4d97; color: white;
   border: none; border-radius: 8px;
   font-size: 0.875rem; font-weight: 600;
   text-decoration: none; cursor: pointer;
@@ -502,9 +502,10 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 }
 
 .card-btn {
-  font-size: 0.78rem; color: var(--blue-dark); text-decoration: none;
+  font-size: 0.78rem; color:white; text-decoration: none;
   font-weight: 500; padding: 0.25rem 0.6rem;
   border: 1px solid var(--blue-light); border-radius: 6px;
+  background-color: var(--blue-dark);
   transition: background 0.15s;
 }
 
@@ -513,15 +514,15 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 /* ── PLANNING ── */
 .planning-nav {
   display: flex; align-items: center; justify-content: space-between;
-  font-size: 0.82rem; font-weight: 600; color: var(--muted);
+  font-size: 0.82rem; font-weight: 600; color:#2b4d97;
   margin-bottom: 0.75rem;
 }
 
 .planning-nav button {
   width: 26px; height: 26px;
-  background: var(--blue-light); border: none;
+  background: #2b4d97; border: none;
   border-radius: 6px; cursor: pointer;
-  color: var(--blue-dark); font-size: 1rem; font-weight: 700;
+  color: white; font-size: 1rem; font-weight: 700;
   transition: background 0.15s;
 }
 
@@ -565,7 +566,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 
 .btn-planning {
   flex: 1; padding: 0.55rem;
-  background: var(--blue); color: white;
+  background: #2b4d97; color: white;
   border: none; border-radius: 8px;
   font-size: 0.8rem; font-weight: 500;
   text-align: center; text-decoration: none;
@@ -997,7 +998,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
     .field-input { width: 100%; padding: 10px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; font-size: 13px; font-family: 'Arial', sans-serif; }
     .field-input:focus { outline: none; border-color: #5B6CFF; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
-    .btn-valider { padding: 9px 20px; background: #5B6CFF; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'Arial', sans-serif; }
+    .btn-valider { padding: 9px 20px; background: #2b4d97; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'Arial', sans-serif; }
     .btn-annuler { padding: 9px 16px; background: white; color: #6B7280; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: 'Arial', sans-serif; }
 
 
