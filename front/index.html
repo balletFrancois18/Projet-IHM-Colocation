@@ -229,9 +229,9 @@
     </div>
     <span class="nav-label">Principal</span>
     <button class="nav-item active" onclick="showScreen('dashboard',this)"><span class="icon">🏠</span> Accueil</button>
-    <button class="nav-item" onclick="showScreen('depenses',this)"><span class="icon">💸</span> Dépenses<span class="nav-badge">3</span></button>
-    <button class="nav-item" onclick="showScreen('taches',this)"><span class="icon">🧹</span> Tâches<span class="nav-badge">5</span></button>
-    <button class="nav-item" onclick="showScreen('reservations',this)"><span class="icon">📅</span> Réservations<span class="nav-badge">3</span></button>
+    <button class="nav-item" onclick="showScreen('depenses',this)"><span class="icon">💸</span> Dépenses</button>
+    <button class="nav-item" onclick="showScreen('taches',this)"><span class="icon">🧹</span> Tâches</button>
+    <button class="nav-item" onclick="showScreen('reservations',this)"><span class="icon">📅</span> Réservations</button>
     <div class="sidebar-spacer"></div>
     <div class="sidebar-user">
       <div class="user-av"></div>
@@ -251,11 +251,7 @@
           <div class="page-eyebrow">Vendredi 27 février 2026 · ☀️ Beau temps à Paris</div>
           <div class="page-title">Bonjour, <span id="dashboard-username"></span> 👋</div>
         </div>
-        <div class="header-actions">
-          <button class="btn-icon">🔔<span class="notif-dot"></span></button>
-          <button class="btn btn-ghost">🛒 Courses</button>
-          <button class="btn btn-primary" onclick="openModal()">＋ Ajouter</button>
-        </div>
+
       </div>
       <div class="grid g4">
         <div class="card stat-card">
@@ -579,7 +575,6 @@
 
   </main>
 </div>
-
 <script>
 // ══════════════════════════════════════════════
 // ÉTAT GLOBAL
@@ -622,7 +617,6 @@ function showScreen(id, navBtn) {
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
-// Filtres tâches (kanban/rota/liste) — uniquement dans screen-taches
 document.querySelectorAll('#screen-taches .filter-btn').forEach(btn => {
   btn.addEventListener('click', function() {
     this.closest('.filter-row').querySelectorAll('.filter-btn')
@@ -637,21 +631,14 @@ document.querySelectorAll('#screen-taches .filter-btn').forEach(btn => {
 document.getElementById('depenses-filter-row').addEventListener('click', function(e) {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
-
-  // Toggle actif
   this.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-
   const f = btn.dataset.filter;
-
-  // Filtrage
   let filtered;
   if      (f === 'toutes')   filtered = _allDepenses;
   else if (f === 'pending')  filtered = _allDepenses.filter(d => d.statut === 'pending');
   else if (f === 'paid')     filtered = _allDepenses.filter(d => d.statut === 'paid');
   else                       filtered = _allDepenses.filter(d => d.categorie === f);
-
-  // Mise à jour liste + total affiché
   renderListe(filtered);
   const filteredTotal = filtered.reduce((s, d) => s + d.montant, 0);
   const totalEl = document.getElementById('depenses-total');
@@ -659,7 +646,7 @@ document.getElementById('depenses-filter-row').addEventListener('click', functio
 });
 
 // ══════════════════════════════════════════════
-// MODALE
+// MODALE DÉPENSE
 // ══════════════════════════════════════════════
 document.getElementById('modal-depense').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
@@ -752,18 +739,15 @@ function openTaskModal() {
 function openTaskEditModal(taskId) {
   const task = _allTasks.find(t => t.id === taskId);
   if (!task) return;
-  
   _currentEditingTaskId = taskId;
   document.getElementById('modal-task-title').textContent = '✏️ Modifier la tâche';
   document.getElementById('btn-task-submit').textContent = '💾 Enregistrer';
   document.getElementById('btn-task-delete').style.display = 'block';
-  
   document.getElementById('task-titre').value = task.titre || '';
   document.getElementById('task-description').value = task.description || '';
   document.getElementById('task-priorite').value = task.priorite || 'normal';
   document.getElementById('task-statut').value = task.statut || 'todo';
   document.getElementById('task-date').value = task.date_due || '';
-  
   document.getElementById('modal-task').classList.add('open');
   setTimeout(() => document.getElementById('task-titre').focus(), 100);
 }
@@ -804,7 +788,6 @@ async function submitTask() {
   try {
     let res;
     if (_currentEditingTaskId) {
-      // Modification
       res = await fetch(`/api/tasks/${_currentEditingTaskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -814,7 +797,6 @@ async function submitTask() {
       closeTaskModal();
       showToast('✅ Tâche modifiée !', 'success');
     } else {
-      // Création
       res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -835,9 +817,8 @@ async function submitTask() {
 
 async function deleteTask() {
   if (!_currentEditingTaskId) return;
-  
   if (!confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) return;
-  
+
   const btn = document.getElementById('btn-task-delete');
   btn.disabled = true;
   const originalText = btn.textContent;
@@ -880,25 +861,17 @@ async function updateTaskStatus(taskId, newStatus) {
 // RENDU KANBAN TÂCHES
 // ══════════════════════════════════════════════
 function renderTasksKanban(tasks) {
-  _allTasks = tasks; // Stocker pour l'édition
+  _allTasks = tasks;
   const priorityMap = { 'haute': '🔴', 'normal': '🟡', 'basse': '🟢' };
-  
-  // Grouper les tâches par statut
   const grouped = { 'todo': [], 'in_progress': [], 'done': [] };
-  tasks.forEach(t => {
-    if (grouped[t.statut]) grouped[t.statut].push(t);
-  });
-  
-  // Mettre à jour les colonnes
+  tasks.forEach(t => { if (grouped[t.statut]) grouped[t.statut].push(t); });
+
   ['todo', 'in_progress', 'done'].forEach(status => {
     const col = document.querySelector(`[data-task-status="${status}"]`);
     if (!col) return;
-    
     const list = col.querySelector('.kan-list');
     const count = col.querySelector('.kan-count');
-    
     if (count) count.textContent = grouped[status].length;
-    
     if (list) {
       list.innerHTML = grouped[status].map(task => {
         const dueDate = task.date_due ? new Date(task.date_due) : null;
@@ -910,14 +883,11 @@ function renderTasksKanban(tasks) {
           else if (dueDate < today) dueCls = 'due-late';
           dueText = dueDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
         }
-        
-        // Boutons de changement de statut
         const statusButtons = {
           'todo': '<button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'in_progress\')" title="Marquer en cours">▶️</button>',
           'in_progress': '<button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'done\')" title="Marquer terminée">✅</button><button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'todo\')" title="Revenir à faire">↩️</button>',
           'done': '<button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'in_progress\')" title="Revenir en cours">↩️</button>'
         };
-        
         return `
           <div class="kan-card" data-task-id="${task.id}" onclick="openTaskEditModal(${task.id})" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
             <div class="kan-card-title">${task.titre}</div>
@@ -935,13 +905,11 @@ function renderTasksKanban(tasks) {
       }).join('') + '<div style="margin-top:10px;padding:12px;border:2px dashed var(--border);border-radius:12px;text-align:center;color:var(--text-muted);font-size:13px;cursor:pointer" onclick="openTaskModal()">＋ Ajouter une tâche</div>';
     }
   });
-  
-  // Stats
+
   const total = tasks.length;
   const done = grouped['done'].length;
   const inProgress = grouped['in_progress'].length;
   const todo = grouped['todo'].length;
-  
   document.querySelectorAll('.task-stats .ts-num').forEach((el, i) => {
     const values = [total, done, inProgress, todo];
     if (i < values.length) el.textContent = values[i];
@@ -955,7 +923,6 @@ function renderPlanning(tasks) {
   const container = document.getElementById('rota-grid-container');
   if (!container) return;
 
-  // Générer les 7 prochains jours
   const today = new Date();
   const days = [];
   for (let i = 0; i < 7; i++) {
@@ -969,7 +936,6 @@ function renderPlanning(tasks) {
     });
   }
 
-  // Grouper les tâches par date_due
   const tasksByDate = {};
   tasks.forEach(task => {
     if (task.date_due) {
@@ -978,52 +944,31 @@ function renderPlanning(tasks) {
     }
   });
 
-  // Créer la grille
-  let html = '<div></div>'; // Coin vide
-
-  // En-têtes des jours
+  let html = '<div></div>';
   days.forEach(day => {
     const style = day.isToday ? 'color:var(--primary);font-weight:700' : '';
     const star = day.isToday ? ' ★' : '';
     html += `<div class="rota-header" style="${style}">${day.dayName}${star}</div>`;
   });
 
-  // Obtenir toutes les dates uniques des tâches
   const uniqueDates = Object.keys(tasksByDate).sort();
-
   if (uniqueDates.length === 0) {
-    // Si pas de tâches avec date, afficher un message
-    container.innerHTML = html + `
-      <div style="grid-column: 1/-1; padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
-        Aucune tâche avec date prévue. Ajoutez une date due aux tâches pour les voir apparaître ici !
-      </div>
-    `;
+    container.innerHTML = html + `<div style="grid-column: 1/-1; padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">Aucune tâche avec date prévue.</div>`;
     return;
   }
 
-  // Pour chaque date avec des tâches
   uniqueDates.forEach(dateStr => {
     const tasks_for_date = tasksByDate[dateStr];
-    
-    // Label (premier emoji + titre de la tâche)
     const label = tasks_for_date[0].titre.substring(0, 15);
     html += `<div class="rota-row-label" title="${tasks_for_date.map(t => t.titre).join(', ')}">${label}...</div>`;
-
-    // Cellules pour chaque jour
     days.forEach(day => {
       const tasksOnDay = tasks_for_date.filter(t => t.date_due === day.dateStr);
-      
       if (tasksOnDay.length > 0) {
-        const task = tasksOnDay[0]; // Prendre la première tâche de ce jour
-
-        // Status badge
+        const task = tasksOnDay[0];
         const statusEmoji = task.statut === 'done' ? '✅' : (task.statut === 'in_progress' ? '🔄' : '📋');
-        const statusLabel = task.statut === 'done' ? 'Fait' : (task.statut === 'in_progress' ? 'En cours' : 'À faire');
         const labelColor = task.statut === 'done' ? 'var(--success)' : (task.statut === 'in_progress' ? 'var(--accent)' : 'var(--text-muted)');
-        
         let cellClass = 'rota-cell assigned';
         if (day.isToday) cellClass += ' today-col';
-        
         html += `
           <div class="${cellClass}" onclick="openTaskEditModal(${task.id})" style="cursor:pointer;position:relative">
             <div style="display:flex;align-items:center;justify-content:center;gap:6px">
@@ -1033,7 +978,6 @@ function renderPlanning(tasks) {
           </div>
         `;
       } else {
-        // Cellule vide
         let cellClass = 'rota-cell';
         if (day.isToday) cellClass += ' today-col';
         html += `<div class="${cellClass}"><div style="font-size:16px;color:var(--border)">–</div></div>`;
@@ -1079,21 +1023,15 @@ function setAvatar(el, user) {
 }
 
 // ══════════════════════════════════════════════
-// RENDU LISTE (utilisé aussi par les filtres)
+// RENDU LISTE DÉPENSES
 // ══════════════════════════════════════════════
 function renderListe(deps) {
   const liste = document.getElementById('depenses-liste-principale');
   if (!liste) return;
-
   if (deps.length === 0) {
-    liste.innerHTML = `
-      <div style="text-align:center;padding:40px 20px;color:var(--text-muted)">
-        <div style="font-size:32px;margin-bottom:10px">🔍</div>
-        <div style="font-size:14px;font-weight:500">Aucune dépense pour ce filtre</div>
-      </div>`;
+    liste.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-muted)"><div style="font-size:32px;margin-bottom:10px">🔍</div><div style="font-size:14px;font-weight:500">Aucune dépense pour ce filtre</div></div>`;
     return;
   }
-
   liste.innerHTML = deps.map((dep, i) => {
     const cat  = catMeta[dep.categorie] || catMeta['Autre'];
     const st   = statusMeta[dep.statut] || statusMeta['pending'];
@@ -1132,20 +1070,16 @@ function renderRepartition(depenses) {
   if (!donutEl || !legendEl) return;
 
   const total = depenses.reduce((s, d) => s + d.montant, 0);
-
   if (depenses.length === 0) {
     donutEl.innerHTML  = `<div style="font-size:13px;color:var(--text-muted);padding:20px 0">Aucune dépense</div>`;
     legendEl.innerHTML = '';
     return;
   }
 
-  // Totaux par catégorie
   const cats = {};
-  depenses.forEach(dep => {
-    cats[dep.categorie] = (cats[dep.categorie] || 0) + dep.montant;
-  });
+  depenses.forEach(dep => { cats[dep.categorie] = (cats[dep.categorie] || 0) + dep.montant; });
 
-  const circonference = 2 * Math.PI * 50; // ~314
+  const circonference = 2 * Math.PI * 50;
   const entries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
   let offset = 0;
   let circles = '';
@@ -1153,12 +1087,7 @@ function renderRepartition(depenses) {
   entries.forEach(([cat, montant]) => {
     const cfg  = catMeta[cat] || catMeta['Autre'];
     const dash = (montant / total) * circonference;
-    circles += `
-      <circle cx="70" cy="70" r="50" fill="none"
-        stroke="${cfg.color}" stroke-width="20"
-        stroke-dasharray="${dash.toFixed(1)} ${(circonference - dash).toFixed(1)}"
-        stroke-dashoffset="${(-offset).toFixed(1)}"
-        style="transform:rotate(-90deg);transform-origin:70px 70px"/>`;
+    circles += `<circle cx="70" cy="70" r="50" fill="none" stroke="${cfg.color}" stroke-width="20" stroke-dasharray="${dash.toFixed(1)} ${(circonference - dash).toFixed(1)}" stroke-dashoffset="${(-offset).toFixed(1)}" style="transform:rotate(-90deg);transform-origin:70px 70px"/>`;
     offset += dash;
   });
 
@@ -1184,195 +1113,9 @@ function renderRepartition(depenses) {
 }
 
 // ══════════════════════════════════════════════
-// RENDU COMPLET DASHBOARD
+// RENDU DÉPENSES (liste + stats + soldes)
 // ══════════════════════════════════════════════
-function renderDashboard(depenses, soldes, tasks, reservations, me) {
-  // ── STATS PRINCIPALES ─────────────────────────
-  const totalDepenses = depenses.reduce((s, d) => s + d.montant, 0);
-  
-  // Solde personnel
-  const monSolde = soldes.find(s => s.name === me.name);
-  const soldeAmount = monSolde ? monSolde.solde : 0;
-  
-  // Stats tâches
-  const doneTasks = tasks.filter(t => t.statut === 'done').length;
-  const totalTasks = tasks.length;
-  const taskPercent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
-  
-  // ── Afficher les stats cartes ─────────────────
-  const statTotal = document.querySelector('#stat-total-mois');
-  if (statTotal) statTotal.textContent = totalDepenses.toFixed(2) + ' €';
-  
-  const statDois = document.querySelector('#stat-je-dois');
-  const statDoiNb = document.querySelector('#stat-je-dois-nb');
-  if (statDois) {
-    const jeDoiSign = soldeAmount >= 0 ? '+' : '';
-    statDois.textContent = jeDoiSign + soldeAmount.toFixed(2) + ' €';
-    if (statDoiNb) {
-      if (soldeAmount > 0) {
-        statDoiNb.textContent = '💰 On te doit cet argent';
-        statDoiNb.style.color = '#34D399';
-      } else if (soldeAmount < 0) {
-        statDoiNb.textContent = '⚠️ Tu dois ' + (-soldeAmount).toFixed(2) + ' €';
-        statDoiNb.style.color = '#FF7A59';
-      } else {
-        statDoiNb.textContent = '✓ Ton compte est équilibré';
-        statDoiNb.style.color = '#34D399';
-      }
-    }
-  }
-  
-  // Tâches
-  const statCards = document.querySelectorAll('.stat-card');
-  if (statCards.length >= 3) {
-    const stat3 = statCards[2];
-    const val3 = stat3.querySelector('.stat-val');
-    const chg3 = stat3.querySelector('.stat-chg');
-    if (val3) val3.innerHTML = `${doneTasks}<span style="font-size:18px;font-weight:500;opacity:.6">/${totalTasks}</span>`;
-    if (chg3) chg3.textContent = `📈 ${taskPercent}% terminé`;
-  }
-  
-  // ── Dépenses récentes ─────────────────────────
-  const dashDep = document.getElementById('dashboard-depenses-recentes');
-  if (dashDep) {
-    if (depenses.length === 0) {
-      dashDep.innerHTML = `<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center">Aucune dépense pour le moment</div>`;
-    } else {
-      dashDep.innerHTML = depenses.slice(0, 3).map((dep, i) => {
-        const cat = catMeta[dep.categorie] || catMeta['Autre'];
-        const st = statusMeta[dep.statut] || statusMeta['pending'];
-        const part = (dep.montant / dep.nb_parts).toFixed(2);
-        const isMe = dep.user_id === me.id;
-        const date = new Date(dep.date).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
-        return `
-          ${i > 0 ? '<hr class="divider">' : ''}
-          <div class="exp-row">
-            <div class="exp-emoji" style="background:${cat.bg}">${cat.emoji}</div>
-            <div class="exp-info">
-              <div class="exp-name">${dep.description}</div>
-              <div class="exp-meta">${date} · ${dep.name || 'Inconnu'}</div>
-            </div>
-            <div class="exp-amt" style="color:${st.cls && st.cls.includes('paid') ? 'var(--text-muted)' : 'var(--accent)'}">
-              ${isMe ? '– ' + dep.montant.toFixed(2) : '+ ' + part}
-              <div style="font-size:11px;color:var(--text-muted)">${st.label}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-  }
-  
-  // ── TÂCHES DU JOUR ────────────────────────────
-  const today = new Date().toISOString().split('T')[0];
-  const todayTasks = tasks.filter(t => t.date_due === today || !t.date_due).slice(0, 4).sort((a, b) => {
-    const statusOrder = { 'done': 2, 'in_progress': 1, 'todo': 0 };
-    return statusOrder[b.statut] - statusOrder[a.statut];
-  });
-  
-  // Chercher le conteneur des tâches du jour et le remplacer
-  const cards = document.querySelectorAll('.card');
-  let tasksCard = null;
-  for (let card of cards) {
-    if (card.textContent.includes('Tâches du jour')) {
-      tasksCard = card;
-      break;
-    }
-  }
-  
-  if (tasksCard) {
-    const tasksContainer = tasksCard.querySelector('[style*="display:flex;flex-direction:column;gap:7px"]');
-    if (tasksContainer) {
-      if (todayTasks.length === 0) {
-        tasksContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Aucune tâche pour aujourd\'hui !</div>';
-      } else {
-        tasksContainer.innerHTML = todayTasks.map(task => {
-          const isDone = task.statut === 'done';
-          const isInProgress = task.statut === 'in_progress';
-          const userIdx = task.user_id ? (task.user_id - 1) % 4 : 0;
-          const borderColor = isInProgress ? 'var(--primary)' : isDone ? 'rgba(52,211,153,0.3)' : 'transparent';
-          const checkBg = isDone ? 'var(--success)' : isInProgress ? 'var(--primary)' : 'none';
-          const checkStyle = isDone || isInProgress ? `background:${checkBg};display:flex;align-items:center;justify-content:center;color:white;font-size:11px` : 'border:2.5px solid var(--border)';
-          
-          return `
-            <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px;border-left:3px solid ${borderColor};cursor:pointer" onclick="showScreen('taches',null); openTaskEditModal(${task.id})">
-              <div style="width:20px;height:20px;border-radius:50%;${checkStyle};flex-shrink:0">${isDone ? '✓' : isInProgress ? '→' : ''}</div>
-              <div style="flex:1;font-size:13.5px;font-weight:${isDone ? '400;text-decoration:line-through;color:var(--text-muted)' : '600'}">${task.titre}</div>
-              <div class="kan-card-av kan-av-${userIdx}" style="font-size:11px"></div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-  }
-  
-  // ── BUDGET PAR CATÉGORIE ──────────────────────
-  const depensesByCategory = {};
-  depenses.forEach(dep => {
-    const cat = dep.categorie || 'Autre';
-    depensesByCategory[cat] = (depensesByCategory[cat] || 0) + dep.montant;
-  });
-  
-  // Chercher la carte "Budget commun"
-  let budgetCard = null;
-  for (let card of cards) {
-    if (card.textContent.includes('Budget commun')) {
-      budgetCard = card;
-      break;
-    }
-  }
-  
-  if (budgetCard) {
-    // Supprimer les anciens prog-wrap
-    budgetCard.querySelectorAll('.prog-wrap').forEach(p => p.remove());
-    
-    // Recalculer et afficher
-    const totalBudget = Object.values(depensesByCategory).reduce((a, b) => a + b, 0);
-    const budgetPercent = totalBudget > 0 ? Math.min(Math.round((totalBudget / 500) * 100), 100) : 0;
-    
-    const categories = Object.entries(depensesByCategory).sort((a, b) => b[1] - a[1]);
-    const maxAmount = Math.max(...Object.values(depensesByCategory), 1);
-    
-    // Créer les barres de progression
-    const progContainer = budgetCard.querySelector('.sec-head')?.nextElementSibling || budgetCard;
-    categories.forEach(([cat, amount]) => {
-      const catMeta1 = catMeta[cat] || catMeta['Autre'];
-      const pct = (amount / maxAmount * 100);
-      const html = `
-        <div class="prog-wrap" style="margin-bottom:12px">
-          <div class="prog-head" style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
-            <span>${catMeta1.emoji} ${cat}</span>
-            <span style="font-weight:600">${amount.toFixed(2)} €</span>
-          </div>
-          <div class="prog-track" style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
-            <div class="prog-fill" style="width:${pct}%;height:100%;background:${catMeta1.color || '#5B6CFF'};border-radius:4px;transition:width 0.3s"></div>
-          </div>
-        </div>
-      `;
-      progContainer.insertAdjacentHTML('beforeend', html);
-    });
-    
-    // Mettre à jour le pie chart et les stats
-    const circle = budgetCard.querySelector('circle[stroke="url(#grad1)"]');
-    if (circle) {
-      const circumference = 2 * Math.PI * 38;
-      const strokeDash = (budgetPercent / 100) * circumference;
-      circle.setAttribute('stroke-dasharray', strokeDash);
-    }
-    
-    const percentText = budgetCard.querySelector('[style*="font-size:22px"]');
-    if (percentText) percentText.textContent = budgetPercent + '%';
-    
-    const budgetInfo = budgetCard.querySelectorAll('div');
-    for (let div of budgetInfo) {
-      if (div.textContent.includes('300 / 400')) {
-        div.textContent = totalBudget.toFixed(0) + ' / 500 €';
-        break;
-      }
-    }
-  }
-}
-
-// ══════════════════════════════════════════════
+function renderDepenses(depenses, soldes, remboursements, me) {
   const total = depenses.reduce((s, d) => s + d.montant, 0);
   _allDepenses = depenses;
 
@@ -1427,17 +1170,15 @@ function renderDashboard(depenses, soldes, tasks, reservations, me) {
     }
     if (jeDoisNb) jeDoisNb.textContent = monSolde.solde >= 0
       ? '✅ Tu es créditeur'
-      : `⚠ ${remboursements.filter(r => r.de === me.name).length} remboursement(s)`;
+      : `⚠ ${(remboursements || []).filter(r => r.de === me.name).length} remboursement(s)`;
   }
 
-  // ── Liste principale (filtre "Toutes" par défaut) ──
-  // Remet le filtre sur "Toutes" à chaque rechargement
+  // ── Liste principale ──
   document.querySelectorAll('#depenses-filter-row .filter-btn').forEach(b => b.classList.remove('active'));
   const toutesBtn = document.querySelector('#depenses-filter-row [data-filter="toutes"]');
   if (toutesBtn) toutesBtn.classList.add('active');
   renderListe(depenses);
 
-  // Total
   const totalEl = document.getElementById('depenses-total');
   if (totalEl) totalEl.textContent = `– ${total.toFixed(2)} €`;
 
@@ -1447,7 +1188,7 @@ function renderDashboard(depenses, soldes, tasks, reservations, me) {
   // ── Remboursements ───────────────────────
   const rembList = document.getElementById('remboursements-list');
   if (rembList) {
-    rembList.innerHTML = remboursements.length === 0
+    rembList.innerHTML = (!remboursements || remboursements.length === 0)
       ? '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">✅ Tout le monde est à jour !</div>'
       : remboursements.map(r => `
           <div class="settle-item">
@@ -1484,7 +1225,79 @@ function renderDashboard(depenses, soldes, tasks, reservations, me) {
 }
 
 // ══════════════════════════════════════════════
-// RECHARGEMENT DEPUIS L'API
+// RENDU DASHBOARD
+// ══════════════════════════════════════════════
+function renderDashboard(depenses, soldes, tasks, reservations, me) {
+  const totalDepenses = depenses.reduce((s, d) => s + d.montant, 0);
+  const monSolde = soldes.find(s => s.name === me.name);
+  const soldeAmount = monSolde ? monSolde.solde : 0;
+  const doneTasks = tasks.filter(t => t.statut === 'done').length;
+  const totalTasks = tasks.length;
+  const taskPercent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+  const statTotal = document.querySelector('#stat-total-mois');
+  if (statTotal) statTotal.textContent = totalDepenses.toFixed(2) + ' €';
+
+  const statDois = document.querySelector('#stat-je-dois');
+  const statDoiNb = document.querySelector('#stat-je-dois-nb');
+  if (statDois) {
+    const jeDoiSign = soldeAmount >= 0 ? '+' : '';
+    statDois.textContent = jeDoiSign + soldeAmount.toFixed(2) + ' €';
+    if (statDoiNb) {
+      if (soldeAmount > 0) {
+        statDoiNb.textContent = '💰 On te doit cet argent';
+        statDoiNb.style.color = '#34D399';
+      } else if (soldeAmount < 0) {
+        statDoiNb.textContent = '⚠️ Tu dois ' + (-soldeAmount).toFixed(2) + ' €';
+        statDoiNb.style.color = '#FF7A59';
+      } else {
+        statDoiNb.textContent = '✓ Ton compte est équilibré';
+        statDoiNb.style.color = '#34D399';
+      }
+    }
+  }
+
+  const statCards = document.querySelectorAll('.stat-card');
+  if (statCards.length >= 3) {
+    const stat3 = statCards[2];
+    const val3 = stat3.querySelector('.stat-val');
+    const chg3 = stat3.querySelector('.stat-chg');
+    if (val3) val3.innerHTML = `${doneTasks}<span style="font-size:18px;font-weight:500;opacity:.6">/${totalTasks}</span>`;
+    if (chg3) chg3.textContent = `📈 ${taskPercent}% terminé`;
+  }
+
+  const dashDep = document.getElementById('dashboard-depenses-recentes');
+  if (dashDep) {
+    if (depenses.length === 0) {
+      dashDep.innerHTML = `<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center">Aucune dépense pour le moment</div>`;
+    } else {
+      dashDep.innerHTML = depenses.slice(0, 3).map((dep, i) => {
+        const cat = catMeta[dep.categorie] || catMeta['Autre'];
+        const st = statusMeta[dep.statut] || statusMeta['pending'];
+        const part = (dep.montant / dep.nb_parts).toFixed(2);
+        const isMe = dep.user_id === me.id;
+        const date = new Date(dep.date).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+        return `
+          ${i > 0 ? '<hr class="divider">' : ''}
+          <div class="exp-row">
+            <div class="exp-emoji" style="background:${cat.bg}">${cat.emoji}</div>
+            <div class="exp-info">
+              <div class="exp-name">${dep.description}</div>
+              <div class="exp-meta">${date} · ${dep.name || 'Inconnu'}</div>
+            </div>
+            <div class="exp-amt" style="color:${st.cls && st.cls.includes('paid') ? 'var(--text-muted)' : 'var(--accent)'}">
+              ${isMe ? '– ' + dep.montant.toFixed(2) : '+ ' + part}
+              <div style="font-size:11px;color:var(--text-muted)">${st.label}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+// RECHARGEMENT DÉPENSES
 // ══════════════════════════════════════════════
 async function reloadDepenses() {
   const [depenses, soldes, remboursements] = await Promise.all([
@@ -1494,11 +1307,10 @@ async function reloadDepenses() {
   ]);
   renderDepenses(depenses, soldes, remboursements, _me);
 }
+
 // ══════════════════════════════════════════════
 // RÉSERVATIONS
 // ══════════════════════════════════════════════
-
-// État
 let _allReservations = [];
 let _currentEditingReservationId = null;
 const RESERVATION_ROOMS = [
@@ -1508,7 +1320,6 @@ const RESERVATION_ROOMS = [
   { name: 'Global',        emoji: '🏠' },
 ];
 
-// Ouvrir modale nouvelle réservation
 function openReservationModal() {
   _currentEditingReservationId = null;
   document.getElementById('modal-res-title').textContent = '📅 Nouvelle réservation';
@@ -1519,34 +1330,28 @@ function openReservationModal() {
   setTimeout(() => document.getElementById('res-date').focus(), 100);
 }
 
-// Ouvrir modale édition
 function openReservationEditModal(resId) {
   const res = _allReservations.find(r => r.id === resId);
   if (!res) return;
-  
   _currentEditingReservationId = resId;
   document.getElementById('modal-res-title').textContent = '✏️ Modifier la réservation';
   document.getElementById('btn-res-submit').textContent = '💾 Enregistrer';
   document.getElementById('btn-res-delete').style.display = 'block';
-  
   document.getElementById('res-date').value = res.date || '';
   document.getElementById('res-salle').value = res.salle || '';
   document.getElementById('res-debut').value = res.debut || '';
   document.getElementById('res-fin').value = res.fin || '';
   document.getElementById('res-statut').value = res.statut || 'Réservé';
-  
   document.getElementById('modal-reservation').classList.add('open');
   setTimeout(() => document.getElementById('res-date').focus(), 100);
 }
 
-// Fermer modale
 function closeReservationModal() {
   document.getElementById('modal-reservation').classList.remove('open');
   resetReservationModal();
   _currentEditingReservationId = null;
 }
 
-// Réinitialiser modale
 function resetReservationModal() {
   document.getElementById('res-date').value = '';
   document.getElementById('res-salle').value = '';
@@ -1555,7 +1360,6 @@ function resetReservationModal() {
   document.getElementById('res-statut').value = 'Réservé';
 }
 
-// Soumettre réservation
 async function submitReservation() {
   const date = document.getElementById('res-date').value;
   const salle = document.getElementById('res-salle').value;
@@ -1563,15 +1367,8 @@ async function submitReservation() {
   const fin = document.getElementById('res-fin').value;
   const statut = document.getElementById('res-statut').value;
 
-  if (!date || !salle || !debut || !fin) {
-    showToast('❌ Complétez tous les champs', 'error');
-    return;
-  }
-
-  if (fin <= debut) {
-    showToast('❌ L\'heure de fin doit être après le début', 'error');
-    return;
-  }
+  if (!date || !salle || !debut || !fin) { showToast('❌ Complétez tous les champs', 'error'); return; }
+  if (fin <= debut) { showToast('❌ L\'heure de fin doit être après le début', 'error'); return; }
 
   const btn = document.getElementById('btn-res-submit');
   btn.disabled = true;
@@ -1606,7 +1403,6 @@ async function submitReservation() {
   }
 }
 
-// Supprimer réservation
 async function deleteReservation() {
   if (!_currentEditingReservationId) return;
   if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) return;
@@ -1633,10 +1429,8 @@ async function deleteReservation() {
   }
 }
 
-// Supprimer réservation directement (depuis le tableau)
 async function deleteReservationDirect(resId) {
   if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) return;
-
   try {
     const res = await fetch(`/api/reservations/${resId}`, {
       method: 'DELETE',
@@ -1650,7 +1444,6 @@ async function deleteReservationDirect(resId) {
   }
 }
 
-// Détection de conflit
 function hasReservationConflict(salle, date, debut, fin, excludeId = null) {
   return _allReservations.some(r => {
     if (r.id === excludeId) return false;
@@ -1660,14 +1453,12 @@ function hasReservationConflict(salle, date, debut, fin, excludeId = null) {
   });
 }
 
-// Vérifier conflit en temps réel (formulaire rapide)
 function checkReservationConflict() {
   const salle = document.getElementById('quick-res-salle').value;
   const date = document.getElementById('quick-res-date').value;
   const debut = document.getElementById('quick-res-start').value;
   const fin = document.getElementById('quick-res-end').value;
   const warning = document.getElementById('res-conflict-warning');
-
   if (salle && date && debut && fin && hasReservationConflict(salle, date, debut, fin)) {
     warning.style.display = 'flex';
   } else {
@@ -1675,27 +1466,15 @@ function checkReservationConflict() {
   }
 }
 
-// Réservation rapide
 async function addReservationQuick() {
   const date = document.getElementById('quick-res-date').value;
   const salle = document.getElementById('quick-res-salle').value;
   const debut = document.getElementById('quick-res-start').value;
   const fin = document.getElementById('quick-res-end').value;
 
-  if (!date || !salle || !debut || !fin) {
-    showToast('❌ Complétez tous les champs', 'error');
-    return;
-  }
-
-  if (fin <= debut) {
-    showToast('❌ L\'heure de fin doit être après le début', 'error');
-    return;
-  }
-
-  if (hasReservationConflict(salle, date, debut, fin)) {
-    showToast('❌ Conflit détecté pour cette période', 'error');
-    return;
-  }
+  if (!date || !salle || !debut || !fin) { showToast('❌ Complétez tous les champs', 'error'); return; }
+  if (fin <= debut) { showToast('❌ L\'heure de fin doit être après le début', 'error'); return; }
+  if (hasReservationConflict(salle, date, debut, fin)) { showToast('❌ Conflit détecté pour cette période', 'error'); return; }
 
   try {
     const res = await fetch('/api/reservations', {
@@ -1716,12 +1495,10 @@ async function addReservationQuick() {
   }
 }
 
-// Rendus
 function renderReservationTable(reservations) {
   _allReservations = reservations;
   const tbody = document.getElementById('reservations-table-body');
   const empty = document.getElementById('reservations-empty');
-
   if (!tbody) return;
 
   if (reservations.length === 0) {
@@ -1736,7 +1513,6 @@ function renderReservationTable(reservations) {
     const statusBg = r.statut === 'Occupé' ? '#FDECEA' : r.statut === 'Réservé' ? '#FDF0E1' : '#D8EFE4';
     const dateStr = new Date(r.date + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     const roomEmoji = RESERVATION_ROOMS.find(room => room.name === r.salle)?.emoji || '📍';
-
     return `
       <tr style="animation:rowIn 0.3s ease both;animation-delay:${i * 0.04}s;border-bottom:1px solid var(--border);transition:background .15s">
         <td style="padding:14px 16px;vertical-align:middle">${dateStr}</td>
@@ -1764,21 +1540,13 @@ function renderReservationRooms(reservations) {
     const active = reservations.find(r =>
       r.salle === room.name && r.date === today && r.debut <= now && r.fin >= now
     );
-
     const upcoming = reservations.find(r =>
       r.salle === room.name && r.date === today && r.debut > now
     );
-
     let status = 'Disponible';
     let dotColor = '#2D6A4F';
-
-    if (active && active.statut === 'Occupé') {
-      status = 'Occupé';
-      dotColor = '#C0392B';
-    } else if (active?.statut === 'Réservé' || upcoming) {
-      status = 'Réservé';
-      dotColor = '#E67E22';
-    }
+    if (active && active.statut === 'Occupé') { status = 'Occupé'; dotColor = '#C0392B'; }
+    else if (active?.statut === 'Réservé' || upcoming) { status = 'Réservé'; dotColor = '#E67E22'; }
 
     return `
       <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;text-align:center" onclick="document.getElementById('quick-res-salle').value = '${room.name}';showScreen('reservations')">
@@ -1792,7 +1560,6 @@ function renderReservationRooms(reservations) {
   }).join('');
 }
 
-// Rechargement
 async function reloadReservations() {
   try {
     const res = await fetch('/api/reservations');
@@ -1806,23 +1573,22 @@ async function reloadReservations() {
 }
 
 // ══════════════════════════════════════════════
+// INITIALISATION
+// ══════════════════════════════════════════════
 Promise.all([
   fetch('/api/me').then(r => r.json()),
   fetch('/api/users').then(r => r.json()),
 ]).then(([me, users]) => {
   _me = me;
 
-  // Sidebar user
   const sidebarName = document.querySelector('.sidebar-user .user-name span');
   if (sidebarName) sidebarName.textContent = me.name;
   const userAv = document.querySelector('.sidebar-user .user-av');
   if (userAv) { userAv.textContent = me.name.charAt(0); userAv.style.background = me.color; }
 
-  // Salutation
   const dashUser = document.getElementById('dashboard-username');
   if (dashUser) dashUser.textContent = me.name;
 
-  // Coloc-pill avatars
   const avEls = document.querySelectorAll('.coloc-pill .av');
   users.slice(0, avEls.length).forEach((u, i) => {
     avEls[i].textContent = u.name.charAt(0);
@@ -1830,7 +1596,6 @@ Promise.all([
     avEls[i].title = u.name;
   });
 
-  // Avatars indexés (kanban, rota)
   [0, 1, 2, 3].forEach(idx => {
     const u = users[idx];
     if (!u) return;
@@ -1841,7 +1606,6 @@ Promise.all([
     });
   });
 
-  // Modale : select "Payé par"
   const depUser = document.getElementById('dep-user');
   if (depUser) {
     depUser.innerHTML = users.map(u =>
@@ -1849,7 +1613,6 @@ Promise.all([
     ).join('');
   }
 
-  // Chat : DM list
   const dmList = document.getElementById('chat-dm-list');
   if (dmList) {
     dmList.innerHTML = users.filter(u => u.id !== me.id).map(u => `
@@ -1863,7 +1626,6 @@ Promise.all([
       </div>`).join('');
   }
 
-  // Chat : avatars messages
   const others = users.filter(u => u.id !== me.id);
   const chatMap = { me, 1: others[0], 2: others[1], 3: others[2] };
   document.querySelectorAll('.chat-av-me').forEach(el => setAvatar(el, me));
@@ -1874,7 +1636,6 @@ Promise.all([
     document.querySelectorAll(`.chat-name-${i}`).forEach(el => { el.textContent = u.name; });
   });
 
-  // Chat : membres en ligne
   const membresList = document.getElementById('chat-membres-liste');
   if (membresList) {
     membresList.innerHTML = users.map(u => `
@@ -1891,12 +1652,10 @@ Promise.all([
       </div>`).join('');
   }
 
-  // Chat : épinglé
   document.querySelectorAll('.pinned-me-name').forEach(el => {
     el.textContent = `600 € · Épinglé par ${me.name}`;
   });
 
-  // Activité récente
   const actData = [
     { userIdx:2, action:'validé',    objet:'"Sortir les poubelles"', emoji:'✅' },
     { userIdx:1, action:'ajouté',    objet:'une dépense : Courses',  emoji:'🛒' },
@@ -1919,24 +1678,20 @@ Promise.all([
     }).join('');
   }
 
-  // Charge TOUTES les données en parallèle
   Promise.all([
     fetch('/api/depenses').then(r => r.json()),
     fetch('/api/soldes').then(r => r.json()),
+    fetch('/api/remboursements').then(r => r.json()),
     fetch('/api/tasks').then(r => r.json()),
     fetch('/api/reservations').then(r => r.json()),
-  ]).then(([depenses, soldes, tasks, reservations]) => {
-    // Rendre le dashboard avec les vraies données
+  ]).then(([depenses, soldes, remboursements, tasks, reservations]) => {
     renderDashboard(depenses, soldes, tasks, reservations, _me);
-    // Rendre les autres écrans
-    renderDepenses(depenses, soldes, [], _me);
+    renderDepenses(depenses, soldes, remboursements, _me);
+    renderTasksKanban(tasks);
+    renderPlanning(tasks);
+    renderReservationTable(reservations);
+    renderReservationRooms(reservations);
   }).catch(err => console.error('Erreur chargement dashboard:', err));
-
-  // Charge les tâches (Kanban + Planning)
-  reloadTasks();
-
-  // Charge les réservations
-  reloadReservations();
 
 }).catch(err => {
   console.warn('Erreur init:', err);
