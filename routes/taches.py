@@ -1,5 +1,6 @@
-from flask import Blueprint, redirect, url_for, render_template, request
+from flask import Blueprint, redirect, url_for, render_template, request, session
 from models import db, Tache
+from routes.auth import login_required
 from routes.auth import login_required
 
 taches_bp = Blueprint('taches', __name__)

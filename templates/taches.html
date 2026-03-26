@@ -134,8 +134,12 @@
         </div>
         <div class="field-group">
           <label class="field-label">Assigné à</label>
-          <input type="text" name="assignee" class="field-input" placeholder="ex: Lucas">
-        </div>
+          <input type="text" 
+                 name="assignee" 
+                 class="field-input" 
+                 value="{{ session.get('user_name', '') }}" 
+                 placeholder="ex: Lucas">
+      </div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
           <button type="button" class="btn-annuler" onclick="fermerModal()">✕ Annuler</button>
           <button type="submit" class="btn-valider">✓ Valider</button>
