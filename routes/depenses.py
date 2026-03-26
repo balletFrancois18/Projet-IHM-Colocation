@@ -66,7 +66,9 @@ def ajouter_depense():
         return redirect(url_for('depenses.liste_depenses'))
     return redirect(url_for('depenses.liste_depenses'))
 
+
 @depenses_bp.route('/depenses/categorie/ajouter', methods=['POST'])
+@login_required
 def ajouter_categorie():
     categorie = request.form.get('categorie')
     if categorie:
@@ -85,6 +87,7 @@ def ajouter_categorie():
 
 
 @depenses_bp.route('/depenses/supprimer-categorie/<categorie>', methods=['POST'])
+@login_required
 def supprimer_categorie(categorie):
     Depense.query.filter_by(categorie=categorie).delete()
     db.session.commit()

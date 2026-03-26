@@ -15,7 +15,6 @@
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
-    <a href="#" class="nav-link">Réservations</a>
     <a href="#" class="nav-link">Chat</a>
     <a href="#" class="nav-link">Bon plan</a>
     <div class="nav-right">
@@ -31,7 +30,7 @@
    <!-- EN-TÊTE PAGE -->
   <div class="page-header">
     <div class="page-title">
-      {% if session.get('user_id') %}Bonjour :){% else %}Dashboard{% endif %}
+      {% if session.get('user_id') %}Bonjour {{ session.get('user_id').prenom }}!{% else %}Dashboard{% endif %}
     </div>
     <div class="page-sub">Vue d'ensemble de votre colocation</div>
   </div>
@@ -79,8 +78,8 @@
       <!-- Pot commun -->
       <div class="card-dash">
         <div class="card-head">
-        <div class="card-title">Tâches récentes</div>
-          <a href="{{ url_for('taches.liste_taches') }}" class="card-btn">Voir tout →</a>
+        <div class="card-title">Dépenses récentes</div>
+          <a href="{{ url_for('depenses.liste_depenses') }}" class="card-btn">Voir tout →</a>
         </div>
         <div class="pot-total">
           {% if depenses %}{{ "%.2f"|format(depenses | sum(attribute='montant')) }} €

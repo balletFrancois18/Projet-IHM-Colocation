@@ -27,5 +27,20 @@ class Tache(db.Model):
     user_id  = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
 
 
+class EspaceReservation(db.Model):
+    id        = db.Column(db.Integer, primary_key=True)
+    nom       = db.Column(db.String(50), unique=True, nullable=False)
+    icone     = db.Column(db.String(10), default='📌')
+    categorie = db.Column(db.String(50), default='Autre')
 
-    
+
+class Reservation(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    espace      = db.Column(db.String(50), nullable=False)
+    date        = db.Column(db.String(20), nullable=False)
+    heure_debut = db.Column(db.String(10), nullable=False)
+    heure_fin   = db.Column(db.String(10), nullable=False)
+    statut      = db.Column(db.String(20), default='confirmé')
+    type_event  = db.Column(db.String(50), default='')
+    profil      = db.Column(db.String(50), nullable=False)
+    user_id     = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)

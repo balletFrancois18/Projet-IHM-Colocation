@@ -4,6 +4,8 @@ from models import db, Tache, Depense
 from routes.taches   import taches_bp
 from routes.depenses import depenses_bp
 from routes.auth     import auth_bp
+from routes.reservations import reservations_bp
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///coloc.db'
@@ -24,6 +26,7 @@ db.init_app(app)
 app.register_blueprint(taches_bp)
 app.register_blueprint(depenses_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(reservations_bp)
 
 @app.route('/')
 def index():

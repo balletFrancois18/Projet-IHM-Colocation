@@ -15,7 +15,8 @@
   <div class="nav-logo">Co<span>Loc</span></div>
   <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
   <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
-  <a href="#" class="nav-link">Réservations</a>
+  <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
+  <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
   <a href="#" class="nav-link">Chat</a>
   <a href="#" class="nav-link">Bon plan</a>
   <div class="nav-right">
@@ -50,7 +51,7 @@
     </div>
     <div>
       <div class="pot-label">Dépensé</div>
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#d72323"> - {{ total }} €</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#4a0000"> - {{ total }} €</div>
     </div>
     <div>
       <div class="pot-label">Reste</div>

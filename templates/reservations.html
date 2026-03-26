@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>CoLoc — Réservations</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .resa-select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid #dde3ea;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      background: white;
+      color: #222;
+      cursor: pointer;
+      appearance: auto;
+      -webkit-appearance: auto;
+    }
+  </style>
+</head>
+<body class="index-page">
+ 
+  <nav>
+    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+    <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
+    <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link" style="background:rgba(255,255,255,0.15);">Réservations</a>
+    <a href="#" class="nav-link">Chat</a>
+    <div class="nav-right">
+      {% if session.get('user_id') %}
+        <div class="nav-avatar">👤</div>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
+      {% endif %}
+    </div>
+  </nav>
+ 
+  <div style="max-width:900px; margin:0 auto; padding:2rem;">
+ 
+    <!-- EN-TÊTE -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Réservations</h1>
+        <p style="font-size:0.85rem; color:var(--muted); margin-top:0.2rem;">Espaces et ressources de la coloc</p>
+      </div>
+      {% if session.get('user_id') %}
+      <button onclick="document.getElementById('modal').style.display='flex'"
+              class="btn-action-primary">+ Réserver</button>
+      {% endif %}
+    </div>
+ 
+    <!-- TABLEAU -->
+    <div style="background:white; border-radius:12px; border:1px solid var(--border); overflow:hidden;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+        <thead>
+          <tr style="background:var(--blue-bg);">
+            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Espace</th>
+            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Statut</th>
+            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Réservé par</th>
+            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Créneau</th>
+            {% if session.get('user_id') %}
+            <th style="padding:12px 16px; text-align:center; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Action</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for espace in espaces %}
+          {% set r = reservations_actives.get(espace) %}
+          <tr style="border-bottom:1px solid var(--border);">
+ 
+            <td style="padding:12px 16px; font-weight:600; color:var(--text);">
+              {% if espace == 'Cuisine' %}🍳
+              {% elif espace == 'Salon' %}🛋️
+              {% elif espace == 'Salle de bain' %}🚿
+              {% elif espace == 'Machine à laver' %}🧺
+              {% elif espace == 'Voiture' %}🚗
+              {% elif espace == 'Trottinette' %}🛴
+              {% elif espace == 'Vélos' %}🚲
+              {% elif espace == 'Télévision' %}📺
+              {% else %}📌{% endif %}
+              {{ espace }}
+            </td>
+ 
+            <td style="padding:12px 16px;">
+              {% if r %}
+                <span style="background:#fee2e2; color:#dc2626; font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:20px;">
+                  {% if r.type_event %}{{ r.type_event }}{% else %}Occupé{% endif %}
+                </span>
+              {% else %}
+                <span style="background:#d1fae5; color:#065f46; font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:20px;">Libre</span>
+              {% endif %}
+            </td>
+ 
+            <td style="padding:12px 16px; color:var(--text);">
+              {% if r %}{{ r.profil }}{% else %}<span style="color:var(--muted);">—</span>{% endif %}
+            </td>
+ 
+            <td style="padding:12px 16px; color:var(--muted); font-size:0.8rem;">
+              {% if r %}{{ r.date }} · {{ r.heure_debut }}→{{ r.heure_fin }}{% else %}—{% endif %}
+            </td>
+ 
+            {% if session.get('user_id') %}
+            <td style="padding:12px 16px; text-align:center;">
+              {% if r and r.user_id == session.get('user_id') %}
+                <form method="POST" action="{{ url_for('reservations.supprimer_reservation', id=r.id) }}" style="margin:0; display:inline;">
+                  <button type="submit" onclick="return confirm('Libérer ?')"
+                          style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:1rem; font-weight:700;">✕</button>
+                </form>
+              {% elif not r %}
+                <button onclick="preselecter('{{ espace }}')"
+                        style="background:none; border:1px solid var(--border); border-radius:6px; padding:4px 12px; cursor:pointer; font-size:0.78rem; color:var(--blue-dark); font-weight:600;">
+                  Réserver
+                </button>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            {% endif %}
+ 
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+ 
+  </div>
+ 
+  <!-- MODAL -->
+  <div id="modal"
+       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;"
+       onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:white; border-radius:14px; padding:28px; width:360px; box-shadow:0 16px 48px rgba(0,0,0,0.15);">
+      <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:20px;">📅 Nouvelle réservation</div>
+ 
+      <form method="POST" action="{{ url_for('reservations.ajouter_reservation') }}">
+ 
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Espace</label>
+          <select name="espace" id="select-espace" class="resa-select" required>
+            {% for espace in espaces %}
+            <option value="{{ espace }}">{{ espace }}</option>
+            {% endfor %}
+          </select>
+        </div>
+ 
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Date</label>
+          <input type="date" name="date" required
+                 style="width:100%; padding:9px 12px; border:1.5px solid #dde3ea; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; box-sizing:border-box;">
+        </div>
+ 
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Début</label>
+            <input type="time" name="heure_debut" required
+                   style="width:100%; padding:9px 12px; border:1.5px solid #dde3ea; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Fin</label>
+            <input type="time" name="heure_fin" required
+                   style="width:100%; padding:9px 12px; border:1.5px solid #dde3ea; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; box-sizing:border-box;">
+          </div>
+        </div>
+ 
+        <div style="margin-bottom:20px;">
+          <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Type (optionnel)</label>
+          <select name="type_event" class="resa-select">
+            <option value="">Normal</option>
+            <option value="🎉 Fête">🎉 Fête</option>
+            <option value="👥 Invités">👥 Invités</option>
+            <option value="🎬 Soirée ciné">🎬 Soirée ciné</option>
+            <option value="🔧 Maintenance">🔧 Maintenance</option>
+          </select>
+        </div>
+ 
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button type="button" onclick="document.getElementById('modal').style.display='none'"
+                  style="padding:9px 16px; background:white; color:#6b7280; border:1.5px solid #dde3ea; border-radius:8px; cursor:pointer; font-size:13px;">
+            Annuler
+          </button>
+          <button type="submit"
+                  style="padding:9px 20px; background:#7bafd4; color:white; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">
+            ✓ Réserver
+          </button>
+        </div>
+ 
+      </form>
+    </div>
+  </div>
+ 
+  <script>
+    function preselecter(espace) {
+      document.getElementById('select-espace').value = espace;
+      document.getElementById('modal').style.display = 'flex';
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') document.getElementById('modal').style.display = 'none';
+    });
+  </script>
+ 
+</body>
+</html>
