@@ -423,45 +423,8 @@
         </div>
       </div>
       <div class="card">
-        <div class="sec-head"><div class="sec-title">📆 Rotation ménagère — cette semaine</div><a class="sec-link">Modifier le planning →</a></div>
-        <div class="rota-grid">
-          <div></div>
-          <div class="rota-header">Lun 24</div><div class="rota-header">Mar 25</div><div class="rota-header">Mer 26</div>
-          <div class="rota-header" style="color:var(--primary);font-weight:700">Jeu 27 ★</div>
-          <div class="rota-header">Ven 28</div><div class="rota-header">Sam 1</div><div class="rota-header">Dim 2</div>
-          <div class="rota-row-label">🍳 Cuisine</div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-0"></div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-1"></div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
-          <div class="rota-cell assigned today-col"><div class="rota-av-sm rota-av-2"></div><div style="font-size:9px;color:var(--accent);font-weight:600">Auj.</div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-3"></div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-row-label">🛋️ Salon</div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-3"></div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned today-col"><div class="rota-av-sm rota-av-0"></div><div style="font-size:9px;color:var(--accent);font-weight:600">En cours</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-1"></div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-2"></div></div>
-          <div class="rota-row-label">🚿 S. de bain</div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-1"></div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-2"></div><div style="font-size:9px;color:var(--primary)">Fait</div></div>
-          <div class="rota-cell today-col"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-3"></div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-0"></div></div>
-          <div class="rota-row-label">🗑️ Poubelles</div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-0"></div><div class="checkmark">✓</div></div>
-          <div class="rota-cell today-col"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-          <div class="rota-cell assigned"><div class="rota-av-sm rota-av-1"></div></div>
-          <div class="rota-cell"><div style="font-size:16px;color:var(--border)">–</div></div>
-        </div>
+        <div class="sec-head"><div class="sec-title">📆 Rotation ménagère — 7 prochains jours</div><a class="sec-link">Ajouter une tâche →</a></div>
+        <div class="rota-grid" id="rota-grid-container"></div>
       </div>
     </div><!-- /taches -->
 
@@ -924,6 +887,102 @@ function renderTasksKanban(tasks) {
 }
 
 // ══════════════════════════════════════════════
+// RENDU PLANNING (ROTATION)
+// ══════════════════════════════════════════════
+function renderPlanning(tasks) {
+  const container = document.getElementById('rota-grid-container');
+  if (!container) return;
+
+  // Générer les 7 prochains jours
+  const today = new Date();
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    days.push({
+      date: d,
+      dateStr: d.toISOString().split('T')[0],
+      dayName: d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }),
+      isToday: d.toDateString() === today.toDateString()
+    });
+  }
+
+  // Grouper les tâches par date_due
+  const tasksByDate = {};
+  tasks.forEach(task => {
+    if (task.date_due) {
+      if (!tasksByDate[task.date_due]) tasksByDate[task.date_due] = [];
+      tasksByDate[task.date_due].push(task);
+    }
+  });
+
+  // Créer la grille
+  let html = '<div></div>'; // Coin vide
+
+  // En-têtes des jours
+  days.forEach(day => {
+    const style = day.isToday ? 'color:var(--primary);font-weight:700' : '';
+    const star = day.isToday ? ' ★' : '';
+    html += `<div class="rota-header" style="${style}">${day.dayName}${star}</div>`;
+  });
+
+  // Obtenir toutes les dates uniques des tâches
+  const uniqueDates = Object.keys(tasksByDate).sort();
+
+  if (uniqueDates.length === 0) {
+    // Si pas de tâches avec date, afficher un message
+    container.innerHTML = html + `
+      <div style="grid-column: 1/-1; padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">
+        Aucune tâche avec date prévue. Ajoutez une date due aux tâches pour les voir apparaître ici !
+      </div>
+    `;
+    return;
+  }
+
+  // Pour chaque date avec des tâches
+  uniqueDates.forEach(dateStr => {
+    const tasks_for_date = tasksByDate[dateStr];
+    
+    // Label (premier emoji + titre de la tâche)
+    const label = tasks_for_date[0].titre.substring(0, 15);
+    html += `<div class="rota-row-label" title="${tasks_for_date.map(t => t.titre).join(', ')}">${label}...</div>`;
+
+    // Cellules pour chaque jour
+    days.forEach(day => {
+      const tasksOnDay = tasks_for_date.filter(t => t.date_due === day.dateStr);
+      
+      if (tasksOnDay.length > 0) {
+        const task = tasksOnDay[0]; // Prendre la première tâche de ce jour
+
+        // Status badge
+        const statusEmoji = task.statut === 'done' ? '✅' : (task.statut === 'in_progress' ? '🔄' : '📋');
+        const statusLabel = task.statut === 'done' ? 'Fait' : (task.statut === 'in_progress' ? 'En cours' : 'À faire');
+        const labelColor = task.statut === 'done' ? 'var(--success)' : (task.statut === 'in_progress' ? 'var(--accent)' : 'var(--text-muted)');
+        
+        let cellClass = 'rota-cell assigned';
+        if (day.isToday) cellClass += ' today-col';
+        
+        html += `
+          <div class="${cellClass}" onclick="openTaskEditModal(${task.id})" style="cursor:pointer;position:relative">
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+              <div class="rota-av-sm" style="background:${task.color};width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0">${task.name?.charAt(0) || '?'}</div>
+              <div style="font-size:9px;color:${labelColor};font-weight:600">${statusEmoji}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        // Cellule vide
+        let cellClass = 'rota-cell';
+        if (day.isToday) cellClass += ' today-col';
+        html += `<div class="${cellClass}"><div style="font-size:16px;color:var(--border)">–</div></div>`;
+      }
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
 // RECHARGEMENT TÂCHES
 // ══════════════════════════════════════════════
 async function reloadTasks() {
@@ -932,6 +991,7 @@ async function reloadTasks() {
     if (!res.ok) throw new Error('Erreur serveur');
     const tasks = await res.json();
     renderTasksKanban(tasks);
+    renderPlanning(tasks);
   } catch (err) {
     console.error('Erreur rechargement tâches:', err);
   }
