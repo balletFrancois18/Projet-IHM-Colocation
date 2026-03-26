@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoLoc — Réservations</title>
+
+  <!-- Police Google Fonts :
+       DM Serif Display = titres (élégant, avec empattements)
+       DM Sans          = texte courant (moderne, lisible)  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Notre feuille de style séparée -->
+  <link rel="stylesheet" href="reservation.css">
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════════════════
+       NAVIGATION — barre fixe en haut de page
+       ══════════════════════════════════════════════════════ -->
+  <nav>
+    <div class="logo">
+      <span>Co</span><span>Loc</span>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-profile">
+        <!-- L'avatar affiche les initiales du colocataire connecté -->
+        <div class="avatar">OL</div>
+        <span>Olivier L.</span>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CONTENU PRINCIPAL
+       ══════════════════════════════════════════════════════ -->
+  <main>
+
+    <!-- En-tête de page -->
+    <div class="page-header">
+      <h1>Réservations</h1>
+      <p>Organisez l'utilisation des espaces communs de l'appartement.</p>
+    </div>
+
+    <!-- Légende des statuts -->
+    <div class="status-bar">
+      <div class="status-pill pill-available"><div class="dot"></div> Disponible</div>
+      <div class="status-pill pill-occupied"> <div class="dot"></div> Occupé</div>
+      <div class="status-pill pill-reserved"> <div class="dot"></div> Réservé</div>
+    </div>
+
+    <!-- Grille principale : tableau à gauche, sidebar à droite -->
+    <div class="content-grid">
+
+
+      <!-- ── COLONNE PRINCIPALE : TABLEAU ─────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Planning des réservations</span>
+          <!-- onclick appelle openAddModal() définie dans script.js -->
+          <button class="btn btn-primary" onclick="openAddModal()">+ Nouvelle réservation</button>
+        </div>
+
+        <div class="table-wrap">
+          <table id="reservationTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Profil</th>
+                <th>Salle</th>
+                <th>Statut</th>
+                <th>H. début</th>
+                <th>H. fin</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <!-- Le <tbody> est rempli dynamiquement par renderTable() en JS -->
+            <tbody id="tableBody"></tbody>
+          </table>
+
+          <!-- Affiché quand le tableau est vide -->
+          <div id="emptyState" class="empty-state">
+            <div class="big-icon">📅</div>
+            <p>Aucune réservation pour le moment.<br>
+               Cliquez sur <strong>+ Nouvelle réservation</strong> pour commencer.</p>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ── SIDEBAR DROITE ────────────────────────────────── -->
+      <div class="sidebar">
+
+        <!-- Carte : aperçu des espaces -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Espaces</span>
+          </div>
+          <!-- Rempli dynamiquement par renderRooms() en JS -->
+          <div class="rooms-grid" id="roomsGrid"></div>
+        </div>
+
+        <!-- Carte : formulaire de réservation rapide -->
+        <div class="card">
+          <div class="form-section">
+            <h3>Réservation rapide</h3>
+
+            <div class="form-group">
+              <label for="quickDate">Date</label>
+              <input type="date" id="quickDate">
+            </div>
+
+            <div class="form-group">
+              <label for="quickProfil">Profil</label>
+              <select id="quickProfil">
+                <option value="">Choisir…</option>
+                <option>OL</option>
+                <option>OB</option>
+                <option>OE</option>
+                <option>ON</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="quickSalle">Salle</label>
+              <select id="quickSalle">
+                <option value="">Choisir…</option>
+                <option>Salle de bain</option>
+                <option>Salon</option>
+                <option>Cuisine</option>
+                <option>Global</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Horaires</label>
+              <div class="time-row">
+                <input type="time" id="quickStart">
+                <input type="time" id="quickEnd">
+              </div>
+            </div>
+
+            <!-- Avertissement visible uniquement si conflit détecté (classe .show ajoutée en JS) -->
+            <div id="conflictWarning" class="conflict-warning">
+              ⚠️ <span>Conflit détecté avec une réservation existante.</span>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-ghost"    onclick="clearQuickForm()">Annuler</button>
+              <button class="btn btn-primary"  onclick="addQuickReservation()">Réserver</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- fin .sidebar -->
+
+    </div>
+    <!-- fin .content-grid -->
+
+  </main>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       MODAL — fenêtre de dialogue (ajout + modification)
+       Invisible par défaut. La classe .open est ajoutée par
+       openAddModal() et openEditModal() en JavaScript.
+       ══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+
+      <div class="modal-header">
+        <!-- Le titre change selon le mode (ajout ou modification) -->
+        <h2 id="modalTitle">Nouvelle réservation</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Bloc Avant / Après — visible uniquement en mode modification -->
+        <div id="compareSection" class="modal-compare" style="display: none;">
+          <div class="compare-block">
+            <div class="compare-label">Avant</div>
+            <!-- Rempli par openEditModal() en JS -->
+            <div class="compare-value" id="compareBefore"></div>
+          </div>
+          <div class="compare-block">
+            <div class="compare-label">Après</div>
+            <!-- Mis à jour en temps réel via updateCompareAfter() en JS -->
+            <div class="compare-value" id="compareAfter"></div>
+          </div>
+        </div>
+
+        <!-- Formulaire partagé ajout / modification -->
+        <div id="formSection">
+
+          <div class="form-group">
+            <label for="modalDate">Date</label>
+            <input type="date" id="modalDate">
+          </div>
+
+          <div class="form-group">
+            <label for="modalProfil">Profil</label>
+            <select id="modalProfil">
+              <option value="">Choisir…</option>
+              <option>OL</option>
+              <option>OB</option>
+              <option>OE</option>
+              <option>ON</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="modalSalle">Salle</label>
+            <select id="modalSalle">
+              <option value="">Choisir…</option>
+              <option>Salle de bain</option>
+              <option>Salon</option>
+              <option>Cuisine</option>
+              <option>Global</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="modalStatut">Statut</label>
+            <select id="modalStatut">
+              <option>Disponible</option>
+              <option>Réservé</option>
+              <option>Occupé</option>
+            </select>
+          </div>
+
+          <div class="time-row">
+            <div class="form-group">
+              <label for="modalStart">H. Début</label>
+              <input type="time" id="modalStart">
+            </div>
+            <div class="form-group">
+              <label for="modalEnd">H. Fin</label>
+              <input type="time" id="modalEnd">
+            </div>
+          </div>
+
+        </div>
+        <!-- fin #formSection -->
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost"   onclick="closeModal()">Annuler</button>
+          <button class="btn btn-primary" onclick="confirmModal()">Confirmer</button>
+        </div>
+
+      </div>
+      <!-- fin .modal-body -->
+
+    </div>
+    <!-- fin .modal -->
+  </div>
+  <!-- fin .modal-overlay -->
+
+
+  <!-- Script chargé EN FIN de body pour s'assurer que tout
+       le HTML est déjà chargé avant que le JS s'exécute -->
+  <script src="reservation.js"></script>
+
+</body>
+</html>
