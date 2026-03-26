@@ -1184,9 +1184,195 @@ function renderRepartition(depenses) {
 }
 
 // ══════════════════════════════════════════════
-// RENDU COMPLET DÉPENSES
+// RENDU COMPLET DASHBOARD
 // ══════════════════════════════════════════════
-function renderDepenses(depenses, soldes, remboursements, me) {
+function renderDashboard(depenses, soldes, tasks, reservations, me) {
+  // ── STATS PRINCIPALES ─────────────────────────
+  const totalDepenses = depenses.reduce((s, d) => s + d.montant, 0);
+  
+  // Solde personnel
+  const monSolde = soldes.find(s => s.name === me.name);
+  const soldeAmount = monSolde ? monSolde.solde : 0;
+  
+  // Stats tâches
+  const doneTasks = tasks.filter(t => t.statut === 'done').length;
+  const totalTasks = tasks.length;
+  const taskPercent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  
+  // ── Afficher les stats cartes ─────────────────
+  const statTotal = document.querySelector('#stat-total-mois');
+  if (statTotal) statTotal.textContent = totalDepenses.toFixed(2) + ' €';
+  
+  const statDois = document.querySelector('#stat-je-dois');
+  const statDoiNb = document.querySelector('#stat-je-dois-nb');
+  if (statDois) {
+    const jeDoiSign = soldeAmount >= 0 ? '+' : '';
+    statDois.textContent = jeDoiSign + soldeAmount.toFixed(2) + ' €';
+    if (statDoiNb) {
+      if (soldeAmount > 0) {
+        statDoiNb.textContent = '💰 On te doit cet argent';
+        statDoiNb.style.color = '#34D399';
+      } else if (soldeAmount < 0) {
+        statDoiNb.textContent = '⚠️ Tu dois ' + (-soldeAmount).toFixed(2) + ' €';
+        statDoiNb.style.color = '#FF7A59';
+      } else {
+        statDoiNb.textContent = '✓ Ton compte est équilibré';
+        statDoiNb.style.color = '#34D399';
+      }
+    }
+  }
+  
+  // Tâches
+  const statCards = document.querySelectorAll('.stat-card');
+  if (statCards.length >= 3) {
+    const stat3 = statCards[2];
+    const val3 = stat3.querySelector('.stat-val');
+    const chg3 = stat3.querySelector('.stat-chg');
+    if (val3) val3.innerHTML = `${doneTasks}<span style="font-size:18px;font-weight:500;opacity:.6">/${totalTasks}</span>`;
+    if (chg3) chg3.textContent = `📈 ${taskPercent}% terminé`;
+  }
+  
+  // ── Dépenses récentes ─────────────────────────
+  const dashDep = document.getElementById('dashboard-depenses-recentes');
+  if (dashDep) {
+    if (depenses.length === 0) {
+      dashDep.innerHTML = `<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center">Aucune dépense pour le moment</div>`;
+    } else {
+      dashDep.innerHTML = depenses.slice(0, 3).map((dep, i) => {
+        const cat = catMeta[dep.categorie] || catMeta['Autre'];
+        const st = statusMeta[dep.statut] || statusMeta['pending'];
+        const part = (dep.montant / dep.nb_parts).toFixed(2);
+        const isMe = dep.user_id === me.id;
+        const date = new Date(dep.date).toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+        return `
+          ${i > 0 ? '<hr class="divider">' : ''}
+          <div class="exp-row">
+            <div class="exp-emoji" style="background:${cat.bg}">${cat.emoji}</div>
+            <div class="exp-info">
+              <div class="exp-name">${dep.description}</div>
+              <div class="exp-meta">${date} · ${dep.name || 'Inconnu'}</div>
+            </div>
+            <div class="exp-amt" style="color:${st.cls && st.cls.includes('paid') ? 'var(--text-muted)' : 'var(--accent)'}">
+              ${isMe ? '– ' + dep.montant.toFixed(2) : '+ ' + part}
+              <div style="font-size:11px;color:var(--text-muted)">${st.label}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+  
+  // ── TÂCHES DU JOUR ────────────────────────────
+  const today = new Date().toISOString().split('T')[0];
+  const todayTasks = tasks.filter(t => t.date_due === today || !t.date_due).slice(0, 4).sort((a, b) => {
+    const statusOrder = { 'done': 2, 'in_progress': 1, 'todo': 0 };
+    return statusOrder[b.statut] - statusOrder[a.statut];
+  });
+  
+  // Chercher le conteneur des tâches du jour et le remplacer
+  const cards = document.querySelectorAll('.card');
+  let tasksCard = null;
+  for (let card of cards) {
+    if (card.textContent.includes('Tâches du jour')) {
+      tasksCard = card;
+      break;
+    }
+  }
+  
+  if (tasksCard) {
+    const tasksContainer = tasksCard.querySelector('[style*="display:flex;flex-direction:column;gap:7px"]');
+    if (tasksContainer) {
+      if (todayTasks.length === 0) {
+        tasksContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Aucune tâche pour aujourd\'hui !</div>';
+      } else {
+        tasksContainer.innerHTML = todayTasks.map(task => {
+          const isDone = task.statut === 'done';
+          const isInProgress = task.statut === 'in_progress';
+          const userIdx = task.user_id ? (task.user_id - 1) % 4 : 0;
+          const borderColor = isInProgress ? 'var(--primary)' : isDone ? 'rgba(52,211,153,0.3)' : 'transparent';
+          const checkBg = isDone ? 'var(--success)' : isInProgress ? 'var(--primary)' : 'none';
+          const checkStyle = isDone || isInProgress ? `background:${checkBg};display:flex;align-items:center;justify-content:center;color:white;font-size:11px` : 'border:2.5px solid var(--border)';
+          
+          return `
+            <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px;border-left:3px solid ${borderColor};cursor:pointer" onclick="showScreen('taches',null); openTaskEditModal(${task.id})">
+              <div style="width:20px;height:20px;border-radius:50%;${checkStyle};flex-shrink:0">${isDone ? '✓' : isInProgress ? '→' : ''}</div>
+              <div style="flex:1;font-size:13.5px;font-weight:${isDone ? '400;text-decoration:line-through;color:var(--text-muted)' : '600'}">${task.titre}</div>
+              <div class="kan-card-av kan-av-${userIdx}" style="font-size:11px"></div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+  }
+  
+  // ── BUDGET PAR CATÉGORIE ──────────────────────
+  const depensesByCategory = {};
+  depenses.forEach(dep => {
+    const cat = dep.categorie || 'Autre';
+    depensesByCategory[cat] = (depensesByCategory[cat] || 0) + dep.montant;
+  });
+  
+  // Chercher la carte "Budget commun"
+  let budgetCard = null;
+  for (let card of cards) {
+    if (card.textContent.includes('Budget commun')) {
+      budgetCard = card;
+      break;
+    }
+  }
+  
+  if (budgetCard) {
+    // Supprimer les anciens prog-wrap
+    budgetCard.querySelectorAll('.prog-wrap').forEach(p => p.remove());
+    
+    // Recalculer et afficher
+    const totalBudget = Object.values(depensesByCategory).reduce((a, b) => a + b, 0);
+    const budgetPercent = totalBudget > 0 ? Math.min(Math.round((totalBudget / 500) * 100), 100) : 0;
+    
+    const categories = Object.entries(depensesByCategory).sort((a, b) => b[1] - a[1]);
+    const maxAmount = Math.max(...Object.values(depensesByCategory), 1);
+    
+    // Créer les barres de progression
+    const progContainer = budgetCard.querySelector('.sec-head')?.nextElementSibling || budgetCard;
+    categories.forEach(([cat, amount]) => {
+      const catMeta1 = catMeta[cat] || catMeta['Autre'];
+      const pct = (amount / maxAmount * 100);
+      const html = `
+        <div class="prog-wrap" style="margin-bottom:12px">
+          <div class="prog-head" style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+            <span>${catMeta1.emoji} ${cat}</span>
+            <span style="font-weight:600">${amount.toFixed(2)} €</span>
+          </div>
+          <div class="prog-track" style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+            <div class="prog-fill" style="width:${pct}%;height:100%;background:${catMeta1.color || '#5B6CFF'};border-radius:4px;transition:width 0.3s"></div>
+          </div>
+        </div>
+      `;
+      progContainer.insertAdjacentHTML('beforeend', html);
+    });
+    
+    // Mettre à jour le pie chart et les stats
+    const circle = budgetCard.querySelector('circle[stroke="url(#grad1)"]');
+    if (circle) {
+      const circumference = 2 * Math.PI * 38;
+      const strokeDash = (budgetPercent / 100) * circumference;
+      circle.setAttribute('stroke-dasharray', strokeDash);
+    }
+    
+    const percentText = budgetCard.querySelector('[style*="font-size:22px"]');
+    if (percentText) percentText.textContent = budgetPercent + '%';
+    
+    const budgetInfo = budgetCard.querySelectorAll('div');
+    for (let div of budgetInfo) {
+      if (div.textContent.includes('300 / 400')) {
+        div.textContent = totalBudget.toFixed(0) + ' / 500 €';
+        break;
+      }
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
   const total = depenses.reduce((s, d) => s + d.montant, 0);
   _allDepenses = depenses;
 
@@ -1733,10 +1919,20 @@ Promise.all([
     }).join('');
   }
 
-  // Charge les dépenses
-  reloadDepenses();
+  // Charge TOUTES les données en parallèle
+  Promise.all([
+    fetch('/api/depenses').then(r => r.json()),
+    fetch('/api/soldes').then(r => r.json()),
+    fetch('/api/tasks').then(r => r.json()),
+    fetch('/api/reservations').then(r => r.json()),
+  ]).then(([depenses, soldes, tasks, reservations]) => {
+    // Rendre le dashboard avec les vraies données
+    renderDashboard(depenses, soldes, tasks, reservations, _me);
+    // Rendre les autres écrans
+    renderDepenses(depenses, soldes, [], _me);
+  }).catch(err => console.error('Erreur chargement dashboard:', err));
 
-  // Charge les tâches
+  // Charge les tâches (Kanban + Planning)
   reloadTasks();
 
   // Charge les réservations
