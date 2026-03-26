@@ -238,6 +238,7 @@
       <div class="user-info">
         <div class="user-name"><span></span></div>
         <div class="user-role">Admin coloc 👑</div>
+        <button onclick="confirmLogout(); return false;" style="width:100%;margin-top:8px;padding:8px;border:none;background:rgba(255,122,89,0.15);color:#FF7A59;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s">🚪 Déconnexion</button>
       </div>
     </div>
   </aside>
@@ -283,83 +284,29 @@
           <span class="stat-chg chg-warn">⏰ Dans 4 jours</span>
         </div>
       </div>
-      <div class="grid g-7-5">
-        <div style="display:flex;flex-direction:column;gap:20px">
-          <div class="card">
-            <div class="sec-head">
-              <div class="sec-title">💸 Dépenses récentes</div>
-              <a class="sec-link" onclick="showScreen('depenses',null)">Tout voir →</a>
-            </div>
-            <div id="dashboard-depenses-recentes"></div>
+      <div class="grid g2">
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title">💸 Dépenses récentes</div>
+            <a class="sec-link" onclick="showScreen('depenses',null)">Tout voir →</a>
           </div>
-          <div class="grid g2">
-            <div class="card">
-              <div class="sec-head">
-                <div class="sec-title">🧹 Tâches du jour</div>
-                <a class="sec-link" onclick="showScreen('taches',null)">Voir →</a>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:7px">
-                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px">
-                  <div style="width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;flex-shrink:0">✓</div>
-                  <div style="flex:1;font-size:13.5px;font-weight:500;text-decoration:line-through;color:var(--text-muted)">Passer l'aspirateur</div>
-                  <div class="kan-card-av kan-av-0"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px">
-                  <div style="width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:11px;flex-shrink:0">✓</div>
-                  <div style="flex:1;font-size:13.5px;font-weight:500;text-decoration:line-through;color:var(--text-muted)">Sortir les poubelles</div>
-                  <div class="kan-card-av kan-av-1"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px;border-left:3px solid var(--primary)">
-                  <div style="width:20px;height:20px;border-radius:50%;border:2.5px solid var(--border);flex-shrink:0"></div>
-                  <div style="flex:1;font-size:13.5px;font-weight:600">Nettoyer la cuisine</div>
-                  <div class="kan-card-av kan-av-2"></div>
-                </div>
-                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px">
-                  <div style="width:20px;height:20px;border-radius:50%;border:2.5px solid var(--border);flex-shrink:0"></div>
-                  <div style="flex:1;font-size:13.5px;font-weight:600">Changer les draps</div>
-                  <div class="kan-card-av kan-av-3"></div>
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="sec-head"><div class="sec-title">📊 Budget commun</div></div>
-              <div style="text-align:center;margin-bottom:14px">
-                <svg width="100" height="100" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
-                  <circle cx="50" cy="50" r="38" fill="none" stroke="#E5E7EB" stroke-width="10"/>
-                  <circle cx="50" cy="50" r="38" fill="none" stroke="url(#grad1)" stroke-width="10" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="60"/>
-                  <defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5B6CFF"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient></defs>
-                </svg>
-                <div style="margin-top:-58px;font-family:'Syne',sans-serif;font-size:22px;font-weight:700">75%</div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:0">300 / 400 €</div>
-                <div style="margin-top:42px"></div>
-              </div>
-              <div class="prog-wrap"><div class="prog-head"><span>🛒 Courses</span><span style="font-weight:600">128 €</span></div><div class="prog-track"><div class="prog-fill" style="width:64%;background:linear-gradient(90deg,#5B6CFF,#A78BFA)"></div></div></div>
-              <div class="prog-wrap"><div class="prog-head"><span>⚡ Factures</span><span style="font-weight:600">95 €</span></div><div class="prog-track"><div class="prog-fill" style="width:48%;background:linear-gradient(90deg,#34D399,#5B6CFF)"></div></div></div>
-              <div class="prog-wrap" style="margin-bottom:0"><div class="prog-head"><span>🎉 Sorties</span><span style="font-weight:600">77 €</span></div><div class="prog-track"><div class="prog-fill" style="width:38%;background:linear-gradient(90deg,#FF7A59,#FFB347)"></div></div></div>
-            </div>
-          </div>
+          <div id="dashboard-depenses-recentes"></div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:20px">
-          <div class="card">
-            <div class="sec-head"><div class="sec-title">📅 Cette semaine</div><a class="sec-link">Calendrier →</a></div>
-            <div class="cal-strip">
-              <div class="cal-day"><div class="cal-day-name">Lun</div><div class="cal-day-num">24</div><div class="cal-day-dot"></div></div>
-              <div class="cal-day"><div class="cal-day-name">Mar</div><div class="cal-day-num">25</div><div class="cal-day-dot"></div></div>
-              <div class="cal-day"><div class="cal-day-name">Mer</div><div class="cal-day-num">26</div><div class="cal-day-dot"></div></div>
-              <div class="cal-day today"><div class="cal-day-name">Jeu</div><div class="cal-day-num">27</div><div class="cal-day-dot"></div></div>
-              <div class="cal-day"><div class="cal-day-name">Ven</div><div class="cal-day-num">28</div><div class="cal-day-dot"></div></div>
-              <div class="cal-day no-event"><div class="cal-day-name">Sam</div><div class="cal-day-num">1</div><div class="cal-day-dot"></div></div>
-              <div class="cal-day no-event"><div class="cal-day-name">Dim</div><div class="cal-day-num">2</div><div class="cal-day-dot"></div></div>
-            </div>
-            <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(91,108,255,0.07);border-radius:12px;border-left:3px solid var(--primary)"><span style="font-size:16px">🧹</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Ménage — Cuisine</div><div style="font-size:11px;color:var(--text-muted)">Auj.</div></div></div>
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,122,89,0.07);border-radius:12px;border-left:3px solid var(--accent)"><span style="font-size:16px">💰</span><div style="flex:1"><div style="font-size:13px;font-weight:600">Loyer — Rappel</div><div style="font-size:11px;color:var(--text-muted)">Dans 4 jours · 600 €</div></div></div>
-            </div>
+        <div class="card">
+          <div class="sec-head"><div class="sec-title">📅 Cette semaine</div><a class="sec-link" onclick="showScreen('reservations'); return false;" style="cursor:pointer">Calendrier →</a></div>
+          <div class="cal-strip" id="dashboard-week-calendar"></div>
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;cursor:pointer" id="dashboard-week-reservations" onclick="showScreen('reservations')"></div>
+        </div>
+        <div class="card">
+          <div class="sec-head">
+            <div class="sec-title">🧹 Tâches du jour</div>
+            <a class="sec-link" onclick="showScreen('taches',null)">Voir →</a>
           </div>
-          <div class="card">
-            <div class="sec-head"><div class="sec-title">⚡ Activité récente</div></div>
-            <div id="dashboard-activite"></div>
-          </div>
+          <div id="dashboard-today-tasks" style="display:flex;flex-direction:column;gap:7px"></div>
+        </div>
+        <div class="card">
+          <div class="sec-head"><div class="sec-title">⚡ Activité récente</div></div>
+          <div id="dashboard-activite"></div>
         </div>
       </div>
     </div><!-- /dashboard -->
@@ -852,6 +799,7 @@ async function updateTaskStatus(taskId, newStatus) {
     const statusLabels = { 'todo': 'À faire', 'in_progress': 'En cours', 'done': 'Terminée' };
     showToast(`📋 Statut changé en "${statusLabels[newStatus]}"`, 'success');
     await reloadTasks();
+    await reloadDashboard();
   } catch (err) {
     showToast('❌ Erreur lors du changement', 'error');
   }
@@ -1297,6 +1245,276 @@ function renderDashboard(depenses, soldes, tasks, reservations, me) {
 }
 
 // ══════════════════════════════════════════════
+// RENDU TÂCHES DU JOUR (dashboard)
+// ══════════════════════════════════════════════
+function renderDashboardTodayTasks(tasks, users) {
+  const container = document.getElementById('dashboard-today-tasks');
+  if (!container) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Récupère les tâches d'aujourd'hui
+  const todayTasks = tasks.filter(t => {
+    const taskDate = new Date(t.date_due);
+    taskDate.setHours(0, 0, 0, 0);
+    return taskDate.getTime() === today.getTime();
+  }).slice(0, 4);
+
+  if (todayTasks.length === 0) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center">Aucune tâche pour aujourd\'hui</div>';
+    return;
+  }
+
+  container.innerHTML = todayTasks.map(t => {
+    const user = users.find(u => u.id === t.user_id) || {};
+    const isDone = t.statut === 'done';
+    const isInProgress = t.statut === 'in_progress';
+    const checkboxBg = isDone ? 'var(--success)' : isInProgress ? 'var(--primary)' : 'transparent';
+    const checkboxBorder = isDone || isInProgress ? 'transparent' : 'var(--border)';
+    const checkmark = isDone ? '✓' : '';
+    
+    return `
+      <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:rgba(246,248,252,0.9);border-radius:12px${isInProgress ? ';border-left:3px solid var(--primary)' : ''}">
+        <div style="width:20px;height:20px;border-radius:50%;background:${checkboxBg};border:2.5px solid ${checkboxBorder};display:flex;align-items:center;justify-content:center;color:white;font-size:11px;flex-shrink:0;cursor:pointer" onclick="updateTaskStatus(${t.id}, '${isDone ? 'todo' : 'done'}')">${checkmark}</div>
+        <div style="flex:1;font-size:13.5px;font-weight:${isDone ? 500 : 600};text-decoration:${isDone ? 'line-through' : 'none'};color:${isDone ? 'var(--text-muted)' : 'var(--text)'}">${t.titre}</div>
+        <div class="kan-card-av" style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;background:${user.color || '#ccc'};color:white">${(user.name || '?').charAt(0)}</div>
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// RENDU RÉSERVATIONS SEMAINE (dashboard)
+// ══════════════════════════════════════════════
+function renderWeeklyReservations(reservations) {
+  const container = document.getElementById('dashboard-week-reservations');
+  if (!container) return;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(today);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const weekReservations = reservations.filter(r => {
+    const resDate = new Date(r.date);
+    resDate.setHours(0, 0, 0, 0);
+    return resDate >= today && resDate <= weekEnd;
+  }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  if (weekReservations.length === 0) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center">Aucune réservation cette semaine</div>';
+    return;
+  }
+
+  // Grouper par jour
+  const byDay = {};
+  weekReservations.forEach(r => {
+    const resDate = new Date(r.date);
+    resDate.setHours(0, 0, 0, 0);
+    const key = resDate.toISOString();
+    if (!byDay[key]) byDay[key] = [];
+    byDay[key].push(r);
+  });
+
+  // Afficher tous les jours avec réservations (sans limite)
+  container.innerHTML = Object.keys(byDay).sort().map(dateKey => {
+    const dayRes = byDay[dateKey];
+    const resDate = new Date(dateKey);
+    const daysFromNow = Math.floor((resDate - today) / (1000 * 60 * 60 * 24));
+    let dateText = 'Auj.';
+    if (daysFromNow === 1) dateText = 'Demain';
+    else if (daysFromNow > 1 && daysFromNow <= 6) {
+      const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+      dateText = days[resDate.getDay()];
+    }
+
+    return dayRes.map(r => {
+      const emoji = r.salle === 'Salle de bain' ? '🚿' : r.salle === 'Salon' ? '🛋️' : r.salle === 'Cuisine' ? '🍳' : '🏠';
+      const bgColor = r.statut === 'Réservé' ? 'rgba(91,108,255,0.07)' : r.statut === 'Occupé' ? 'rgba(255,122,89,0.07)' : 'rgba(52,211,153,0.07)';
+      const borderColor = r.statut === 'Réservé' ? 'var(--primary)' : r.statut === 'Occupé' ? 'var(--accent)' : 'var(--success)';
+
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${bgColor};border-radius:12px;border-left:3px solid ${borderColor};cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateX(4px)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'"; onmouseout="this.style.transform='translateX(0)';this.style.boxShadow='none'">
+        <span style="font-size:16px">${emoji}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600">${r.salle}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${dateText} · ${r.debut} - ${r.fin}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// RENDU ACTIVITÉ RÉCENTE
+// ══════════════════════════════════════════════
+function renderActivityFeed(depenses, tasks, users, me) {
+  const actContainer = document.getElementById('dashboard-activite');
+  if (!actContainer) return;
+
+  const activities = [];
+
+  // Ajouter TOUTES les tâches (pas juste les done)
+  tasks.forEach(t => {
+    const user = users.find(u => u.id === t.user_id) || {};
+    const actionMap = { 'done': 'validé', 'in_progress': 'démarre', 'todo': 'créé' };
+    activities.push({
+      user: user,
+      action: actionMap[t.statut] || 'mis à jour',
+      objet: `"${t.titre}"`,
+      emoji: '✅',
+      timestamp: t.updated || t.created || t.date
+    });
+  });
+
+  // Ajouter TOUTES les dépenses (pas juste 2)
+  depenses.forEach(d => {
+    const user = users.find(u => u.id === d.user_id) || {};
+    activities.push({
+      user: user,
+      action: 'ajouté',
+      objet: `une dépense : ${d.description}`,
+      emoji: d.categorie === 'Courses' ? '🛒' : d.categorie === 'Factures' ? '⚡' : '💸',
+      timestamp: d.date
+    });
+  });
+
+  // Trier par timestamp et limiter à 4 activités
+  activities.sort((a, b) => {
+    const timeA = new Date(a.timestamp).getTime();
+    const timeB = new Date(b.timestamp).getTime();
+    return timeB - timeA;
+  });
+  const recentActivities = activities.slice(0, 4);
+
+  if (recentActivities.length === 0) {
+    actContainer.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:12px 0;text-align:center">Aucune activité récente</div>';
+    return;
+  }
+
+  actContainer.innerHTML = recentActivities.map(a => {
+    const now = new Date().getTime();
+    const actTime = new Date(a.timestamp).getTime();
+    const diffMs = now - actTime;
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    let timeText = 'À l\'instant';
+    if (diffSecs < 0) timeText = 'À l\'instant';
+    else if (diffSecs < 60) timeText = 'À l\'instant';
+    else if (diffMins < 60) timeText = diffMins + ' min';
+    else if (diffHours < 24) timeText = diffHours + 'h';
+    else if (diffDays < 7) timeText = diffDays + 'j';
+    else timeText = 'Plus de temps';
+
+    return `
+      <div class="act-item">
+        <div class="av-circle" style="width:30px;height:30px;background:${a.user.color || '#ccc'};font-size:12px;flex-shrink:0;margin-top:2px">${(a.user.name || '?').charAt(0)}</div>
+        <div style="flex:1">
+          <div class="act-txt"><strong>${a.user.name || 'Inconnu'}</strong> a <span class="hi">${a.action}</span> ${a.objet}</div>
+          <div class="act-time">Il y a ${timeText}</div>
+        </div>
+        <div class="act-emoji">${a.emoji}</div>
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════
+// RECHARGEMENT DASHBOARD (widgets uniquement)
+// ══════════════════════════════════════════════
+async function reloadDashboard() {
+  try {
+    const [tasks, reservations, depenses] = await Promise.all([
+      fetch('/api/tasks').then(r => r.json()),
+      fetch('/api/reservations').then(r => r.json()),
+      fetch('/api/depenses').then(r => r.json()),
+    ]);
+    const users = JSON.parse(localStorage.getItem('_dashboard_users') || '[]');
+    const me = JSON.parse(localStorage.getItem('coloc_user') || '{}');
+    renderDashboardTodayTasks(tasks, users);
+    renderWeeklyReservations(reservations);
+    renderWeekCalendar();
+    renderActivityFeed(depenses, tasks, users, me);
+  } catch (err) {
+    console.error('Erreur rechargement dashboard:', err);
+  }
+}
+
+// ══════════════════════════════════════════════
+// CALENDRIER SEMAINE (dynamique)
+// ══════════════════════════════════════════════
+function renderWeekCalendar() {
+  const container = document.getElementById('dashboard-week-calendar');
+  if (!container) return;
+  
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  
+  const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  let html = '';
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfWeek);
+    date.setDate(startOfWeek.getDate() + i);
+    const dayNum = date.getDate();
+    const isToday = date.toDateString() === today.toDateString();
+    const dayName = days[i];
+    const hasEvent = i < 5; // Événements en semaine
+    
+    html += `<div class="cal-day${isToday ? ' today' : ''}${!hasEvent ? ' no-event' : ''}"><div class="cal-day-name">${dayName}</div><div class="cal-day-num">${dayNum}</div><div class="cal-day-dot"></div></div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+// POPUP CONFIRMATION DÉCONNEXION
+// ══════════════════════════════════════════════
+function confirmLogout() {
+  const overlay = document.createElement('div');
+  overlay.id = 'logout-modal-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = 'background:#fff;border-radius:16px;padding:32px;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp 0.3s ease';
+  modal.innerHTML = `
+    <div style="text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">👋</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Vous êtes sûr(e)?</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px">Vous allez être déconnecté(e)...</div>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <button onclick="document.getElementById('logout-modal-overlay').remove()" style="padding:10px 24px;border:1px solid var(--border);background:transparent;color:var(--text-dark);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">Annuler</button>
+        <button onclick="logout()" style="padding:10px 24px;border:none;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">Déconnexion</button>
+      </div>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+// ══════════════════════════════════════════════
+// DÉCONNEXION
+// ══════════════════════════════════════════════
+async function logout() {
+  try {
+    await fetch('/api/logout', { method: 'POST' });
+  } catch (err) {
+    console.error('Erreur déconnexion:', err);
+  }
+  localStorage.removeItem('coloc_user');
+  localStorage.removeItem('_dashboard_users');
+  window.location.href = 'login.html';
+}
+
+// ══════════════════════════════════════════════
 // RECHARGEMENT DÉPENSES
 // ══════════════════════════════════════════════
 async function reloadDepenses() {
@@ -1575,8 +1793,17 @@ async function reloadReservations() {
 // ══════════════════════════════════════════════
 // INITIALISATION
 // ══════════════════════════════════════════════
+// Récupère l'user depuis localStorage (défini après login)
+const userFromStorage = localStorage.getItem('coloc_user');
+if (!userFromStorage) {
+  // Si pas de user, redirection vers login
+  window.location.href = 'login.html';
+}
+
+const storedUser = JSON.parse(userFromStorage);
+
 Promise.all([
-  fetch('/api/me').then(r => r.json()),
+  Promise.resolve(storedUser),  // Utilise l'user du localStorage
   fetch('/api/users').then(r => r.json()),
 ]).then(([me, users]) => {
   _me = me;
@@ -1656,27 +1883,7 @@ Promise.all([
     el.textContent = `600 € · Épinglé par ${me.name}`;
   });
 
-  const actData = [
-    { userIdx:2, action:'validé',    objet:'"Sortir les poubelles"', emoji:'✅' },
-    { userIdx:1, action:'ajouté',    objet:'une dépense : Courses',  emoji:'🛒' },
-    { userIdx:0, action:'remboursé', objet:`${me.name} (Fibre)`,     emoji:'💸' },
-  ];
-  const actContainer = document.getElementById('dashboard-activite');
-  if (actContainer) {
-    actContainer.innerHTML = actData.map(a => {
-      const u = users[a.userIdx];
-      if (!u) return '';
-      return `
-        <div class="act-item">
-          <div class="av-circle" style="width:30px;height:30px;background:${u.color};font-size:12px;flex-shrink:0;margin-top:2px">${u.name.charAt(0)}</div>
-          <div style="flex:1">
-            <div class="act-txt"><strong>${u.name}</strong> a <span class="hi">${a.action}</span> ${a.objet}</div>
-            <div class="act-time">Il y a 45 min</div>
-          </div>
-          <div class="act-emoji">${a.emoji}</div>
-        </div>`;
-    }).join('');
-  }
+  // Charger les données depuis l'API et les afficher
 
   Promise.all([
     fetch('/api/depenses').then(r => r.json()),
@@ -1691,6 +1898,10 @@ Promise.all([
     renderPlanning(tasks);
     renderReservationTable(reservations);
     renderReservationRooms(reservations);
+    renderDashboardTodayTasks(tasks, users);
+    renderWeeklyReservations(reservations);
+    renderWeekCalendar();
+    renderActivityFeed(depenses, tasks, users, me);
   }).catch(err => console.error('Erreur chargement dashboard:', err));
 
 }).catch(err => {
