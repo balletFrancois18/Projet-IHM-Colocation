@@ -105,4 +105,29 @@ function ouvrirModal() {
       if (e.key === 'Escape') fermerModal();
     });
 
-   
+function ouvrirModalModifier(id, titre, assignee) {
+    const modal = document.getElementById('modal-modifier-overlay');
+    const form = document.getElementById('form-modifier-tache');
+    
+    // On donne l'ID à l'URL du formulaire pour Flask
+    form.action = "/taches/" + id + "/modifier";
+    
+    // On remplit les champs de la pop-up avec les données actuelles
+    document.getElementById('edit-titre').value = titre;
+    document.getElementById('edit-assignee').value = assignee;
+    
+    // On affiche la pop-up en mode "flex" pour qu'elle soit centrée
+    modal.style.display = 'flex';
+}
+
+function fermerModalModifier() {
+    document.getElementById('modal-modifier-overlay').style.display = 'none';
+}
+
+// Ferme la pop-up si on clique à côté de la boîte blanche
+function fermerModalModifierOverlay(e) {
+    if (e.target.id === 'modal-modifier-overlay') {
+        fermerModalModifier();
+    }
+}
+

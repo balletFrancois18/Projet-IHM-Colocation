@@ -27,6 +27,18 @@ def ajouter_tache():
     db.session.commit()
     return redirect(url_for('taches.liste_taches'))
 
+    
+@taches_bp.route('/taches/<int:id>/modifier', methods=['POST']) 
+@login_required
+def modifier_tache(id):
+    tache = Tache.query.get_or_404(id)
+    if request.method == 'POST':
+        tache.titre = request.form['titre']
+        tache.assignee = request.form['assignee']
+        db.session.commit()
+        # Vérifiez que 'taches.liste_taches' est bien le nom de votre route d'affichage
+        return redirect(url_for('taches.liste_taches'))
+
 
 #AJOUT FONCTIONNALITE SUPPRIMER TACHE
 @taches_bp.route('/taches/<int:id>/supprimer', methods=['POST'])

@@ -699,6 +699,17 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 
 
 /* ── MODAL ── */
+
+/* Style des moda
+
+/* S'assurer que les labels sont visibles (souvent blancs sur fond blanc sinon) */
+.field-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333 !important;
+    font-weight: 600;
+}
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -833,13 +844,14 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
   background: white;
   font-size: 0.82rem;
   font-weight: 500;
-  color: var(--muted);
+  color: grey;
   cursor: pointer;
   transition: all 0.15s;
+  border-color: #2b4d97;
 }
 
 .filtre-btn:hover { border-color: var(--blue); color: var(--blue); }
-.filtre-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+.filtre-btn.active { background:#2b4d97; color: white; border-color: var(--blue); }
 
 .tache-card {
   display: flex;
@@ -881,6 +893,48 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 .badge-done { background: #d1fae5; color: #065f46; }
 
 
+  /* Le bouton par défaut */
+  .btn-supprimer {
+    background: var(--red);
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 10px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease; /* Animation fluide */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* L'effet au survol (Hover) */
+  .btn-supprimer:hover {
+    background: red; /* Devient rouge plein */
+    color: white;        /* Le texte devient blanc */
+    transform: scale(1.1); /* Grossit légèrement */
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+  }
+
+  /* Optionnel : effet au clic */
+  .btn-supprimer:active {
+    transform: scale(0.95);
+  }
+
+.btn-edit {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 16px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .btn-edit:hover {
+      color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
 
 
 /*Dépenses*/
