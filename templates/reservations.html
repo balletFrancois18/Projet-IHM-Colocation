@@ -48,9 +48,10 @@
         <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Réservations</h1>
         <p style="font-size:0.85rem; color:var(--muted); margin-top:0.2rem;">Espaces et ressources de la coloc</p>
       </div>
-      {% if session.get('user_id') %}
-      <button onclick="document.getElementById('modal').style.display='flex'"
-              class="btn-action-primary">+ Réserver</button>
+          {% if session.get('user_id') %}
+        <button onclick="document.getElementById('modal').style.display='flex'" class="btn-action-primary">+ Réserver</button>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn-action-primary">+ Réserver</a>
       {% endif %}
     </div>
  
@@ -63,9 +64,7 @@
             <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Statut</th>
             <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Réservé par</th>
             <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Créneau</th>
-            {% if session.get('user_id') %}
             <th style="padding:12px 16px; text-align:center; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Action</th>
-            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -104,24 +103,28 @@
               {% if r %}{{ r.date }} · {{ r.heure_debut }}→{{ r.heure_fin }}{% else %}—{% endif %}
             </td>
  
-            {% if session.get('user_id') %}
             <td style="padding:12px 16px; text-align:center;">
-              {% if r and r.user_id == session.get('user_id') %}
+              {% if r and session.get('user_id') and r.user_id == session.get('user_id') %}
                 <form method="POST" action="{{ url_for('reservations.supprimer_reservation', id=r.id) }}" style="margin:0; display:inline;">
                   <button type="submit" onclick="return confirm('Libérer ?')"
                           style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:1rem; font-weight:700;">✕</button>
                 </form>
               {% elif not r %}
-                <button onclick="preselecter('{{ espace }}')"
-                        style="background:none; border:1px solid var(--border); border-radius:6px; padding:4px 12px; cursor:pointer; font-size:0.78rem; color:var(--blue-dark); font-weight:600;">
-                  Réserver
-                </button>
+                {% if session.get('user_id') %}
+                  <button onclick="preselecter('{{ espace }}')"
+                          style="background:none; border:1px solid var(--border); border-radius:6px; padding:4px 12px; cursor:pointer; font-size:0.78rem; color:var(--blue-dark); font-weight:600;">
+                    Réserver
+                  </button>
+                {% else %}
+                  <a href="{{ url_for('auth.login') }}"
+                    style="background:none; border:1px solid var(--border); border-radius:6px; padding:4px 12px; font-size:0.78rem; color:var(--blue-dark); font-weight:600; text-decoration:none;">
+                    Réserver
+                  </a>
+                {% endif %}
               {% else %}
                 —
               {% endif %}
             </td>
-            {% endif %}
- 
           </tr>
           {% endfor %}
         </tbody>

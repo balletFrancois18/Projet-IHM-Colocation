@@ -6,13 +6,8 @@ depenses_bp = Blueprint('depenses', __name__)
 
 POT_TOTAL = 2800
 
-COULEURS = {
-    'Banu':     '#F59E0B',
-    'Eoghan':   '#5B6CFF',
-    'Francois': '#34D399',
-    'Loucia':   '#A78BFA',
-    'Nassim':   '#FF7A59',
-}
+
+PALETTE = ['#F59E0B', '#5B6CFF', '#34D399', '#A78BFA', '#FF7A59', '#F87171', '#60A5FA']
 
 
 # Catégories de base toujours présentes
@@ -21,24 +16,35 @@ CATEGORIES_BASE = ['loyer', 'activite', 'courses']
 #SQL / base de données classique (ORM type SQLAlchemy)
 @depenses_bp.route('/depenses')
 def liste_depenses():
-    depenses       = Depense.query.all()
-    # Filtre les dépenses réelles (exclut les placeholders montant=0 payeur=none)
-    depenses_reelles = [d for d in depenses if d.payeur != 'none']
-    total_depenses   = sum(d.montant for d in depenses_reelles)
-    reste            = POT_TOTAL - total_depenses
+    # 1. On récupère TOUS les utilisateurs de la BDD
+    tous_les_utilisateurs = User.query.all()
+    
+    # 2. On récupère TOUTES les dépenses
+    depenses_reelles = Depense.query.all()
 
-    # Récupère les catégories dynamiques depuis la BDD
-    toutes_cats = {d.categorie for d in depenses}
-    cats_extra  = [c for c in toutes_cats if c not in CATEGORIES_BASE]
+    # 3. Génération dynamique des couleurs (Problème 1 & 2 réglés ici)
+    # On associe chaque prénom de la BDD à une couleur de la PALETTE
+    couleurs_dynamiques = {
+        u.prenom: PALETTE[i % len(PALETTE)]
+        for i, u in enumerate(tous_les_utilisateurs)
+    }
+
+    # 4. Calculs pour l'affichage
+    total_depenses = sum(d.montant for d in depenses_reelles)
+    reste = POT_TOTAL - total_depenses
+
+    # 5. Gestion des catégories supplémentaires
+    toutes_cats_bdd = {d.categorie for d in depenses_reelles}
+    cats_extra = [c for c in toutes_cats_bdd if c not in CATEGORIES_BASE and c != 'none']
 
     return render_template('depenses.html',
                            depenses=depenses_reelles,
                            total=total_depenses,
                            reste=reste,
                            pot_total=POT_TOTAL,
-                           couleurs=COULEURS,
-                           cats_extra=cats_extra)
-
+                           couleurs=couleurs_dynamiques, # C'est cette variable que le HTML utilise pour le select
+                           cats_extra=cats_extra,
+                           categories_base=CATEGORIES_BASE)
 
 @depenses_bp.route('/depenses/ajouter', methods=['GET', 'POST'])
 @login_required

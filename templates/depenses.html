@@ -38,7 +38,7 @@
       <div style="font-size:13px;color:#6B7280;margin-top:4px">{{ total }} € dépensés sur {{ pot_total }} €</div>
     </div>
     <button onclick="ouvrirModalNouvelleCategorie()"
-            style="padding:10px 20px;background:#5B6CFF;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">
+            style="padding:10px 20px;background:#7bafd4;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Arial',sans-serif">
       ＋ Ajouter une catégorie
     </button>
   </div>
@@ -270,7 +270,7 @@ function ouvrirModalModifier(categorie) {
 
 function validerParticipant() {
   const categorie = document.getElementById('modal-categorie').value;
-  const nom       = document.getElementById('input-nom').value;
+  const nom = document.getElementById('input-nom').value;
   const montant   = parseFloat(document.getElementById('input-montant').value);
 
   if (!nom || isNaN(montant)) {

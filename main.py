@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from flask_mail import Mail
-from models import db, Tache, Depense
+from models import db, Tache, Depense, Reservation, EspaceReservation
 from routes.taches   import taches_bp
 from routes.depenses import depenses_bp
 from routes.auth     import auth_bp
