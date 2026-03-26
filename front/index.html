@@ -110,6 +110,42 @@
   </div>
 </div>
 
+<!-- MODALE TÂCHE -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📋 Nouvelle tâche</div>
+      <button class="modal-close" onclick="closeTaskModal()">✕</button>
+    </div>
+    <div class="field">
+      <label>Titre de la tâche</label>
+      <input type="text" id="task-titre" placeholder="Ex : Nettoyer la salle de bain…" maxlength="100">
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <input type="text" id="task-description" placeholder="Ex : Zone principale, 30 min…" maxlength="150">
+    </div>
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0">
+        <label>Priorité</label>
+        <select id="task-priorite">
+          <option value="basse">Basse</option>
+          <option value="normal" selected>Normal</option>
+          <option value="haute">Haute</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Date due</label>
+        <input type="date" id="task-date">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeTaskModal()">Annuler</button>
+      <button class="btn btn-submit" id="btn-task-submit" onclick="submitTask()">＋ Ajouter la tâche</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div class="app">
@@ -350,7 +386,7 @@
             <button class="filter-btn">Rota</button>
             <button class="filter-btn">Liste</button>
           </div>
-          <button class="btn btn-primary">＋ Nouvelle tâche</button>
+          <button class="btn btn-primary" onclick="openTaskModal()">＋ Nouvelle tâche</button>
         </div>
       </div>
       <div class="task-stats">
@@ -360,25 +396,17 @@
         <div class="ts-card"><div class="ts-num" style="color:var(--text-muted)">2</div><div class="ts-lbl">À faire 📋</div></div>
       </div>
       <div class="kanban">
-        <div class="kan-col">
-          <div class="kan-col-head"><span style="font-size:18px">📋</span><div class="kan-col-title">À faire</div><div class="kan-count" style="background:var(--text-muted)">2</div></div>
-          <div class="kan-card"><div class="kan-card-title">🧽 Nettoyer la salle de bain</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Zone principale · Rotation hebdo</div><div class="kan-card-meta"><span class="kan-card-due due-today">Auj.</span><span class="tag tag-orange" style="font-size:10.5px">Priorité haute</span><div class="kan-card-av kan-av-3"></div></div></div>
-          <div class="kan-card"><div class="kan-card-title">🛒 Aller aux courses de la semaine</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Budget max : 80 € · Liste partagée</div><div class="kan-card-meta"><span class="kan-card-due due-ok">Sam. 1 mars</span><div class="kan-card-av kan-av-1"></div></div></div>
-          <div style="margin-top:10px;padding:12px;border:2px dashed var(--border);border-radius:12px;text-align:center;color:var(--text-muted);font-size:13px;cursor:pointer">＋ Ajouter une tâche</div>
+        <div class="kan-col" data-task-status="todo">
+          <div class="kan-col-head"><span style="font-size:18px">📋</span><div class="kan-col-title">À faire</div><div class="kan-count" style="background:var(--text-muted)">0</div></div>
+          <div class="kan-list"></div>
         </div>
-        <div class="kan-col">
-          <div class="kan-col-head"><span style="font-size:18px">🔄</span><div class="kan-col-title">En cours</div><div class="kan-count" style="background:var(--primary)">3</div></div>
-          <div class="kan-card" style="border-color:rgba(91,108,255,.25);box-shadow:0 4px 14px rgba(91,108,255,.08)"><div class="kan-card-title">🧹 Passer l'aspirateur — Salon</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Commencé ce matin</div><div style="margin-bottom:10px"><div class="prog-head" style="font-size:11.5px"><span>Progression</span><span style="font-weight:600">60%</span></div><div class="prog-track"><div class="prog-fill" style="width:60%;background:linear-gradient(90deg,#5B6CFF,#A78BFA)"></div></div></div><div class="kan-card-meta"><span class="kan-card-due due-today">Auj.</span><div class="kan-card-av kan-av-0"></div></div></div>
-          <div class="kan-card"><div class="kan-card-title">🪴 Arroser les plantes</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Plantes salon + cuisine</div><div class="kan-card-meta"><span class="kan-card-due due-ok">Demain</span><div class="kan-card-av kan-av-2"></div></div></div>
-          <div class="kan-card"><div class="kan-card-title">🧺 Faire la lessive commune</div><div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Serviettes + torchons</div><div class="kan-card-meta"><span class="kan-card-due due-late">En retard</span><div class="kan-card-av kan-av-3"></div></div></div>
+        <div class="kan-col" data-task-status="in_progress">
+          <div class="kan-col-head"><span style="font-size:18px">🔄</span><div class="kan-col-title">En cours</div><div class="kan-count" style="background:var(--primary)">0</div></div>
+          <div class="kan-list"></div>
         </div>
-        <div class="kan-col">
-          <div class="kan-col-head"><span style="font-size:18px">✅</span><div class="kan-col-title">Terminées</div><div class="kan-count" style="background:var(--success)">8</div></div>
-          <div class="kan-card" style="opacity:.75"><div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🗑️ Sortir les poubelles</div><div class="kan-card-meta"><span class="tag tag-green">Fait ✓</span><div class="av-circle kan-av-1" style="width:22px;height:22px;font-size:9px;margin-left:auto"></div></div></div>
-          <div class="kan-card" style="opacity:.75"><div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🍽️ Faire la vaisselle</div><div class="kan-card-meta"><span class="tag tag-green">Fait ✓</span><div class="av-circle kan-av-0" style="width:22px;height:22px;font-size:9px;margin-left:auto"></div></div></div>
-          <div class="kan-card" style="opacity:.75"><div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">📦 Vider le compost</div><div class="kan-card-meta"><span class="tag tag-green">Fait ✓</span><div class="av-circle kan-av-2" style="width:22px;height:22px;font-size:9px;margin-left:auto"></div></div></div>
-          <div class="kan-card" style="opacity:.75"><div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🪥 Nettoyer les toilettes</div><div class="kan-card-meta"><span class="tag tag-green">Fait ✓</span><div class="av-circle kan-av-3" style="width:22px;height:22px;font-size:9px;margin-left:auto"></div></div></div>
-          <div class="kan-card" style="opacity:.75"><div class="kan-card-title" style="text-decoration:line-through;color:var(--text-muted)">🛒 Produits ménagers</div><div class="kan-card-meta"><span class="tag tag-green">Fait ✓</span><div class="av-circle kan-av-0" style="width:22px;height:22px;font-size:9px;margin-left:auto"></div></div></div>
+        <div class="kan-col" data-task-status="done">
+          <div class="kan-col-head"><span style="font-size:18px">✅</span><div class="kan-col-title">Terminées</div><div class="kan-count" style="background:var(--success)">0</div></div>
+          <div class="kan-list"></div>
         </div>
       </div>
       <div class="card">
@@ -661,6 +689,132 @@ async function submitDepense() {
     showToast('❌ Erreur lors de l\'ajout', 'error');
   } finally {
     btn.disabled = false; btn.textContent = '＋ Ajouter la dépense';
+  }
+}
+
+// ══════════════════════════════════════════════
+// MODALE TÂCHES
+// ══════════════════════════════════════════════
+function openTaskModal() {
+  document.getElementById('modal-task').classList.add('open');
+  setTimeout(() => document.getElementById('task-titre').focus(), 100);
+}
+function closeTaskModal() {
+  document.getElementById('modal-task').classList.remove('open');
+  resetTaskModal();
+}
+function resetTaskModal() {
+  document.getElementById('task-titre').value = '';
+  document.getElementById('task-description').value = '';
+  document.getElementById('task-priorite').value = 'normal';
+  document.getElementById('task-date').value = '';
+}
+async function submitTask() {
+  const titre = document.getElementById('task-titre').value.trim();
+  const description = document.getElementById('task-description').value.trim();
+  const priorite = document.getElementById('task-priorite').value;
+  const date_due = document.getElementById('task-date').value;
+
+  if (!titre) {
+    document.getElementById('task-titre').classList.add('error');
+    return;
+  } else {
+    document.getElementById('task-titre').classList.remove('error');
+  }
+
+  const btn = document.getElementById('btn-task-submit');
+  btn.disabled = true; btn.textContent = 'Envoi…';
+
+  try {
+    const res = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titre, description, priorite, date_due })
+    });
+    if (!res.ok) throw new Error('Erreur serveur');
+    closeTaskModal();
+    showToast('✅ Tâche ajoutée !', 'success');
+    await reloadTasks();
+  } catch (err) {
+    showToast('❌ Erreur lors de l\'ajout', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '＋ Ajouter la tâche';
+  }
+}
+
+// ══════════════════════════════════════════════
+// RENDU KANBAN TÂCHES
+// ══════════════════════════════════════════════
+function renderTasksKanban(tasks) {
+  const priorityMap = { 'haute': '🔴', 'normal': '🟡', 'basse': '🟢' };
+  const statusMap = { 'todo': 'À faire', 'in_progress': 'En cours', 'done': 'Terminées' };
+  
+  // Grouper les tâches par statut
+  const grouped = { 'todo': [], 'in_progress': [], 'done': [] };
+  tasks.forEach(t => {
+    if (grouped[t.statut]) grouped[t.statut].push(t);
+  });
+  
+  // Mettre à jour les colonnes
+  ['todo', 'in_progress', 'done'].forEach(status => {
+    const col = document.querySelector(`[data-task-status="${status}"]`);
+    if (!col) return;
+    
+    const list = col.querySelector('.kan-list');
+    const count = col.querySelector('.kan-count');
+    
+    if (count) count.textContent = grouped[status].length;
+    
+    if (list) {
+      list.innerHTML = grouped[status].map(task => {
+        const dueDate = task.date_due ? new Date(task.date_due) : null;
+        const today = new Date();
+        let dueCls = 'due-ok';
+        let dueText = 'Sans date';
+        if (dueDate) {
+          if (dueDate.toDateString() === today.toDateString()) dueCls = 'due-today';
+          else if (dueDate < today) dueCls = 'due-late';
+          dueText = dueDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+        }
+        
+        return `
+          <div class="kan-card" data-task-id="${task.id}">
+            <div class="kan-card-title">${task.titre}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">${task.description || ''}</div>
+            <div class="kan-card-meta">
+              <span class="kan-card-due ${dueCls}">${dueText}</span>
+              ${task.priorite && task.priorite !== 'normal' ? `<span class="tag">${priorityMap[task.priorite]} ${task.priorite}</span>` : ''}
+              <div class="kan-card-av" style="background:${task.color};">${task.name?.charAt(0) || '?'}</div>
+            </div>
+          </div>
+        `;
+      }).join('') + '<div style="margin-top:10px;padding:12px;border:2px dashed var(--border);border-radius:12px;text-align:center;color:var(--text-muted);font-size:13px;cursor:pointer" onclick="openTaskModal()">＋ Ajouter une tâche</div>';
+    }
+  });
+  
+  // Stats
+  const total = tasks.length;
+  const done = grouped['done'].length;
+  const inProgress = grouped['in_progress'].length;
+  const todo = grouped['todo'].length;
+  
+  document.querySelectorAll('.task-stats .ts-num').forEach((el, i) => {
+    const values = [total, done, inProgress, todo];
+    if (i < values.length) el.textContent = values[i];
+  });
+}
+
+// ══════════════════════════════════════════════
+// RECHARGEMENT TÂCHES
+// ══════════════════════════════════════════════
+async function reloadTasks() {
+  try {
+    const res = await fetch('/api/tasks');
+    if (!res.ok) throw new Error('Erreur serveur');
+    const tasks = await res.json();
+    renderTasksKanban(tasks);
+  } catch (err) {
+    console.error('Erreur rechargement tâches:', err);
   }
 }
 
@@ -1032,6 +1186,9 @@ Promise.all([
 
   // Charge les dépenses
   reloadDepenses();
+
+  // Charge les tâches
+  reloadTasks();
 
 }).catch(err => {
   console.warn('Erreur init:', err);

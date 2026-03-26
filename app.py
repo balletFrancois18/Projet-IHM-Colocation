@@ -50,6 +50,20 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         )''')
 
+    # Table tasks — avec titre, statut, priorité, date due
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS tasks (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            titre       TEXT NOT NULL,
+            description TEXT,
+            statut      TEXT DEFAULT 'todo',
+            priorite    TEXT DEFAULT 'normal',
+            date_due    DATE,
+            user_id     INTEGER,
+            created     DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )''')
+
     # Insertion des colocataires (ignoré si déjà existant)
     colocataires = [
         ('Eoghan',   'eoghan@coloc.fr',   '1111', '#5B6CFF', 'coloc'),
@@ -228,6 +242,110 @@ def get_remboursements():
         if abs(creanciers[j]['solde']) < 0.01: j += 1
 
     return jsonify(remboursements)
+
+
+# ══════════════════════════════════════
+# ROUTES API — TÂCHES
+# ══════════════════════════════════════
+
+# GET /api/tasks — toutes les tâches
+@app.route('/api/tasks', methods=['GET'])
+def get_tasks():
+    conn = get_db()
+    rows = conn.execute('''
+        SELECT t.id, t.titre, t.description, t.statut, t.priorite,
+               t.date_due, t.user_id, u.name, u.color, t.created
+        FROM tasks t
+        LEFT JOIN users u ON t.user_id = u.id
+        ORDER BY 
+            CASE WHEN t.statut = 'todo' THEN 0 WHEN t.statut = 'in_progress' THEN 1 ELSE 2 END,
+            t.date_due ASC,
+            t.created DESC
+    ''').fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
+# POST /api/tasks — créer une tâche
+@app.route('/api/tasks', methods=['POST'])
+def add_task():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    titre = data.get('titre', '').strip()
+    description = data.get('description', '').strip()
+    priorite = data.get('priorite', 'normal')
+    date_due = data.get('date_due')
+    user_id = session['user_id']
+    
+    if not titre:
+        return jsonify({'error': 'Titre requis'}), 400
+    
+    conn = get_db()
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO tasks (titre, description, priorite, date_due, user_id)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (titre, description, priorite, date_due, user_id))
+    conn.commit()
+    task_id = c.lastrowid
+    conn.close()
+    
+    return jsonify({'success': True, 'id': task_id}), 201
+
+# PUT /api/tasks/<id> — modifier une tâche
+@app.route('/api/tasks/<int:task_id>', methods=['PUT'])
+def update_task(task_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    statut = data.get('statut')
+    priorite = data.get('priorite')
+    titre = data.get('titre')
+    description = data.get('description')
+    
+    conn = get_db()
+    updates = []
+    values = []
+    
+    if statut is not None:
+        updates.append('statut = ?')
+        values.append(statut)
+    if priorite is not None:
+        updates.append('priorite = ?')
+        values.append(priorite)
+    if titre is not None:
+        updates.append('titre = ?')
+        values.append(titre)
+    if description is not None:
+        updates.append('description = ?')
+        values.append(description)
+    
+    if not updates:
+        conn.close()
+        return jsonify({'error': 'Aucune modification'}), 400
+    
+    values.append(task_id)
+    query = f"UPDATE tasks SET {', '.join(updates)} WHERE id = ?"
+    conn.execute(query, values)
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+# DELETE /api/tasks/<id> — supprimer une tâche
+@app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    conn = get_db()
+    conn.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
 
 
 # ══════════════════════════════════════
