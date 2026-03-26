@@ -64,6 +64,21 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES users(id)
         )''')
 
+    # Table reservations — planning des espaces communs
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS reservations (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            date        DATE NOT NULL,
+            salle       TEXT NOT NULL,
+            profil      TEXT NOT NULL,
+            statut      TEXT DEFAULT 'Réservé',
+            debut       TIME NOT NULL,
+            fin         TIME NOT NULL,
+            user_id     INTEGER,
+            created     DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )''')
+
     # Insertion des colocataires (ignoré si déjà existant)
     colocataires = [
         ('Eoghan',   'eoghan@coloc.fr',   '1111', '#5B6CFF', 'coloc'),
@@ -342,6 +357,141 @@ def delete_task(task_id):
     
     conn = get_db()
     conn.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+
+# ══════════════════════════════════════
+# ROUTES API — RÉSERVATIONS
+# ══════════════════════════════════════
+
+# GET /api/reservations — toutes les réservations
+@app.route('/api/reservations', methods=['GET'])
+def get_reservations():
+    conn = get_db()
+    rows = conn.execute('''
+        SELECT r.id, r.date, r.salle, r.profil, r.statut,
+               r.debut, r.fin, r.user_id, u.name, u.color, r.created
+        FROM reservations r
+        LEFT JOIN users u ON r.user_id = u.id
+        ORDER BY r.date DESC, r.debut ASC
+    ''').fetchall()
+    conn.close()
+    return jsonify([dict(r) for r in rows])
+
+# POST /api/reservations — créer une réservation
+@app.route('/api/reservations', methods=['POST'])
+def add_reservation():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    date = data.get('date')
+    salle = data.get('salle', '').strip()
+    profil = data.get('profil', '').strip()
+    statut = data.get('statut', 'Réservé')
+    debut = data.get('debut')
+    fin = data.get('fin')
+    user_id = session['user_id']
+    
+    if not all([date, salle, profil, debut, fin]):
+        return jsonify({'error': 'Tous les champs sont requis'}), 400
+    
+    if fin <= debut:
+        return jsonify({'error': 'Heure de fin doit être après l\'heure de début'}), 400
+    
+    # Vérifier les conflits
+    conn = get_db()
+    conflict = conn.execute('''
+        SELECT id FROM reservations
+        WHERE salle = ? AND date = ? AND debut < ? AND fin > ?
+    ''', (salle, date, fin, debut)).fetchone()
+    
+    if conflict:
+        conn.close()
+        return jsonify({'error': 'Conflit avec une réservation existante'}), 409
+    
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO reservations (date, salle, profil, statut, debut, fin, user_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ''', (date, salle, profil, statut, debut, fin, user_id))
+    conn.commit()
+    res_id = c.lastrowid
+    conn.close()
+    
+    return jsonify({'success': True, 'id': res_id}), 201
+
+# PUT /api/reservations/<id> — modifier une réservation
+@app.route('/api/reservations/<int:res_id>', methods=['PUT'])
+def update_reservation(res_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    date = data.get('date')
+    salle = data.get('salle')
+    profil = data.get('profil')
+    statut = data.get('statut')
+    debut = data.get('debut')
+    fin = data.get('fin')
+    
+    conn = get_db()
+    updates = []
+    values = []
+    
+    if date:
+        updates.append('date = ?')
+        values.append(date)
+    if salle:
+        updates.append('salle = ?')
+        values.append(salle)
+    if profil:
+        updates.append('profil = ?')
+        values.append(profil)
+    if statut:
+        updates.append('statut = ?')
+        values.append(statut)
+    if debut:
+        updates.append('debut = ?')
+        values.append(debut)
+    if fin:
+        updates.append('fin = ?')
+        values.append(fin)
+    
+    if not updates:
+        conn.close()
+        return jsonify({'error': 'Aucune modification'}), 400
+    
+    # Vérifier les conflits (en excluant la résa qu'on modifie)
+    if date and salle and debut and fin:
+        conflict = conn.execute('''
+            SELECT id FROM reservations
+            WHERE id != ? AND salle = ? AND date = ? AND debut < ? AND fin > ?
+        ''', (res_id, salle, date, fin, debut)).fetchone()
+        
+        if conflict:
+            conn.close()
+            return jsonify({'error': 'Conflit avec une réservation existante'}), 409
+    
+    values.append(res_id)
+    query = f"UPDATE reservations SET {', '.join(updates)} WHERE id = ?"
+    conn.execute(query, values)
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+# DELETE /api/reservations/<id> — supprimer une réservation
+@app.route('/api/reservations/<int:res_id>', methods=['DELETE'])
+def delete_reservation(res_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    conn = get_db()
+    conn.execute('DELETE FROM reservations WHERE id = ?', (res_id,))
     conn.commit()
     conn.close()
     

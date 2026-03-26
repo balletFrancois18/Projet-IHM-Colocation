@@ -159,6 +159,58 @@
   </div>
 </div>
 
+<!-- MODALE RÉSERVATION -->
+<div class="modal-overlay" id="modal-reservation">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-res-title">📅 Nouvelle réservation</div>
+      <button class="modal-close" onclick="closeReservationModal()">✕</button>
+    </div>
+    
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="res-date" />
+    </div>
+    
+    <div class="field">
+      <label>Salle</label>
+      <select id="res-salle">
+        <option value="">Choisir une salle</option>
+        <option value="Salle de bain">🚿 Salle de bain</option>
+        <option value="Salon">🛋️ Salon</option>
+        <option value="Cuisine">🍳 Cuisine</option>
+        <option value="Global">🏠 Global</option>
+      </select>
+    </div>
+
+    <div class="field-row">
+      <div>
+        <label>Début</label>
+        <input type="time" id="res-debut" />
+      </div>
+      <div>
+        <label>Fin</label>
+        <input type="time" id="res-fin" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Statut</label>
+      <select id="res-statut">
+        <option value="Réservé">Réservé</option>
+        <option value="Occupé">Occupé</option>
+        <option value="Disponible">Disponible</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeReservationModal()">Annuler</button>
+      <button class="btn btn-submit" id="btn-res-submit" onclick="submitReservation()">＋ Réserver</button>
+      <button class="btn btn-cancel" id="btn-res-delete" style="background:#ff6b6b;color:#fff;display:none" onclick="deleteReservation()">🗑️ Supprimer</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div class="app">
@@ -179,14 +231,7 @@
     <button class="nav-item active" onclick="showScreen('dashboard',this)"><span class="icon">🏠</span> Accueil</button>
     <button class="nav-item" onclick="showScreen('depenses',this)"><span class="icon">💸</span> Dépenses<span class="nav-badge">3</span></button>
     <button class="nav-item" onclick="showScreen('taches',this)"><span class="icon">🧹</span> Tâches<span class="nav-badge">5</span></button>
-    <button class="nav-item" onclick="showScreen('chat',this)"><span class="icon">💬</span> Messages<span class="nav-badge">2</span></button>
-    <span class="nav-label">Coloc</span>
-    <button class="nav-item" onclick="showScreen('dashboard',this)"><span class="icon">📅</span> Planning</button>
-    <button class="nav-item" onclick="showScreen('dashboard',this)"><span class="icon">📢</span> Annonces</button>
-    <button class="nav-item" onclick="showScreen('dashboard',this)"><span class="icon">🛒</span> Courses</button>
-    <span class="nav-label">Gestion</span>
-    <button class="nav-item" onclick="showScreen('dashboard',this)"><span class="icon">📄</span> Documents</button>
-    <button class="nav-item" onclick="showScreen('dashboard',this)"><span class="icon">⚙️</span> Réglages</button>
+    <button class="nav-item" onclick="showScreen('reservations',this)"><span class="icon">📅</span> Réservations<span class="nav-badge">3</span></button>
     <div class="sidebar-spacer"></div>
     <div class="sidebar-user">
       <div class="user-av"></div>
@@ -394,11 +439,6 @@
           <div class="page-title">Tâches <span>& Ménage</span></div>
         </div>
         <div class="header-actions">
-          <div class="filter-row">
-            <button class="filter-btn active">Kanban</button>
-            <button class="filter-btn">Rota</button>
-            <button class="filter-btn">Liste</button>
-          </div>
           <button class="btn btn-primary" onclick="openTaskModal()">＋ Nouvelle tâche</button>
         </div>
       </div>
@@ -429,91 +469,113 @@
     </div><!-- /taches -->
 
 
-    <!-- SCREEN 4 — CHAT -->
-    <div id="screen-chat" class="screen">
-      <div class="page-header" style="margin-bottom:16px">
+    <!-- SCREEN 4 — RÉSERVATIONS -->
+    <div id="screen-reservations" class="screen">
+      <div class="page-header" style="margin-bottom:20px">
         <div class="page-title-group">
-          <div class="page-eyebrow">4 membres en ligne</div>
-          <div class="page-title">Messages <span>coloc</span></div>
+          <div class="page-eyebrow">Planning des espaces</div>
+          <div class="page-title">Réservations 📅</div>
         </div>
-        <div class="header-actions"><button class="btn btn-ghost">＋ Nouveau salon</button></div>
+        <div class="header-actions"><button class="btn btn-primary" onclick="openReservationModal()">＋ Nouvelle réservation</button></div>
       </div>
-      <div class="chat-layout">
-        <div class="channels-panel">
-          <div class="chan-head"><div class="chan-head-title">🏡 Appart' Voltaire</div></div>
-          <div class="chan-section">
-            <span class="chan-sec-label">Salons</span>
-            <div class="chan-item active"><span class="chan-icon">💬</span><span class="chan-name">général</span></div>
-            <div class="chan-item"><span class="chan-icon">🛒</span><span class="chan-name">courses</span><span class="chan-badge">1</span></div>
-            <div class="chan-item"><span class="chan-icon">📅</span><span class="chan-name">planning</span></div>
-            <div class="chan-item"><span class="chan-icon">💸</span><span class="chan-name">dépenses</span><span class="chan-badge">2</span></div>
-            <div class="chan-item"><span class="chan-icon">🎉</span><span class="chan-name">événements</span></div>
-            <div class="chan-item"><span class="chan-icon">📢</span><span class="chan-name">annonces</span></div>
-          </div>
-          <div class="chan-section">
-            <span class="chan-sec-label">Messages privés</span>
-            <div id="chat-dm-list"></div>
-          </div>
+
+      <!-- Légende des statuts -->
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:12px;background:#D8EFE4;color:#2D6A4F;font-size:13px;font-weight:500">
+          <span style="width:8px;height:8px;border-radius:50%;background:#2D6A4F"></span> Disponible
         </div>
-        <div class="chat-panel">
-          <div class="chat-header">
-            <span style="font-size:20px">💬</span>
-            <div><div class="chat-title"># général</div><div class="chat-sub">4 membres · Appart' Voltaire</div></div>
-            <div class="chat-actions">
-              <button class="btn-icon" style="width:36px;height:36px;font-size:16px">🔍</button>
-              <button class="btn-icon" style="width:36px;height:36px;font-size:16px">📌</button>
-              <button class="btn-icon" style="width:36px;height:36px;font-size:16px">👥</button>
-            </div>
-          </div>
-          <div class="chat-messages">
-            <div class="chat-date">Mercredi 26 février</div>
-            <div class="msg-group"><div class="msg-av-col"><div class="msg-av chat-av-1"></div></div><div class="msg-content"><div class="msg-sender chat-name-1"></div><div class="bubble bubble-other">Salut tout le monde ! 👋 Quelqu'un a vu la télécommande de la télé ?</div><div class="msg-time">09:14</div></div></div>
-            <div class="msg-group"><div class="msg-av-col"><div class="msg-av chat-av-2"></div></div><div class="msg-content"><div class="msg-sender chat-name-2"></div><div class="bubble bubble-other">Haha je l'avais laissée sur le canapé ce matin 😅</div><div class="msg-time">09:22</div></div></div>
-            <div class="msg-group"><div class="msg-av-col"><div class="msg-av chat-av-1"></div></div><div class="msg-content"><div class="msg-sender chat-name-1"></div><div class="bubble bubble-other">Au fait, j'ai ajouté les courses de ce matin sur l'appli !</div><div class="msg-time">09:45</div></div></div>
-            <div class="chat-date">Aujourd'hui · 27 février</div>
-            <div class="msg-group"><div class="msg-av-col"><div class="msg-av chat-av-3"></div></div><div class="msg-content"><div class="msg-sender chat-name-3"></div><div class="bubble bubble-other">Bonjour ! 🌞 Quelqu'un peut acheter du liquide vaisselle ? On est à cours</div><div class="msg-time">08:30</div></div></div>
-            <div class="msg-group mine"><div class="msg-av-col"><div class="msg-av chat-av-me"></div></div><div class="msg-content"><div class="bubble bubble-mine">Pas de souci ! Je passe au supermarché ce soir, j'en prends 🙌</div><div class="msg-time" style="text-align:right">10:05</div></div></div>
-            <div class="msg-group mine"><div class="msg-av-col"><div class="msg-av chat-av-me"></div></div><div class="msg-content"><div class="bubble bubble-mine">Au fait, qui est dispo vendredi soir pour la soirée raclette ? 🧀</div><div class="msg-time" style="text-align:right">10:06</div></div></div>
-            <div class="msg-group"><div class="msg-av-col"><div class="msg-av chat-av-2"></div></div><div class="msg-content"><div class="msg-sender chat-name-2"></div><div class="bubble bubble-other">Moi ! J'ai déjà voté vendredi dans le sondage 🙋‍♂️</div><div class="msg-time">10:18</div></div></div>
-            <div class="msg-group"><div class="msg-av-col"><div class="msg-av chat-av-1"></div></div><div class="msg-content"><div class="msg-sender chat-name-1"></div><div class="bubble bubble-other">Pareil pour moi ✋ Hâte !</div><div class="msg-time">10:24</div></div></div>
-            <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-              <div class="msg-av chat-av-3" style="width:30px;height:30px;font-size:11px;flex-shrink:0"></div>
-              <div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-              <div style="font-size:11.5px;color:var(--text-muted)"><span class="chat-name-3"></span> est en train d'écrire…</div>
-            </div>
-          </div>
-          <div class="chat-input-wrap">
-            <div class="chat-input-box">
-              <div class="chat-actions-row"><button class="chat-action-btn">😊</button><button class="chat-action-btn">📎</button><button class="chat-action-btn">🖼️</button></div>
-              <div class="chat-input-placeholder">Écrire un message dans #général…</div>
-              <div class="chat-actions-row"><button class="chat-action-btn">💸</button><button class="chat-action-btn">📋</button></div>
-              <button class="send-btn">➤</button>
-            </div>
-          </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:12px;background:#FDECEA;color:#C0392B;font-size:13px;font-weight:500">
+          <span style="width:8px;height:8px;border-radius:50%;background:#C0392B"></span> Occupé
         </div>
-        <div class="chat-sidebar">
-          <div class="chat-sidebar-section">
-            <div class="css-title">📌 Épinglés</div>
-            <div class="pinned-item"><div class="pinned-icon">💰</div><div class="pinned-info"><div class="pinned-name">Loyer mars — 3 mars</div><div class="pinned-meta pinned-me-name">600 € · Épinglé par …</div></div></div>
-            <div class="pinned-item"><div class="pinned-icon">🗳️</div><div class="pinned-info"><div class="pinned-name">Vote soirée raclette</div><div class="pinned-meta">3 votes · Se termine demain</div></div></div>
-            <div class="pinned-item"><div class="pinned-icon">📄</div><div class="pinned-info"><div class="pinned-name">Règles de la coloc</div><div class="pinned-meta">PDF · Mis à jour janv.</div></div></div>
-          </div>
-          <hr style="border:none;border-top:1px solid var(--border)">
-          <div class="chat-sidebar-section">
-            <div class="css-title">👥 Membres en ligne</div>
-            <div id="chat-membres-liste"></div>
-          </div>
-          <hr style="border:none;border-top:1px solid var(--border)">
-          <div class="chat-sidebar-section">
-            <div class="css-title">📅 Prochains events</div>
-            <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px">
-              <div style="padding:10px 12px;background:rgba(255,122,89,0.08);border-radius:12px;border-left:3px solid var(--accent)"><div style="font-size:12.5px;font-weight:600">💰 Loyer à payer</div><div style="font-size:11px;color:var(--text-muted)">Lundi 3 mars · 600 €</div></div>
-              <div style="padding:10px 12px;background:rgba(91,108,255,0.07);border-radius:12px;border-left:3px solid var(--primary)"><div style="font-size:12.5px;font-weight:600">🧀 Soirée raclette</div><div style="font-size:11px;color:var(--text-muted)">Vendredi 28 fév. · 20h</div></div>
-            </div>
-          </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:12px;background:#FDF0E1;color:#E67E22;font-size:13px;font-weight:500">
+          <span style="width:8px;height:8px;border-radius:50%;background:#E67E22"></span> Réservé
         </div>
       </div>
-    </div><!-- /chat -->
+
+      <!-- Contenu principal : 2 colonnes -->
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start">
+
+        <!-- Tableau des réservations -->
+        <div style="background:rgba(255,255,255,0.6);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)">
+          <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <div style="font-family:'Syne',sans-serif;font-size:16.5px;font-weight:700">Planning des réservations</div>
+          </div>
+          
+          <div style="overflow-x:auto;overflow-y:auto;max-height:600px">
+            <table style="width:100%;border-collapse:collapse;font-size:14px">
+              <thead>
+                <tr style="background:#FAF8F4">
+                  <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)">Date</th>
+                  <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)">Profil</th>
+                  <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)">Salle</th>
+                  <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)">Statut</th>
+                  <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)">Horaire</th>
+                  <th style="padding:12px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reservations-table-body"></tbody>
+            </table>
+          </div>
+
+          <!-- État vide -->
+          <div id="reservations-empty" style="display:none;padding:48px 24px;text-align:center;color:var(--text-muted)">
+            <div style="font-size:40px;margin-bottom:12px">📅</div>
+            <div style="font-size:14px">Aucune réservation pour le moment.<br>Cliquez sur <strong>＋ Nouvelle réservation</strong> pour créer une.</div>
+          </div>
+        </div>
+
+        <!-- Sidebar des espaces -->
+        <div>
+          <!-- Grille des espaces -->
+          <div style="background:rgba(255,255,255,0.6);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:20px">
+            <div style="padding:18px 24px;border-bottom:1px solid var(--border)">
+              <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">Espaces de la coloc</div>
+            </div>
+            <div id="rooms-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px 20px">
+              <!-- Rempli dynamiquement par renderReservationRooms() -->
+            </div>
+          </div>
+
+          <!-- Formulaire rapide -->
+          <div style="background:rgba(255,255,255,0.6);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden">
+            <div style="padding:18px 24px;border-bottom:1px solid var(--border)">
+              <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">Réservation rapide</div>
+            </div>
+            <div style="padding:18px 24px">
+              <div style="margin-bottom:14px">
+                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:6px">Date</label>
+                <input type="date" id="quick-res-date" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--bg);color:var(--text)" onchange="checkReservationConflict()">
+              </div>
+              <div style="margin-bottom:14px">
+                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:6px">Salle</label>
+                <select id="quick-res-salle" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--bg);color:var(--text)" onchange="checkReservationConflict()">
+                  <option value="">Choisir une salle</option>
+                  <option value="Salle de bain">🚿 Salle de bain</option>
+                  <option value="Salon">🛋️ Salon</option>
+                  <option value="Cuisine">🍳 Cuisine</option>
+                  <option value="Global">🏠 Global</option>
+                </select>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+                <div>
+                  <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:6px">Début</label>
+                  <input type="time" id="quick-res-start" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--bg);color:var(--text)" onchange="checkReservationConflict()">
+                </div>
+                <div>
+                  <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:6px">Fin</label>
+                  <input type="time" id="quick-res-end" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--bg);color:var(--text)" onchange="checkReservationConflict()">
+                </div>
+              </div>
+              <div id="res-conflict-warning" style="display:none;background:#FDECEA;border:1px solid #F0B0AA;border-radius:8px;padding:10px 12px;font-size:13px;color:#C0392B;margin-bottom:14px;gap:8px;align-items:flex-start">
+                ⚠️ Conflit détecté : cette salle est déjà réservée pour cette période
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="addReservationQuick()">Réserver maintenant</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /reservations -->
 
   </main>
 </div>
@@ -1246,9 +1308,317 @@ async function reloadDepenses() {
   ]);
   renderDepenses(depenses, soldes, remboursements, _me);
 }
-
 // ══════════════════════════════════════════════
-// INIT
+// RÉSERVATIONS
+// ══════════════════════════════════════════════
+
+// État
+let _allReservations = [];
+let _currentEditingReservationId = null;
+const RESERVATION_ROOMS = [
+  { name: 'Salle de bain', emoji: '🚿' },
+  { name: 'Salon',         emoji: '🛋️' },
+  { name: 'Cuisine',       emoji: '🍳' },
+  { name: 'Global',        emoji: '🏠' },
+];
+
+// Ouvrir modale nouvelle réservation
+function openReservationModal() {
+  _currentEditingReservationId = null;
+  document.getElementById('modal-res-title').textContent = '📅 Nouvelle réservation';
+  document.getElementById('btn-res-submit').textContent = '＋ Réserver';
+  document.getElementById('btn-res-delete').style.display = 'none';
+  resetReservationModal();
+  document.getElementById('modal-reservation').classList.add('open');
+  setTimeout(() => document.getElementById('res-date').focus(), 100);
+}
+
+// Ouvrir modale édition
+function openReservationEditModal(resId) {
+  const res = _allReservations.find(r => r.id === resId);
+  if (!res) return;
+  
+  _currentEditingReservationId = resId;
+  document.getElementById('modal-res-title').textContent = '✏️ Modifier la réservation';
+  document.getElementById('btn-res-submit').textContent = '💾 Enregistrer';
+  document.getElementById('btn-res-delete').style.display = 'block';
+  
+  document.getElementById('res-date').value = res.date || '';
+  document.getElementById('res-salle').value = res.salle || '';
+  document.getElementById('res-debut').value = res.debut || '';
+  document.getElementById('res-fin').value = res.fin || '';
+  document.getElementById('res-statut').value = res.statut || 'Réservé';
+  
+  document.getElementById('modal-reservation').classList.add('open');
+  setTimeout(() => document.getElementById('res-date').focus(), 100);
+}
+
+// Fermer modale
+function closeReservationModal() {
+  document.getElementById('modal-reservation').classList.remove('open');
+  resetReservationModal();
+  _currentEditingReservationId = null;
+}
+
+// Réinitialiser modale
+function resetReservationModal() {
+  document.getElementById('res-date').value = '';
+  document.getElementById('res-salle').value = '';
+  document.getElementById('res-debut').value = '';
+  document.getElementById('res-fin').value = '';
+  document.getElementById('res-statut').value = 'Réservé';
+}
+
+// Soumettre réservation
+async function submitReservation() {
+  const date = document.getElementById('res-date').value;
+  const salle = document.getElementById('res-salle').value;
+  const debut = document.getElementById('res-debut').value;
+  const fin = document.getElementById('res-fin').value;
+  const statut = document.getElementById('res-statut').value;
+
+  if (!date || !salle || !debut || !fin) {
+    showToast('❌ Complétez tous les champs', 'error');
+    return;
+  }
+
+  if (fin <= debut) {
+    showToast('❌ L\'heure de fin doit être après le début', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('btn-res-submit');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'En cours…';
+
+  try {
+    let res;
+    if (_currentEditingReservationId) {
+      res = await fetch(`/api/reservations/${_currentEditingReservationId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date, salle, debut, fin, statut, profil: _me.name })
+      });
+      showToast('✅ Réservation modifiée !', 'success');
+    } else {
+      res = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date, salle, debut, fin, statut, profil: _me.name })
+      });
+      showToast('✅ Réservation créée !', 'success');
+    }
+    if (!res.ok) throw new Error('Erreur serveur');
+    closeReservationModal();
+    await reloadReservations();
+  } catch (err) {
+    showToast('❌ Erreur lors de la sauvegarde', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+// Supprimer réservation
+async function deleteReservation() {
+  if (!_currentEditingReservationId) return;
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) return;
+
+  const btn = document.getElementById('btn-res-delete');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Suppression…';
+
+  try {
+    const res = await fetch(`/api/reservations/${_currentEditingReservationId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Erreur serveur');
+    closeReservationModal();
+    showToast('✅ Réservation supprimée !', 'success');
+    await reloadReservations();
+  } catch (err) {
+    showToast('❌ Erreur lors de la suppression', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+// Supprimer réservation directement (depuis le tableau)
+async function deleteReservationDirect(resId) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) return;
+
+  try {
+    const res = await fetch(`/api/reservations/${resId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Erreur serveur');
+    showToast('✅ Réservation supprimée !', 'success');
+    await reloadReservations();
+  } catch (err) {
+    showToast('❌ Erreur lors de la suppression', 'error');
+  }
+}
+
+// Détection de conflit
+function hasReservationConflict(salle, date, debut, fin, excludeId = null) {
+  return _allReservations.some(r => {
+    if (r.id === excludeId) return false;
+    if (r.salle !== salle) return false;
+    if (r.date !== date) return false;
+    return debut < r.fin && fin > r.debut;
+  });
+}
+
+// Vérifier conflit en temps réel (formulaire rapide)
+function checkReservationConflict() {
+  const salle = document.getElementById('quick-res-salle').value;
+  const date = document.getElementById('quick-res-date').value;
+  const debut = document.getElementById('quick-res-start').value;
+  const fin = document.getElementById('quick-res-end').value;
+  const warning = document.getElementById('res-conflict-warning');
+
+  if (salle && date && debut && fin && hasReservationConflict(salle, date, debut, fin)) {
+    warning.style.display = 'flex';
+  } else {
+    warning.style.display = 'none';
+  }
+}
+
+// Réservation rapide
+async function addReservationQuick() {
+  const date = document.getElementById('quick-res-date').value;
+  const salle = document.getElementById('quick-res-salle').value;
+  const debut = document.getElementById('quick-res-start').value;
+  const fin = document.getElementById('quick-res-end').value;
+
+  if (!date || !salle || !debut || !fin) {
+    showToast('❌ Complétez tous les champs', 'error');
+    return;
+  }
+
+  if (fin <= debut) {
+    showToast('❌ L\'heure de fin doit être après le début', 'error');
+    return;
+  }
+
+  if (hasReservationConflict(salle, date, debut, fin)) {
+    showToast('❌ Conflit détecté pour cette période', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date, salle, debut, fin, statut: 'Réservé', profil: _me.name })
+    });
+    if (!res.ok) throw new Error('Erreur serveur');
+    showToast('✅ Réservation créée !', 'success');
+    document.getElementById('quick-res-date').value = '';
+    document.getElementById('quick-res-salle').value = '';
+    document.getElementById('quick-res-start').value = '';
+    document.getElementById('quick-res-end').value = '';
+    document.getElementById('res-conflict-warning').style.display = 'none';
+    await reloadReservations();
+  } catch (err) {
+    showToast('❌ Erreur lors de la création', 'error');
+  }
+}
+
+// Rendus
+function renderReservationTable(reservations) {
+  _allReservations = reservations;
+  const tbody = document.getElementById('reservations-table-body');
+  const empty = document.getElementById('reservations-empty');
+
+  if (!tbody) return;
+
+  if (reservations.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+  tbody.innerHTML = reservations.map((r, i) => {
+    const statusColor = r.statut === 'Occupé' ? '#C0392B' : r.statut === 'Réservé' ? '#E67E22' : '#2D6A4F';
+    const statusBg = r.statut === 'Occupé' ? '#FDECEA' : r.statut === 'Réservé' ? '#FDF0E1' : '#D8EFE4';
+    const dateStr = new Date(r.date + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const roomEmoji = RESERVATION_ROOMS.find(room => room.name === r.salle)?.emoji || '📍';
+
+    return `
+      <tr style="animation:rowIn 0.3s ease both;animation-delay:${i * 0.04}s;border-bottom:1px solid var(--border);transition:background .15s">
+        <td style="padding:14px 16px;vertical-align:middle">${dateStr}</td>
+        <td style="padding:14px 16px;vertical-align:middle"><strong>${r.profil || '-'}</strong></td>
+        <td style="padding:14px 16px;vertical-align:middle"><span style="display:inline-flex;align-items:center;gap:8px">${roomEmoji} ${r.salle}</span></td>
+        <td style="padding:14px 16px;vertical-align:middle"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:${statusBg};color:${statusColor}">● ${r.statut}</span></td>
+        <td style="padding:14px 16px;vertical-align:middle">${r.debut}-${r.fin}</td>
+        <td style="padding:14px 16px;vertical-align:middle;display:flex;gap:6px">
+          <button class="btn btn-ghost" style="padding:7px 11px;font-size:13px" onclick="openReservationEditModal(${r.id})" title="Modifier">✏️</button>
+          <button class="btn btn-danger-ghost" style="padding:7px 11px;font-size:13px" onclick="deleteReservationDirect(${r.id})" title="Supprimer">🗑</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderReservationRooms(reservations) {
+  const grid = document.getElementById('rooms-grid');
+  if (!grid) return;
+
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date().toTimeString().slice(0, 5);
+
+  grid.innerHTML = RESERVATION_ROOMS.map(room => {
+    const active = reservations.find(r =>
+      r.salle === room.name && r.date === today && r.debut <= now && r.fin >= now
+    );
+
+    const upcoming = reservations.find(r =>
+      r.salle === room.name && r.date === today && r.debut > now
+    );
+
+    let status = 'Disponible';
+    let dotColor = '#2D6A4F';
+
+    if (active && active.statut === 'Occupé') {
+      status = 'Occupé';
+      dotColor = '#C0392B';
+    } else if (active?.statut === 'Réservé' || upcoming) {
+      status = 'Réservé';
+      dotColor = '#E67E22';
+    }
+
+    return `
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;text-align:center" onclick="document.getElementById('quick-res-salle').value = '${room.name}';showScreen('reservations')">
+        <div style="font-size:24px;display:block;margin-bottom:4px">${room.emoji}</div>
+        <div style="font-size:12px;font-weight:600">${room.name}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;margin-right:4px"></span>${status}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Rechargement
+async function reloadReservations() {
+  try {
+    const res = await fetch('/api/reservations');
+    if (!res.ok) throw new Error('Erreur serveur');
+    const reservations = await res.json();
+    renderReservationTable(reservations);
+    renderReservationRooms(reservations);
+  } catch (err) {
+    console.error('Erreur rechargement réservations:', err);
+  }
+}
+
 // ══════════════════════════════════════════════
 Promise.all([
   fetch('/api/me').then(r => r.json()),
@@ -1368,6 +1738,9 @@ Promise.all([
 
   // Charge les tâches
   reloadTasks();
+
+  // Charge les réservations
+  reloadReservations();
 
 }).catch(err => {
   console.warn('Erreur init:', err);
