@@ -568,9 +568,9 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
   flex: 1; padding: 0.55rem;
   background: #2b4d97; color: white;
   border: none; border-radius: 8px;
-  font-size: 0.8rem; font-weight: 500;
+  font-size: 0.8rem; font-weight: 600;
   text-align: center; text-decoration: none;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Arial', sans-serif;
   transition: background 0.15s, transform 0.15s;
 }
 
@@ -993,7 +993,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
       margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.07);
     }
     .pot-label { font-size: 13px; color: #6B7280; margin-bottom: 4px; }
-    .pot-montant { font-family: 'Arial', sans-serif; font-size: 28px; font-weight: 800; color: #5B6CFF; }
+    .pot-montant { font-family: 'Arial', sans-serif; font-size: 28px; font-weight: 800; color:#2b4d97; }
 
     .categorie-card {
       background: white; border-radius: 16px; padding: 22px 26px;
