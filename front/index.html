@@ -50,6 +50,8 @@
 .btn-submit { background:linear-gradient(135deg,#5B6CFF,#A78BFA); color:#fff; }
 .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
 .btn-submit:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.status-btn { padding:4px 8px; border:1px solid var(--border,#e5e7eb); background:#fff; border-radius:6px; font-size:12px; cursor:pointer; transition:all .15s; margin:2px; }
+.status-btn:hover { background:var(--primary,#5B6CFF); color:#fff; border-color:var(--primary,#5B6CFF); transform:scale(1.1); }
 .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:#111827; color:#fff; padding:12px 22px; border-radius:14px; font-size:14px; font-weight:500; z-index:2000; opacity:0; transition:all .3s cubic-bezier(.34,1.4,.64,1); white-space:nowrap; pointer-events:none; }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 .toast.success { background:#059669; }
@@ -114,7 +116,7 @@
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">📋 Nouvelle tâche</div>
+      <div class="modal-title" id="modal-task-title">📋 Nouvelle tâche</div>
       <button class="modal-close" onclick="closeTaskModal()">✕</button>
     </div>
     <div class="field">
@@ -135,12 +137,23 @@
         </select>
       </div>
       <div class="field" style="margin-bottom:0">
+        <label>Statut</label>
+        <select id="task-statut">
+          <option value="todo">À faire</option>
+          <option value="in_progress">En cours</option>
+          <option value="done">Terminée</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0">
         <label>Date due</label>
         <input type="date" id="task-date">
       </div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeTaskModal()">Annuler</button>
+      <button class="btn btn-cancel" id="btn-task-delete" style="background:#ff6b6b;color:#fff;display:none" onclick="deleteTask()">🗑️ Supprimer</button>
       <button class="btn btn-submit" id="btn-task-submit" onclick="submitTask()">＋ Ajouter la tâche</button>
     </div>
   </div>
@@ -693,26 +706,62 @@ async function submitDepense() {
 }
 
 // ══════════════════════════════════════════════
+// ÉTAT DES TÂCHES
+// ══════════════════════════════════════════════
+let _currentEditingTaskId = null;
+let _allTasks = [];
+
+// ══════════════════════════════════════════════
 // MODALE TÂCHES
 // ══════════════════════════════════════════════
 function openTaskModal() {
+  _currentEditingTaskId = null;
+  document.getElementById('modal-task-title').textContent = '📋 Nouvelle tâche';
+  document.getElementById('btn-task-submit').textContent = '＋ Ajouter la tâche';
+  document.getElementById('btn-task-delete').style.display = 'none';
+  resetTaskModal();
   document.getElementById('modal-task').classList.add('open');
   setTimeout(() => document.getElementById('task-titre').focus(), 100);
 }
+
+function openTaskEditModal(taskId) {
+  const task = _allTasks.find(t => t.id === taskId);
+  if (!task) return;
+  
+  _currentEditingTaskId = taskId;
+  document.getElementById('modal-task-title').textContent = '✏️ Modifier la tâche';
+  document.getElementById('btn-task-submit').textContent = '💾 Enregistrer';
+  document.getElementById('btn-task-delete').style.display = 'block';
+  
+  document.getElementById('task-titre').value = task.titre || '';
+  document.getElementById('task-description').value = task.description || '';
+  document.getElementById('task-priorite').value = task.priorite || 'normal';
+  document.getElementById('task-statut').value = task.statut || 'todo';
+  document.getElementById('task-date').value = task.date_due || '';
+  
+  document.getElementById('modal-task').classList.add('open');
+  setTimeout(() => document.getElementById('task-titre').focus(), 100);
+}
+
 function closeTaskModal() {
   document.getElementById('modal-task').classList.remove('open');
   resetTaskModal();
+  _currentEditingTaskId = null;
 }
+
 function resetTaskModal() {
   document.getElementById('task-titre').value = '';
   document.getElementById('task-description').value = '';
   document.getElementById('task-priorite').value = 'normal';
+  document.getElementById('task-statut').value = 'todo';
   document.getElementById('task-date').value = '';
 }
+
 async function submitTask() {
   const titre = document.getElementById('task-titre').value.trim();
   const description = document.getElementById('task-description').value.trim();
   const priorite = document.getElementById('task-priorite').value;
+  const statut = document.getElementById('task-statut').value;
   const date_due = document.getElementById('task-date').value;
 
   if (!titre) {
@@ -723,22 +772,82 @@ async function submitTask() {
   }
 
   const btn = document.getElementById('btn-task-submit');
-  btn.disabled = true; btn.textContent = 'Envoi…';
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'En cours…';
 
   try {
-    const res = await fetch('/api/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ titre, description, priorite, date_due })
+    let res;
+    if (_currentEditingTaskId) {
+      // Modification
+      res = await fetch(`/api/tasks/${_currentEditingTaskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titre, description, priorite, statut, date_due })
+      });
+      if (!res.ok) throw new Error('Erreur serveur');
+      closeTaskModal();
+      showToast('✅ Tâche modifiée !', 'success');
+    } else {
+      // Création
+      res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titre, description, priorite, statut, date_due })
+      });
+      if (!res.ok) throw new Error('Erreur serveur');
+      closeTaskModal();
+      showToast('✅ Tâche ajoutée !', 'success');
+    }
+    await reloadTasks();
+  } catch (err) {
+    showToast('❌ Erreur', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function deleteTask() {
+  if (!_currentEditingTaskId) return;
+  
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) return;
+  
+  const btn = document.getElementById('btn-task-delete');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Suppression…';
+
+  try {
+    const res = await fetch(`/api/tasks/${_currentEditingTaskId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
     });
     if (!res.ok) throw new Error('Erreur serveur');
     closeTaskModal();
-    showToast('✅ Tâche ajoutée !', 'success');
+    showToast('✅ Tâche supprimée !', 'success');
     await reloadTasks();
   } catch (err) {
-    showToast('❌ Erreur lors de l\'ajout', 'error');
+    showToast('❌ Erreur lors de la suppression', 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '＋ Ajouter la tâche';
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function updateTaskStatus(taskId, newStatus) {
+  try {
+    const res = await fetch(`/api/tasks/${taskId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statut: newStatus })
+    });
+    if (!res.ok) throw new Error('Erreur serveur');
+    const statusLabels = { 'todo': 'À faire', 'in_progress': 'En cours', 'done': 'Terminée' };
+    showToast(`📋 Statut changé en "${statusLabels[newStatus]}"`, 'success');
+    await reloadTasks();
+  } catch (err) {
+    showToast('❌ Erreur lors du changement', 'error');
   }
 }
 
@@ -746,8 +855,8 @@ async function submitTask() {
 // RENDU KANBAN TÂCHES
 // ══════════════════════════════════════════════
 function renderTasksKanban(tasks) {
+  _allTasks = tasks; // Stocker pour l'édition
   const priorityMap = { 'haute': '🔴', 'normal': '🟡', 'basse': '🟢' };
-  const statusMap = { 'todo': 'À faire', 'in_progress': 'En cours', 'done': 'Terminées' };
   
   // Grouper les tâches par statut
   const grouped = { 'todo': [], 'in_progress': [], 'done': [] };
@@ -777,14 +886,24 @@ function renderTasksKanban(tasks) {
           dueText = dueDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
         }
         
+        // Boutons de changement de statut
+        const statusButtons = {
+          'todo': '<button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'in_progress\')" title="Marquer en cours">▶️</button>',
+          'in_progress': '<button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'done\')" title="Marquer terminée">✅</button><button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'todo\')" title="Revenir à faire">↩️</button>',
+          'done': '<button class="status-btn" onclick="updateTaskStatus(' + task.id + ', \'in_progress\')" title="Revenir en cours">↩️</button>'
+        };
+        
         return `
-          <div class="kan-card" data-task-id="${task.id}">
+          <div class="kan-card" data-task-id="${task.id}" onclick="openTaskEditModal(${task.id})" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
             <div class="kan-card-title">${task.titre}</div>
             <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">${task.description || ''}</div>
             <div class="kan-card-meta">
               <span class="kan-card-due ${dueCls}">${dueText}</span>
-              ${task.priorite && task.priorite !== 'normal' ? `<span class="tag">${priorityMap[task.priorite]} ${task.priorite}</span>` : ''}
+              ${task.priorite && task.priorite !== 'normal' ? `<span class="tag">${priorityMap[task.priorite]}</span>` : ''}
               <div class="kan-card-av" style="background:${task.color};">${task.name?.charAt(0) || '?'}</div>
+            </div>
+            <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap" onclick="event.stopPropagation()">
+              ${statusButtons[task.statut] || ''}
             </div>
           </div>
         `;
