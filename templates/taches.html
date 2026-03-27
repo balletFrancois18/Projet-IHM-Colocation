@@ -27,7 +27,23 @@
     </div>
   </nav>
 
-  <!-- EN-TÊTE — en dehors du grid -->
+  <!-- Messages flash -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="max-width:1000px; margin:1rem auto; padding:0 2rem;">
+        {% for category, message in messages %}
+          <div style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:0.5rem;
+                      background:{{ '#fee2e2' if category == 'error' else '#dcfce7' }};
+                      color:{{ '#991b1b' if category == 'error' else '#166534' }};
+                      font-size:0.875rem;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- EN-TÊTE -->
   <div style="max-width:1000px; margin:0 auto; padding:2rem 2rem 0 2rem;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
       <div>
@@ -36,7 +52,9 @@
           {{ taches | selectattr('faite') | list | length }} / {{ taches | length }} tâches complétées
         </p>
       </div>
-      <button onclick="ouvrirModal()" class="btn-action-primary">+ Ajouter une tâche</button>
+      {% if session.get('user_id') %}
+        <button onclick="ouvrirModal()" class="btn-action-primary">+ Ajouter une tâche</button>
+      {% endif %}
     </div>
   </div>
 
@@ -53,37 +71,47 @@
 
       <!-- Liste tâches -->
       <div id="liste-taches">
-        {% if taches %}
-          {% for tache in taches %}
+        {% for tache in taches %}
           <div class="tache-card" data-statut="{{ 'fait' if tache.faite else 'todo' }}">
-            <a href="{{ url_for('taches.cocher_tache', id=tache.id) }}" class="tache-check {% if tache.faite %}done{% endif %}">
-              {% if tache.faite %}✓{% endif %}
-            </a>
+
+            {% if tache.user_id == session.get('user_id') %}
+              <!-- C'est SA tâche → cocher cliquable -->
+              <form method="POST" action="{{ url_for('taches.cocher_tache', id=tache.id) }}" style="margin:0;">
+                <button type="submit" class="tache-check {% if tache.faite %}done{% endif %}" style="border:none;background:none;padding:0;cursor:pointer;">
+                  {% if tache.faite %}✓{% endif %}
+                </button>
+              </form>
+            {% else %}
+              <!-- Tâche d'un autre → lecture seule -->
+              <div class="tache-check {% if tache.faite %}done{% endif %}" style="cursor:default; opacity:0.5;">
+                {% if tache.faite %}✓{% endif %}
+              </div>
+            {% endif %}
+
             <div class="tache-info">
               <div class="tache-titre {% if tache.faite %}done{% endif %}">{{ tache.titre }}</div>
               <div class="tache-assignee">👤 {{ tache.assignee }}</div>
             </div>
+
             <span class="tache-badge {% if tache.faite %}badge-done{% else %}badge-todo{% endif %}">
               {% if tache.faite %}Fait{% else %}À faire{% endif %}
             </span>
-            <!-- <button class="btn-round" onclick="supprimerCategorie('loyer')" title="Supprimer" style="color:#EF4444">X</button> -->
 
-            <form method="POST" action="{{ url_for('taches.supprimer_tache', id=tache.id) }}" style="margin:0; margin-left:10px;">
-              <button type="submit" 
-                      onclick="return confirm('Supprimer définitivement cette tâche ?')" 
-                      title="Supprimer" 
-                      class = "btn-supprimer">
-                  ✕
-              </button>
-            </form>
+            {% if tache.user_id == session.get('user_id') %}
+              <form method="POST" action="{{ url_for('taches.supprimer_tache', id=tache.id) }}" style="margin:0; margin-left:10px;">
+                <button type="submit"
+                        onclick="return confirm('Supprimer cette tâche ?')"
+                        class="btn-supprimer">✕</button>
+              </form>
+            {% endif %}
+
           </div>
-          {% endfor %}
         {% else %}
           <div class="empty">
             <div class="empty-icon">📋</div>
             <div class="empty-text">Aucune tâche pour l'instant</div>
           </div>
-        {% endif %}
+        {% endfor %}
       </div>
     </div>
 
@@ -121,20 +149,18 @@
 
   </div>
 
-  <!-- Modal ajouter tâche -->
+  <!-- Modal ajouter tâche (uniquement si connecté) -->
+  {% if session.get('user_id') %}
   <div id="modal-overlay"
        onclick="fermerModalOverlay(event)"
        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:200; align-items:center; justify-content:center;">
     <div style="background:white; border-radius:16px; padding:28px; width:360px; box-shadow:0 16px 48px rgba(0,0,0,0.15);">
-      <div style="font-family:'Syne',sans-serif; font-size:17px; font-weight:700; margin-bottom:18px;">Ajouter une tâche</div>
+      <div style="font-size:17px; font-weight:700; margin-bottom:18px;">Ajouter une tâche</div>
       <form method="POST" action="{{ url_for('taches.ajouter_tache') }}">
         <div class="field-group">
           <label class="field-label">Titre</label>
-          <input type="text" name="titre" class="field-input" placeholder="ex: Passer l'aspirateur" required>
-        </div>
-        <div class="field-group">
-          <label class="field-label">Assigné à</label>
-          <input type="text" name="assignee" class="field-input" placeholder="ex: Lucas">
+          <input type="text" name="titre" class="field-input"
+                 placeholder="ex: Passer l'aspirateur" required>
         </div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
           <button type="button" class="btn-annuler" onclick="fermerModal()">✕ Annuler</button>
@@ -143,6 +169,7 @@
       </form>
     </div>
   </div>
+  {% endif %}
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
