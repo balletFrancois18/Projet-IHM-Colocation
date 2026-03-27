@@ -868,17 +868,55 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 .tache-card:hover { box-shadow: 0 2px 10px rgba(123,175,212,0.15); transform: translateX(2px); }
 
 .tache-check {
-  width: 20px; height: 20px;
+  width: 28px; height: 28px;
   border-radius: 6px;
-  border: 2px solid var(--border);
+  border: 2.5px solid #333333;
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.65rem; color: white;
-  transition: all 0.2s; cursor: pointer;
+  font-size: 0.9rem;
+  color: #333333;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  cursor: pointer;
   text-decoration: none;
+  background: white;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
 }
 
-.tache-check.done { background: var(--green); border-color: var(--green); }
+.tache-check:hover {
+  border-color: var(--green);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+  background: #f0fdf4;
+}
+
+.tache-check.done {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  font-size: 0.95rem;
+}
+
+.tache-check-disabled {
+  border-color: #cccccc !important;
+  background: #f9f9f9 !important;
+  color: #aaaaaa !important;
+  cursor: not-allowed !important;
+}
+
+.tache-check-disabled:hover {
+  border-color: #cccccc !important;
+  box-shadow: none !important;
+  background: #f9f9f9 !important;
+}
+
+.tache-check-disabled.done {
+  background: #c5f8e8 !important;
+  border-color: #86efac !important;
+  color: #047857 !important;
+}
 .tache-info { flex: 1; }
 .tache-titre { font-size: 0.9rem; font-weight: 500; color: var(--text); }
 .tache-titre.done { text-decoration: line-through; color: var(--muted); }

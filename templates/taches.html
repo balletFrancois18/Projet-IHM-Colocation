@@ -77,13 +77,13 @@
             {% if tache.user_id == session.get('user_id') %}
               <!-- C'est SA tâche → cocher cliquable -->
               <form method="POST" action="{{ url_for('taches.cocher_tache', id=tache.id) }}" style="margin:0;">
-                <button type="submit" class="tache-check {% if tache.faite %}done{% endif %}" style="border:none;background:none;padding:0;cursor:pointer;">
+                <button type="submit" class="tache-check {% if tache.faite %}done{% endif %}">
                   {% if tache.faite %}✓{% endif %}
                 </button>
               </form>
             {% else %}
-              <!-- Tâche d'un autre → lecture seule -->
-              <div class="tache-check {% if tache.faite %}done{% endif %}" style="cursor:default; opacity:0.5;">
+              <!-- Tâche d'un autre → lecture seule, visuellement différente -->
+              <div class="tache-check tache-check-disabled {% if tache.faite %}done{% endif %}">
                 {% if tache.faite %}✓{% endif %}
               </div>
             {% endif %}
