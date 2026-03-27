@@ -3,6 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import hashlib
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'coloc-voltaire-secret-2026'
@@ -53,15 +54,20 @@ def init_db():
     # Table tasks — avec titre, statut, priorité, date due
     c.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            titre       TEXT NOT NULL,
-            description TEXT,
-            statut      TEXT DEFAULT 'todo',
-            priorite    TEXT DEFAULT 'normal',
-            date_due    DATE,
-            user_id     INTEGER,
-            created     DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(user_id) REFERENCES users(id)
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            titre               TEXT NOT NULL,
+            description         TEXT,
+            statut              TEXT DEFAULT 'todo',
+            priorite            TEXT DEFAULT 'normal',
+            date_due            DATE,
+            user_id             INTEGER,
+            is_recurring        BOOLEAN DEFAULT 0,
+            recurrence_type     TEXT DEFAULT 'none',
+            recurrence_end_date DATE,
+            parent_task_id      INTEGER,
+            created             DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id),
+            FOREIGN KEY(parent_task_id) REFERENCES tasks(id)
         )''')
 
     # Table reservations — planning des espaces communs
@@ -327,7 +333,8 @@ def get_tasks():
     conn = get_db()
     rows = conn.execute('''
         SELECT t.id, t.titre, t.description, t.statut, t.priorite,
-               t.date_due, t.user_id, u.name, u.color, t.created
+               t.date_due, t.user_id, u.name, u.color, t.created, 
+               t.is_recurring, t.recurrence_type, t.recurrence_end_date, t.parent_task_id
         FROM tasks t
         LEFT JOIN users u ON t.user_id = u.id
         ORDER BY 
@@ -349,6 +356,8 @@ def add_task():
     description = data.get('description', '').strip()
     priorite = data.get('priorite', 'normal')
     date_due = data.get('date_due')
+    recurrence_type = data.get('recurrence_type', 'none')
+    recurrence_end_date = data.get('recurrence_end_date')
     user_id = session['user_id']
     
     if not titre:
@@ -356,15 +365,72 @@ def add_task():
     
     conn = get_db()
     c = conn.cursor()
+    
+    # Créer la tâche principale
+    is_recurring = recurrence_type != 'none'
     c.execute('''
-        INSERT INTO tasks (titre, description, priorite, date_due, user_id)
-        VALUES (?, ?, ?, ?, ?)
-    ''', (titre, description, priorite, date_due, user_id))
+        INSERT INTO tasks (titre, description, priorite, date_due, user_id, is_recurring, recurrence_type, recurrence_end_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (titre, description, priorite, date_due, user_id, is_recurring, recurrence_type if is_recurring else None, recurrence_end_date if is_recurring else None))
     conn.commit()
-    task_id = c.lastrowid
+    parent_task_id = c.lastrowid
+    
+    # Générer les instances récurrentes si nécessaire
+    if is_recurring and date_due and recurrence_end_date:
+        try:
+            start_date = datetime.strptime(date_due, '%Y-%m-%d')
+            end_date = datetime.strptime(recurrence_end_date, '%Y-%m-%d')
+            
+            current_date = start_date
+            instance_count = 0
+            
+            while current_date < end_date and instance_count < 52:  # Limite à 52 instances (1 an)
+                # Calculer la prochaine date
+                if recurrence_type == 'weekly':
+                    current_date = current_date + timedelta(days=7)
+                elif recurrence_type == 'biweekly':
+                    current_date = current_date + timedelta(days=14)
+                elif recurrence_type == 'monthly':
+                    # Ajouter un mois en gérant les jours invalides
+                    try:
+                        if current_date.month == 12:
+                            current_date = current_date.replace(year=current_date.year + 1, month=1)
+                        else:
+                            current_date = current_date.replace(month=current_date.month + 1)
+                    except ValueError:
+                        # Si le jour n'existe pas dans le mois suivant (ex: 31 janvier → février)
+                        # On ajuste au dernier jour du mois
+                        if current_date.month == 12:
+                            new_month = 1
+                            new_year = current_date.year + 1
+                        else:
+                            new_month = current_date.month + 1
+                            new_year = current_date.year
+                        # Trouver le dernier jour du mois
+                        if new_month == 2:
+                            last_day = 29 if new_year % 4 == 0 and (new_year % 100 != 0 or new_year % 400 == 0) else 28
+                        elif new_month in [4, 6, 9, 11]:
+                            last_day = 30
+                        else:
+                            last_day = 31
+                        current_date = current_date.replace(year=new_year, month=new_month, day=last_day)
+                
+                # Créer l'instance récurrente
+                if current_date < end_date:
+                    c.execute('''
+                        INSERT INTO tasks (titre, description, priorite, date_due, user_id, is_recurring, recurrence_type, recurrence_end_date, parent_task_id)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (titre, description, priorite, current_date.strftime('%Y-%m-%d'), user_id, True, recurrence_type, recurrence_end_date, parent_task_id))
+                    instance_count += 1
+            
+            conn.commit()
+        except Exception as err:
+            conn.close()
+            return jsonify({'error': f'Erreur récurrence: {str(err)}'}), 400
+    
     conn.close()
     
-    return jsonify({'success': True, 'id': task_id}), 201
+    return jsonify({'success': True, 'id': parent_task_id}), 201
 
 # PUT /api/tasks/<id> — modifier une tâche
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
@@ -377,6 +443,9 @@ def update_task(task_id):
     priorite = data.get('priorite')
     titre = data.get('titre')
     description = data.get('description')
+    date_due = data.get('date_due')
+    recurrence_type = data.get('recurrence_type')
+    recurrence_end_date = data.get('recurrence_end_date')
     
     conn = get_db()
     updates = []
@@ -394,6 +463,17 @@ def update_task(task_id):
     if description is not None:
         updates.append('description = ?')
         values.append(description)
+    if date_due is not None:
+        updates.append('date_due = ?')
+        values.append(date_due)
+    if recurrence_type is not None:
+        updates.append('recurrence_type = ?')
+        values.append(recurrence_type if recurrence_type != 'none' else None)
+        updates.append('is_recurring = ?')
+        values.append(recurrence_type != 'none')
+    if recurrence_end_date is not None:
+        updates.append('recurrence_end_date = ?')
+        values.append(recurrence_end_date)
     
     if not updates:
         conn.close()

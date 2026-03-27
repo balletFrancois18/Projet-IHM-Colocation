@@ -56,7 +56,293 @@
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 .toast.success { background:#059669; }
 .toast.error   { background:#DC2626; }
+
+/* DARK MODE */
+html.dark-mode {
+  --primary:       #7B8CFF;
+  --primary-light: #1F2847;
+  --primary-dark:  #5566DD;
+  --secondary:     #A78BFA;
+  --accent:        #FF8A65;
+  --success:       #4ADE80;
+  --border:        #374151;
+  --bg:            #111827;
+  --bg-card:       #1F2937;
+  --text:          #F3F4F6;
+  --text-muted:    #9CA3AF;
+  --shadow:        0 2px 8px rgba(0,0,0,0.4);
+}
+
+html.dark-mode body {
+  background: #0F1419;
+}
+
+html.dark-mode .app {
+  background: #0F1419;
+}
+
+html.dark-mode .sidebar {
+  background: #1F2937;
+  border-right: 1px solid #374151;
+}
+
+html.dark-mode .nav-item:hover {
+  background: #374151;
+}
+
+html.dark-mode .card,
+html.dark-mode .modal {
+  background: #1F2937;
+  border: 1px solid #374151;
+}
+
+html.dark-mode .bg-blob {
+  display: none;
+}
+
+html.dark-mode .modal-overlay {
+  background: rgba(0,0,0,0.7);
+}
+
+html.dark-mode .field input,
+html.dark-mode .field select {
+  background: #111827;
+  border-color: #374151;
+  color: #F3F4F6;
+}
+
+html.dark-mode .field input:focus,
+html.dark-mode .field select:focus {
+  background: #374151;
+  border-color: #7B8CFF;
+}
+
+html.dark-mode .modal-close {
+  background: #374151;
+  color: #F3F4F6;
+}
+
+html.dark-mode .modal-close:hover {
+  background: #4B5563;
+}
+
+#dark-mode-toggle {
+  width: 100% !important;
+  margin-top: 8px !important;
+  padding: 8px !important;
+}
+
+html.dark-mode #dark-mode-toggle {
+  background: rgba(123,140,255,0.15) !important;
+  color: #7B8CFF !important;
+}
+
+/* DARK MODE - KANBAN TÂCHES */
+html.dark-mode .kan-col {
+  background: #374151;
+  border: 1px solid #4B5563;
+}
+
+html.dark-mode .kan-col-head {
+  border-bottom-color: #4B5563;
+}
+
+html.dark-mode .kan-card {
+  background: #1F2937;
+  border-color: #374151;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+html.dark-mode .kan-card:hover {
+  border-color: #7B8CFF;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+/* DARK MODE - ROTATION PLANNING */
+html.dark-mode .rota-cell {
+  background: #374151;
+  border-color: #4B5563;
+}
+
+html.dark-mode .rota-cell:hover {
+  background: #4B5563;
+}
+
+html.dark-mode .rota-cell.assigned {
+  background: #1F3A5F;
+  border-color: #7B8CFF;
+}
+
+/* DARK MODE - TASK STATS */
+html.dark-mode .ts-card {
+  background: #374151;
+  border: 1px solid #4B5563;
+}
+
+/* DARK MODE - DATE TAGS */
+html.dark-mode .due-today {
+  background: #5F3A1F;
+  color: #FFA366;
+}
+
+html.dark-mode .due-ok {
+  background: #1F5F3A;
+  color: #66FF99;
+}
+
+html.dark-mode .due-late {
+  background: #5F1F1F;
+  color: #FF6666;
+}
+
+/* DARK MODE - SETTLEMENT ITEMS */
+html.dark-mode .settle-item {
+  background: #374151;
+  border: 1px solid #4B5563;
+}
+
+/* DARK MODE - MEMBER PROGRESS */
+html.dark-mode .member-prog-item {
+  background: #374151;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #4B5563;
+}
+
+/* DARK MODE - RESERVATIONS TABLE */
+html.dark-mode table {
+  background: #1F2937;
+}
+
+html.dark-mode table thead {
+  background: #374151;
+  border-bottom-color: #4B5563;
+}
+
+html.dark-mode table tbody tr {
+  border-bottom-color: #4B5563;
+}
+
+html.dark-mode table tbody tr:hover {
+  background: #374151;
+}
+
+html.dark-mode .res-conflict-warning {
+  background: #5F3A2F;
+  border-color: #FF8A65;
+  color: #FFB399;
+}
+
+/* DARK MODE - SPENDING LEGEND */
+html.dark-mode .leg-bar {
+  background: #4B5563;
+}
+
+/* DARK MODE - DIVIDERS */
+html.dark-mode .divider {
+  border-color: #374151;
+}
+
+/* DARK MODE - RÉSERVATIONS */
+html.dark-mode [style*="background:rgba(255,255,255"] {
+  background: #1F2937 !important;
+}
+
+html.dark-mode #rooms-grid > div {
+  background: #374151 !important;
+  border-color: #4B5563 !important;
+  color: #F3F4F6 !important;
+}
+
+html.dark-mode #rooms-grid > div:hover {
+  background: #4B5563 !important;
+}
+
+html.dark-mode #rooms-grid {
+  color: #F3F4F6;
+}
+
+html.dark-mode #quick-res-date,
+html.dark-mode #quick-res-salle,
+html.dark-mode #quick-res-start,
+html.dark-mode #quick-res-end {
+  background: #374151 !important;
+  border-color: #4B5563 !important;
+  color: #F3F4F6 !important;
+}
+
+html.dark-mode #quick-res-date:focus,
+html.dark-mode #quick-res-salle:focus,
+html.dark-mode #quick-res-start:focus,
+html.dark-mode #quick-res-end:focus {
+  background: #4B5563 !important;
+  border-color: #7B8CFF !important;
+}
+
+html.dark-mode #res-conflict-warning {
+  background: #5F3A2F !important;
+  border-color: #FF8A65 !important;
+  color: #FFB399 !important;
+}
+
+html.dark-mode table thead {
+  background: #374151 !important;
+}
+
+html.dark-mode table thead tr {
+  border-bottom-color: #4B5563 !important;
+}
+
+html.dark-mode table tbody tr {
+  border-bottom-color: #4B5563 !important;
+}
+
+html.dark-mode table td,
+html.dark-mode table th {
+  color: #F3F4F6;
+  border-color: #4B5563 !important;
+}
+
+html.dark-mode table tbody tr:hover {
+  background: #374151 !important;
+}
+
+/* DARK MODE - LÉGENDE RÉSERVATIONS */
+html.dark-mode [style*="background:#D8EFE4"],
+html.dark-mode [style*="background:#FDECEA"],
+html.dark-mode [style*="background:#FDF0E1"] {
+  background: #374151 !important;
+  color: #F3F4F6 !important;
+  border-radius: 12px;
+}
+
+html.dark-mode [style*="background:#D8EFE4"] span,
+html.dark-mode [style*="background:#FDECEA"] span,
+html.dark-mode [style*="background:#FDF0E1"] span {
+  background: inherit !important;
+}
+
+/* DARK MODE - SECTION HEADERS */
+#screen-reservations [style*="font-family:'Syne'"] {
+  color: inherit;
+}
+
+html.dark-mode #screen-reservations [style*="font-family:'Syne'"] {
+  color: #F3F4F6;
+}
+
+/* DARK MODE - RÉSERVATION VIDE STATE */
+html.dark-mode #reservations-empty {
+  color: #9CA3AF;
+}
+
+/* DARK MODE - GRID LAYOUT */
+html.dark-mode [style*="display:grid;grid-template-columns:1fr 360px"] [style*="background:rgba"] {
+  background: #1F2937 !important;
+  border-color: #374151 !important;
+}
 </style>
+
 </head>
 <body>
 <div class="bg-blob bg-blob-1"></div>
@@ -155,6 +441,21 @@
     </div>
     <div class="field-row">
       <div class="field" style="margin-bottom:0">
+        <label>Récurrence</label>
+        <select id="task-recurrence">
+          <option value="none">Aucune</option>
+          <option value="weekly">Chaque semaine</option>
+          <option value="biweekly">Tous les 15 jours</option>
+          <option value="monthly">Chaque mois</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0" id="task-recurrence-end-field" style="display:none">
+        <label>Fin de récurrence</label>
+        <input type="date" id="task-recurrence-end">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0">
         <label>Date due</label>
         <input type="date" id="task-date">
       </div>
@@ -246,6 +547,7 @@
       <div class="user-info">
         <div class="user-name"><span></span></div>
         <div class="user-role">Admin coloc 👑</div>
+        <button id="dark-mode-toggle" onclick="toggleDarkMode()" style="width:100%;margin-top:8px;padding:8px;border:none;background:rgba(91,108,255,0.15);color:#5B6CFF;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s">🌙 Mode sombre</button>
         <button onclick="confirmLogout(); return false;" style="width:100%;margin-top:8px;padding:8px;border:none;background:rgba(255,122,89,0.15);color:#FF7A59;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s">🚪 Déconnexion</button>
       </div>
     </div>
@@ -544,6 +846,39 @@ let _me           = null;
 let _allDepenses  = [];
 
 // ══════════════════════════════════════════════
+// DARK MODE
+// ══════════════════════════════════════════════
+function initDarkMode() {
+  // Charger la préférence depuis localStorage
+  const savedMode = localStorage.getItem('dark-mode');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = savedMode !== null ? savedMode === 'true' : prefersDark;
+  
+  if (isDark) {
+    document.documentElement.classList.add('dark-mode');
+    updateDarkModeButton();
+  }
+}
+
+function toggleDarkMode() {
+  const html = document.documentElement;
+  const isDark = html.classList.toggle('dark-mode');
+  localStorage.setItem('dark-mode', isDark);
+  updateDarkModeButton();
+  showToast(isDark ? '🌙 Mode sombre activé' : '☀️ Mode clair activé', 'success');
+}
+
+function updateDarkModeButton() {
+  const btn = document.getElementById('dark-mode-toggle');
+  if (!btn) return;
+  const isDark = document.documentElement.classList.contains('dark-mode');
+  btn.textContent = isDark ? '☀️ Mode clair' : '🌙 Mode sombre';
+}
+
+// Initialiser le dark mode au chargement
+initDarkMode();
+
+// ══════════════════════════════════════════════
 // CONSTANTES MÉTIER
 // ══════════════════════════════════════════════
 const catMeta = {
@@ -824,6 +1159,8 @@ function openTaskEditModal(taskId) {
   document.getElementById('task-priorite').value = task.priorite || 'normal';
   document.getElementById('task-statut').value = task.statut || 'todo';
   document.getElementById('task-date').value = task.date_due || '';
+  document.getElementById('task-recurrence').value = task.recurrence_type || 'none';
+  document.getElementById('task-recurrence-end').value = task.recurrence_end_date || '';
   document.getElementById('modal-task').classList.add('open');
   setTimeout(() => document.getElementById('task-titre').focus(), 100);
 }
@@ -840,6 +1177,8 @@ function resetTaskModal() {
   document.getElementById('task-priorite').value = 'normal';
   document.getElementById('task-statut').value = 'todo';
   document.getElementById('task-date').value = '';
+  document.getElementById('task-recurrence').value = 'none';
+  document.getElementById('task-recurrence-end').value = '';
 }
 
 async function submitTask() {
@@ -848,6 +1187,8 @@ async function submitTask() {
   const priorite = document.getElementById('task-priorite').value;
   const statut = document.getElementById('task-statut').value;
   const date_due = document.getElementById('task-date').value;
+  const recurrence_type = document.getElementById('task-recurrence').value;
+  const recurrence_end_date = document.getElementById('task-recurrence-end').value;
 
   if (!titre) {
     document.getElementById('task-titre').classList.add('error');
@@ -867,7 +1208,7 @@ async function submitTask() {
       res = await fetch(`/api/tasks/${_currentEditingTaskId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titre, description, priorite, statut, date_due })
+        body: JSON.stringify({ titre, description, priorite, statut, date_due, recurrence_type, recurrence_end_date })
       });
       if (!res.ok) throw new Error('Erreur serveur');
       closeTaskModal();
@@ -876,7 +1217,7 @@ async function submitTask() {
       res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titre, description, priorite, statut, date_due })
+        body: JSON.stringify({ titre, description, priorite, statut, date_due, recurrence_type, recurrence_end_date })
       });
       if (!res.ok) throw new Error('Erreur serveur');
       closeTaskModal();
@@ -995,7 +1336,14 @@ function renderTasksKanban(tasks) {
         };
         return `
           <div class="kan-card" data-task-id="${task.id}" onclick="openTaskEditModal(${task.id})" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
-            <div class="kan-card-title">${task.titre}</div>
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+              <div class="kan-card-title">${task.titre}</div>
+              ${task.is_recurring ? `<span style="background:var(--primary);color:white;border-radius:4px;padding:2px 6px;font-size:11px;white-space:nowrap">${
+                task.recurrence_type === 'weekly' ? '🔄 Hebdo' : 
+                task.recurrence_type === 'biweekly' ? '🔄 Bi-Hebdo' : 
+                task.recurrence_type === 'monthly' ? '🔄 Mensuel' : ''
+              }</span>` : ''}
+            </div>
             <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">${task.description || ''}</div>
             <div class="kan-card-meta">
               <span class="kan-card-due ${dueCls}">${dueText}</span>
@@ -1065,20 +1413,22 @@ function renderPlanning(tasks) {
   uniqueDates.forEach(dateStr => {
     const tasks_for_date = tasksByDate[dateStr];
     const label = tasks_for_date[0].titre.substring(0, 15);
-    html += `<div class="rota-row-label" title="${tasks_for_date.map(t => t.titre).join(', ')}">${label}...</div>`;
+    const recurrenceLabel = tasks_for_date[0].is_recurring ? ` [${tasks_for_date[0].recurrence_type}]` : '';
+    html += `<div class="rota-row-label" title="${tasks_for_date.map(t => t.titre + (t.is_recurring ? ` [${t.recurrence_type}]` : '')).join(', ')}">${label}${recurrenceLabel}...</div>`;
     days.forEach(day => {
       const tasksOnDay = tasks_for_date.filter(t => t.date_due === day.dateStr);
       if (tasksOnDay.length > 0) {
         const task = tasksOnDay[0];
         const statusEmoji = task.statut === 'done' ? '✅' : (task.statut === 'in_progress' ? '🔄' : '📋');
         const labelColor = task.statut === 'done' ? 'var(--success)' : (task.statut === 'in_progress' ? 'var(--accent)' : 'var(--text-muted)');
+        const recurrenceEmoji = task.is_recurring ? ' 🔄' : '';
         let cellClass = 'rota-cell assigned';
         if (day.isToday) cellClass += ' today-col';
         html += `
-          <div class="${cellClass}" onclick="openTaskEditModal(${task.id})" style="cursor:pointer;position:relative">
+          <div class="${cellClass}" onclick="openTaskEditModal(${task.id})" style="cursor:pointer;position:relative" title="${task.titre}${task.is_recurring ? ` (${task.recurrence_type})` : ''}">
             <div style="display:flex;align-items:center;justify-content:center;gap:6px">
               <div class="rota-av-sm" style="background:${task.color};width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0">${task.name?.charAt(0) || '?'}</div>
-              <div style="font-size:9px;color:${labelColor};font-weight:600">${statusEmoji}</div>
+              <div style="font-size:9px;color:${labelColor};font-weight:600">${statusEmoji}${recurrenceEmoji}</div>
             </div>
           </div>
         `;
@@ -1512,10 +1862,11 @@ function renderActivityFeed(depenses, tasks, users, me) {
 
   // Ajouter TOUTES les tâches (pas juste les done)
   tasks.forEach(t => {
-    const user = users.find(u => u.id === t.user_id) || {};
+    const userName = t.name || 'Inconnu';
+    const userColor = t.color || '#ccc';
     const actionMap = { 'done': 'validé', 'in_progress': 'démarre', 'todo': 'créé' };
     activities.push({
-      user: user,
+      user: { name: userName, color: userColor },
       action: actionMap[t.statut] || 'mis à jour',
       objet: `"${t.titre}"`,
       emoji: '✅',
@@ -1525,9 +1876,10 @@ function renderActivityFeed(depenses, tasks, users, me) {
 
   // Ajouter TOUTES les dépenses (pas juste 2)
   depenses.forEach(d => {
-    const user = users.find(u => u.id === d.user_id) || {};
+    const userName = d.name || 'Inconnu';
+    const userColor = d.color || '#ccc';
     activities.push({
-      user: user,
+      user: { name: userName, color: userColor },
       action: 'ajouté',
       objet: `une dépense : ${d.description}`,
       emoji: d.categorie === 'Courses' ? '🛒' : d.categorie === 'Factures' ? '⚡' : '💸',
@@ -1630,20 +1982,26 @@ function renderWeekCalendar() {
 // POPUP CONFIRMATION DÉCONNEXION
 // ══════════════════════════════════════════════
 function confirmLogout() {
+  const isDarkMode = document.documentElement.classList.contains('dark-mode');
+  const bgColor = isDarkMode ? '#1F2937' : '#fff';
+  const textColor = isDarkMode ? '#F3F4F6' : '#000';
+  const mutedColor = isDarkMode ? '#9CA3AF' : '#666';
+  const borderColor = isDarkMode ? '#374151' : '#e5e7eb';
+  
   const overlay = document.createElement('div');
   overlay.id = 'logout-modal-overlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+  overlay.style.cssText = `position:fixed;top:0;left:0;right:0;bottom:0;background:${isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.5)'};display:flex;align-items:center;justify-content:center;z-index:9999`;
   
   const modal = document.createElement('div');
-  modal.style.cssText = 'background:#fff;border-radius:16px;padding:32px;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp 0.3s ease';
+  modal.style.cssText = `background:${bgColor};border-radius:16px;padding:32px;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp 0.3s ease;color:${textColor}`;
   modal.innerHTML = `
     <div style="text-align:center">
       <div style="font-size:48px;margin-bottom:16px">👋</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Vous êtes sûr(e)?</div>
-      <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px">Vous allez être déconnecté(e)...</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:${textColor}">Vous êtes sûr(e)?</div>
+      <div style="font-size:13px;color:${mutedColor};margin-bottom:24px">Vous allez être déconnecté(e)...</div>
       <div style="display:flex;gap:12px;justify-content:center">
-        <button onclick="document.getElementById('logout-modal-overlay').remove()" style="padding:10px 24px;border:1px solid var(--border);background:transparent;color:var(--text-dark);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">Annuler</button>
-        <button onclick="logout()" style="padding:10px 24px;border:none;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">Déconnexion</button>
+        <button onclick="document.getElementById('logout-modal-overlay').remove()" style="padding:10px 24px;border:1px solid ${borderColor};background:transparent;color:${textColor};border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;hover:opacity:0.8">Annuler</button>
+        <button onclick="logout()" style="padding:10px 24px;border:none;background:#FF7A59;color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">Déconnexion</button>
       </div>
     </div>
   `;
