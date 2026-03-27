@@ -62,11 +62,11 @@
 <div class="bg-blob bg-blob-1"></div>
 <div class="bg-blob bg-blob-2"></div>
 <div class="bg-blob bg-blob-3"></div>
-<!-- MODALE -->
+<!-- MODALE DÉPENSE -->
 <div class="modal-overlay" id="modal-depense">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">💸 Nouvelle dépense</div>
+      <div class="modal-title" id="modal-depense-title">💸 Nouvelle dépense</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="field">
@@ -105,9 +105,17 @@
       <label>Payé par</label>
       <select id="dep-user"></select>
     </div>
+    <div class="field" id="dep-statut-field" style="display:none">
+      <label>Statut</label>
+      <select id="dep-statut">
+        <option value="pending">En attente</option>
+        <option value="paid">Remboursé</option>
+      </select>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeModal()">Annuler</button>
-      <button class="btn btn-submit" id="btn-submit" onclick="submitDepense()">＋ Ajouter la dépense</button>
+      <button class="btn btn-cancel" id="btn-dep-delete" style="background:#ff6b6b;color:#fff;display:none" onclick="deleteDepense()">🗑️ Supprimer</button>
+      <button class="btn btn-submit" id="btn-dep-submit" onclick="submitDepense()">＋ Ajouter la dépense</button>
     </div>
   </div>
 </div>
@@ -320,7 +328,8 @@
           <div class="page-title">Dépenses <span>& Comptes</span></div>
         </div>
         <div class="header-actions">
-          <button class="btn btn-accent" onclick="openModal()">＋ Nouvelle dépense</button>
+          <button class="btn" style="background:#ff6b6b;color:#fff;margin-left:10px" onclick="deleteAllExpenses()">🗑️ Supprimer les dépenses</button>
+          <button class="btn btn-primary" onclick="openModal()">＋ Nouvelle dépense</button>
         </div>
       </div>
 
@@ -382,6 +391,7 @@
           <div class="page-title">Tâches <span>& Ménage</span></div>
         </div>
         <div class="header-actions">
+          <button class="btn" style="background:#ff6b6b;color:#fff;margin-left:10px" onclick="deleteAllCompletedTasks()">🗑️ Supprimer les tâches terminées</button>
           <button class="btn btn-primary" onclick="openTaskModal()">＋ Nouvelle tâche</button>
         </div>
       </div>
@@ -419,7 +429,11 @@
           <div class="page-eyebrow">Planning des espaces</div>
           <div class="page-title">Réservations 📅</div>
         </div>
-        <div class="header-actions"><button class="btn btn-primary" onclick="openReservationModal()">＋ Nouvelle réservation</button></div>
+        <div class="header-actions">
+          <button class="btn" style="background:#ff6b6b;color:#fff;margin-left:10px" onclick="deleteAllReservations()">🗑️ Supprimer les réservations</button>
+          <button class="btn btn-primary" onclick="openReservationModal()">＋ Nouvelle réservation</button>
+
+        </div>
       </div>
 
       <!-- Légende des statuts -->
@@ -593,6 +607,11 @@ document.getElementById('depenses-filter-row').addEventListener('click', functio
 });
 
 // ══════════════════════════════════════════════
+// ÉTAT DÉPENSES
+// ══════════════════════════════════════════════
+let _currentEditingDepenseId = null;
+
+// ══════════════════════════════════════════════
 // MODALE DÉPENSE
 // ══════════════════════════════════════════════
 document.getElementById('modal-depense').addEventListener('click', function(e) {
@@ -600,17 +619,54 @@ document.getElementById('modal-depense').addEventListener('click', function(e) {
 });
 
 function openModal() {
+  _currentEditingDepenseId = null;
+  document.getElementById('modal-depense-title').textContent = '💸 Nouvelle dépense';
+  document.getElementById('btn-dep-submit').textContent = '＋ Ajouter la dépense';
+  document.getElementById('btn-dep-delete').style.display = 'none';
+  document.getElementById('dep-statut-field').style.display = 'none';
+  resetModal();
   document.getElementById('modal-depense').classList.add('open');
   setTimeout(() => document.getElementById('dep-description').focus(), 100);
 }
+
+function openDepenseEditModal(depenseId) {
+  const depense = _allDepenses.find(d => d.id === depenseId);
+  if (!depense) return;
+  _currentEditingDepenseId = depenseId;
+  document.getElementById('modal-depense-title').textContent = '✏️ Modifier la dépense';
+  document.getElementById('btn-dep-submit').textContent = '💾 Enregistrer';
+  document.getElementById('btn-dep-delete').style.display = 'block';
+  document.getElementById('dep-statut-field').style.display = 'block';
+  
+  // Remplir les champs avec les données de la dépense
+  document.getElementById('dep-description').value = depense.description || '';
+  document.getElementById('dep-montant').value = depense.montant;
+  document.getElementById('dep-nb-parts').value = depense.nb_parts;
+  document.getElementById('dep-statut').value = depense.statut;
+  
+  // Sélectionner la catégorie
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  const catBtn = document.querySelector(`.cat-pill[data-cat="${depense.categorie}"]`);
+  if (catBtn) catBtn.classList.add('active');
+  
+  // Sélectionner l'utilisateur
+  document.getElementById('dep-user').value = depense.user_id;
+  
+  updatePreview();
+  document.getElementById('modal-depense').classList.add('open');
+  setTimeout(() => document.getElementById('dep-description').focus(), 100);
+}
+
 function closeModal() {
   document.getElementById('modal-depense').classList.remove('open');
   resetModal();
+  _currentEditingDepenseId = null;
 }
 function resetModal() {
   document.getElementById('dep-description').value = '';
   document.getElementById('dep-montant').value = '';
   document.getElementById('dep-nb-parts').value = '4';
+  document.getElementById('dep-statut').value = 'pending';
   document.getElementById('preview-part-val').textContent = '– €';
   document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
   document.querySelector('.cat-pill[data-cat="Courses"]').classList.add('active');
@@ -635,6 +691,7 @@ async function submitDepense() {
   const nbParts     = parseInt(document.getElementById('dep-nb-parts').value);
   const categorie   = document.querySelector('.cat-pill.active')?.dataset.cat || 'Autre';
   const userId      = parseInt(document.getElementById('dep-user').value);
+  const statut      = document.getElementById('dep-statut').value;
 
   let valid = true;
   if (!description) { document.getElementById('dep-description').classList.add('error'); valid = false; }
@@ -643,24 +700,96 @@ async function submitDepense() {
   else                          { document.getElementById('dep-montant').classList.remove('error'); }
   if (!valid) return;
 
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = true; btn.textContent = 'Envoi…';
+  const btn = document.getElementById('btn-dep-submit');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'En cours…';
 
   try {
-    const res = await fetch('/api/depenses', {
-      method: 'POST',
+    let res;
+    if (_currentEditingDepenseId) {
+      // Mode édition : PUT
+      res = await fetch(`/api/depenses/${_currentEditingDepenseId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ description, montant, categorie, nb_parts: nbParts, statut })
+      });
+      if (!res.ok) throw new Error('Erreur serveur');
+      closeModal();
+      showToast('✅ Dépense modifiée !', 'success');
+    } else {
+      // Mode création : POST
+      res = await fetch('/api/depenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ description, montant, categorie, nb_parts: nbParts, user_id_override: userId })
+      });
+      if (!res.ok) throw new Error('Erreur serveur');
+      closeModal();
+      showToast('✅ Dépense ajoutée !', 'success');
+    }
+    await reloadDepenses();
+  } catch (err) {
+    showToast('❌ Erreur', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function deleteDepense() {
+  if (!_currentEditingDepenseId) return;
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette dépense ?')) return;
+
+  const btn = document.getElementById('btn-dep-delete');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Suppression…';
+
+  try {
+    const res = await fetch(`/api/depenses/${_currentEditingDepenseId}`, {
+      method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ description, montant, categorie, nb_parts: nbParts, user_id_override: userId })
+      credentials: 'include'
     });
     if (!res.ok) throw new Error('Erreur serveur');
     closeModal();
-    showToast('✅ Dépense ajoutée !', 'success');
+    showToast('✅ Dépense supprimée !', 'success');
     await reloadDepenses();
   } catch (err) {
-    showToast('❌ Erreur lors de l\'ajout', 'error');
+    showToast('❌ Erreur lors de la suppression', 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '＋ Ajouter la dépense';
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function deleteAllExpenses() {
+  if (_allDepenses.length === 0) {
+    showToast('ℹ️ Aucune dépense à supprimer', 'error');
+    return;
+  }
+  
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer toutes les ${_allDepenses.length} dépense(s) ?`)) return;
+
+  try {
+    // Supprimer toutes les dépenses en parallèle
+    await Promise.all(
+      _allDepenses.map(dep =>
+        fetch(`/api/depenses/${dep.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include'
+        })
+      )
+    );
+    
+    showToast(`✅ ${_allDepenses.length} dépense(s) supprimée(s) !`, 'success');
+    await reloadDepenses();
+  } catch (err) {
+    showToast('❌ Erreur lors de la suppression', 'error');
   }
 }
 
@@ -785,6 +914,34 @@ async function deleteTask() {
   } finally {
     btn.disabled = false;
     btn.textContent = originalText;
+  }
+}
+
+async function deleteAllCompletedTasks() {
+  const completedTasks = _allTasks.filter(t => t.statut === 'done');
+  
+  if (completedTasks.length === 0) {
+    showToast('ℹ️ Aucune tâche terminée à supprimer', 'error');
+    return;
+  }
+  
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer ${completedTasks.length} tâche(s) terminée(s) ?`)) return;
+
+  try {
+    // Supprimer toutes les tâches terminées en parallèle
+    await Promise.all(
+      completedTasks.map(task =>
+        fetch(`/api/tasks/${task.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        })
+      )
+    );
+    
+    showToast(`✅ ${completedTasks.length} tâche(s) supprimée(s) !`, 'success');
+    await reloadTasks();
+  } catch (err) {
+    showToast('❌ Erreur lors de la suppression', 'error');
   }
 }
 
@@ -991,7 +1148,7 @@ function renderListe(deps) {
     const date = new Date(dep.date).toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
     return `
       ${i > 0 ? '<hr class="divider" style="margin:0 16px">' : ''}
-      <div class="exp-row">
+      <div class="exp-row" onclick="openDepenseEditModal(${dep.id})" style="cursor:pointer;transition:all 0.2s;padding:10px;margin:-10px;border-radius:12px" onmouseover="this.style.backgroundColor='rgba(91,108,255,0.05)';this.style.transform='translateX(2px)'" onmouseout="this.style.backgroundColor='transparent';this.style.transform='translateX(0)'">
         <div class="exp-emoji" style="background:${cat.bg}">${cat.emoji}</div>
         <div class="exp-info">
           <div class="exp-name">${dep.description}</div>
@@ -1143,7 +1300,6 @@ function renderDepenses(depenses, soldes, remboursements, me) {
             <div class="av-circle" style="width:34px;height:34px;background:${r.de_color};font-size:13px">${r.de.charAt(0)}</div>
             <div style="font-size:13px;font-weight:500;flex:1"><strong>${r.de}</strong> → <strong>${r.a}</strong></div>
             <div class="settle-amt">${r.montant} €</div>
-            <button class="settle-btn">Rembourser</button>
           </div>`).join('');
   }
 
@@ -1656,6 +1812,32 @@ async function deleteReservationDirect(resId) {
     });
     if (!res.ok) throw new Error('Erreur serveur');
     showToast('✅ Réservation supprimée !', 'success');
+    await reloadReservations();
+  } catch (err) {
+    showToast('❌ Erreur lors de la suppression', 'error');
+  }
+}
+
+async function deleteAllReservations() {
+  if (_allReservations.length === 0) {
+    showToast('ℹ️ Aucune réservation à supprimer', 'error');
+    return;
+  }
+  
+  if (!confirm(`Êtes-vous sûr de vouloir supprimer toutes les ${_allReservations.length} réservation(s) ?`)) return;
+
+  try {
+    // Supprimer toutes les réservations en parallèle
+    await Promise.all(
+      _allReservations.map(res =>
+        fetch(`/api/reservations/${res.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        })
+      )
+    );
+    
+    showToast(`✅ ${_allReservations.length} réservation(s) supprimée(s) !`, 'success');
     await reloadReservations();
   } catch (err) {
     showToast('❌ Erreur lors de la suppression', 'error');

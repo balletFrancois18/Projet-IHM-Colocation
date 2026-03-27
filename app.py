@@ -178,6 +178,64 @@ def add_depense():
     conn.close()
     return jsonify({'success': True}), 201
 
+# PUT /api/depenses/<id> — modifier une dépense
+@app.route('/api/depenses/<int:depense_id>', methods=['PUT'])
+def update_depense(depense_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    data = request.get_json()
+    montant = data.get('montant')
+    description = data.get('description')
+    categorie = data.get('categorie')
+    nb_parts = data.get('nb_parts')
+    statut = data.get('statut')
+    
+    conn = get_db()
+    updates = []
+    values = []
+    
+    if montant is not None:
+        updates.append('montant = ?')
+        values.append(montant)
+    if description is not None:
+        updates.append('description = ?')
+        values.append(description)
+    if categorie is not None:
+        updates.append('categorie = ?')
+        values.append(categorie)
+    if nb_parts is not None:
+        updates.append('nb_parts = ?')
+        values.append(nb_parts)
+    if statut is not None:
+        updates.append('statut = ?')
+        values.append(statut)
+    
+    if not updates:
+        conn.close()
+        return jsonify({'error': 'Aucune modification'}), 400
+    
+    values.append(depense_id)
+    query = f"UPDATE depenses SET {', '.join(updates)} WHERE id = ?"
+    conn.execute(query, values)
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
+# DELETE /api/depenses/<id> — supprimer une dépense
+@app.route('/api/depenses/<int:depense_id>', methods=['DELETE'])
+def delete_depense(depense_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non connecté'}), 401
+    
+    conn = get_db()
+    conn.execute('DELETE FROM depenses WHERE id = ?', (depense_id,))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'success': True})
+
 # GET /api/soldes — calcule le solde net de chaque colocataire
 @app.route('/api/soldes', methods=['GET'])
 def get_soldes():
