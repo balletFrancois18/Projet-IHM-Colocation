@@ -7,14 +7,8 @@
 
  // PLANNING
 
-const evenements = [
-  { jour: 1, heure: 6,  titre: "Yoga" },
-  { jour: 0, heure: 12, titre: "Repas" },
-  { jour: 2, heure: 12, titre: "Repas" },
-  { jour: 3, heure: 12, titre: "Repas" },
-  { jour: 1, heure: 23, titre: "Soirée" },
-  { jour: 4, heure: 23, titre: "Soirée" },
-];
+// Les événements sont injectés depuis Flask via window.planningData
+// Format : [{date: "YYYY-MM-DD", heure: 14, titre: "...", type: "resa"|"tache", couleur: "#..."}]
 
 const jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const heures = [6, 12, 18, 23];
@@ -56,19 +50,51 @@ function afficherSemaine() {
     }
   }
 
-  // Affiche les événements sur la semaine courante uniquement
-  if (offsetSemaine === 0) {
-    for (const ev of evenements) {
-      const cell = document.getElementById(`cell-${ev.jour}-${ev.heure}`);
-      if (cell) {
-        cell.innerHTML = `<div class="resa">${ev.titre}</div>`;
-      }
+  // Affiche les événements réels (tâches + réservations)
+  const events = window.planningData || [];
+  for (const ev of events) {
+    // Calcul du jour de la semaine à partir de la date ISO
+    const evDate = new Date(ev.date + 'T00:00:00');
+    const evDay  = evDate.getDay(); // 0=dim, 1=lun...
+    // Convertir en index 0=lun..6=dim
+    const jourIdx = evDay === 0 ? 6 : evDay - 1;
+    // Vérifier que la date appartient à la semaine affichée
+    const debutSemaine = new Date(lundi);
+    const finSemaine   = new Date(lundi);
+    finSemaine.setDate(lundi.getDate() + 6);
+    finSemaine.setHours(23, 59, 59);
+    if (evDate < debutSemaine || evDate > finSemaine) continue;
+    // Trouver le slot d'heure le plus proche
+    const h = ev.heure;
+    let slot;
+    if (h < 9)       slot = 6;
+    else if (h < 15) slot = 12;
+    else if (h < 20) slot = 18;
+    else             slot = 23;
+    const cell = document.getElementById(`cell-${jourIdx}-${slot}`);
+    if (cell) {
+      const couleur = ev.couleur || '#7bafd4';
+      const url = ev.type === 'tache' ? '/taches' : '/reservations';
+      cell.innerHTML += `<a href="${url}" class="resa" style="background:${couleur}; cursor:pointer; text-decoration:none;" title="${ev.titre}">${ev.titre}</a>`;
     }
   }
 }
 
 function changerSemaine(delta) {
   offsetSemaine += delta;
+  afficherSemaine();
+}
+
+function allerADate(dateStr) {
+  if (!dateStr) return;
+  const cible = new Date(dateStr + 'T00:00:00');
+  const lundiAujourdhui = getLundiSemaine(0);
+  const lundiCible = new Date(cible);
+  const jourCible = cible.getDay();
+  const diffLundi = jourCible === 0 ? -6 : 1 - jourCible;
+  lundiCible.setDate(cible.getDate() + diffLundi);
+  const diffMs = lundiCible - lundiAujourdhui;
+  offsetSemaine = Math.round(diffMs / (7 * 24 * 3600 * 1000));
   afficherSemaine();
 }
 

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoLoc — Mon Profil</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="index-page">
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+    <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
+    <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
+    <a href="#" class="nav-link">Réservations</a>
+    <div class="nav-right">
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- CONTENU PROFIL -->
+  <div class="profil-wrapper">
+
+    <!-- Carte principale -->
+    <div class="profil-card">
+      <!-- Avatar cliquable -->
+      <label for="avatar-input" class="profil-avatar-wrap" title="Changer la photo">
+        {% if user.avatar %}
+          <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="profil-avatar-img" alt="Photo de profil">
+        {% else %}
+          <div class="profil-avatar-big">{{ user.prenom[0] | upper }}{{ user.nom[0] | upper }}</div>
+        {% endif %}
+        <div class="profil-avatar-overlay">📷</div>
+      </label>
+      <!-- Upload caché — soumet automatiquement -->
+      <form method="POST" action="{{ url_for('auth.upload_avatar') }}" enctype="multipart/form-data" id="form-avatar">
+        <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display:none;" onchange="document.getElementById('form-avatar').submit()">
+      </form>
+      <div class="profil-name">{{ user.prenom }} {{ user.nom }}</div>
+      <div class="profil-email">{{ user.email }}</div>
+    </div>
+
+    <!-- Infos & Modifier -->
+    <div class="profil-main">
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:1rem; font-size:0.9rem;
+              {% if category == 'success' %}background:#d1fae5; color:#065f46; border:1px solid #6ee7b7;
+              {% else %}background:#fee2e2; color:#991b1b; border:1px solid #fca5a5;{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Section Informations -->
+      <div class="profil-section">
+        <div class="profil-section-title">Informations personnelles</div>
+        <form method="POST" action="{{ url_for('auth.profil') }}">
+          <input type="hidden" name="action" value="update_info">
+          <div class="profil-fields">
+            <div class="profil-field">
+              <label class="profil-label">Prénom</label>
+              <input class="profil-input" type="text" name="prenom" value="{{ user.prenom }}" required>
+            </div>
+            <div class="profil-field">
+              <label class="profil-label">Nom</label>
+              <input class="profil-input" type="text" name="nom" value="{{ user.nom }}" required>
+            </div>
+            <div class="profil-field" style="grid-column:1/-1;">
+              <label class="profil-label">Email</label>
+              <input class="profil-input" type="email" name="email" value="{{ user.email }}" required>
+            </div>
+          </div>
+          <button type="submit" class="btn-profil-save">Enregistrer les modifications</button>
+        </form>
+      </div>
+
+      <!-- Section Mot de passe -->
+      <div class="profil-section">
+        <div class="profil-section-title">Changer le mot de passe</div>
+        <form method="POST" action="{{ url_for('auth.profil') }}">
+          <input type="hidden" name="action" value="update_password">
+          <div class="profil-fields">
+            <div class="profil-field">
+              <label class="profil-label">Mot de passe actuel</label>
+              <div class="pwd-wrapper">
+                <input class="profil-input" type="password" id="old_password" name="old_password" placeholder="••••••••" required>
+                <button type="button" class="pwd-toggle" onclick="togglePwd('old_password', this)" tabindex="-1" aria-label="Afficher/masquer">
+                  <svg class="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="profil-field">
+              <label class="profil-label">Nouveau mot de passe</label>
+              <div class="pwd-wrapper">
+                <input class="profil-input" type="password" id="new_password" name="new_password" placeholder="••••••••" required>
+                <button type="button" class="pwd-toggle" onclick="togglePwd('new_password', this)" tabindex="-1" aria-label="Afficher/masquer">
+                  <svg class="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="profil-field" style="grid-column:1/-1;">
+              <label class="profil-label">Confirmer le nouveau mot de passe</label>
+              <div class="pwd-wrapper">
+                <input class="profil-input" type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" required>
+                <button type="button" class="pwd-toggle" onclick="togglePwd('confirm_password', this)" tabindex="-1" aria-label="Afficher/masquer">
+                  <svg class="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn-profil-save">Modifier le mot de passe</button>
+        </form>
+      </div>
+
+      <!-- Stats rapides -->
+      <div class="profil-section">
+        <div class="profil-section-title">Mes statistiques</div>
+        <div class="profil-stats">
+          <div class="profil-stat-card">
+            <div class="profil-stat-val">{{ nb_taches }}</div>
+            <div class="profil-stat-label">Tâches créées</div>
+          </div>
+          <div class="profil-stat-card">
+            <div class="profil-stat-val">{{ nb_depenses }}</div>
+            <div class="profil-stat-label">Dépenses payées</div>
+          </div>
+          <div class="profil-stat-card">
+            <div class="profil-stat-val">{{ nb_reservations }}</div>
+            <div class="profil-stat-label">Réservations</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+function togglePwd(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.classList.toggle('active', isHidden);
+}
+</script>
+</body>
+</html>

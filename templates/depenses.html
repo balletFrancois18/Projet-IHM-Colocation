@@ -7,6 +7,232 @@
   <title>CoLoc — Dépenses</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* ===== DEUX BOUTONS HEADER ===== */
+    .header-btns { display:flex; gap:10px; }
+
+    .btn-cat {
+      padding:10px 18px;
+      background:#2b4d97;
+      color:white;
+      border:none;
+      border-radius:10px;
+      font-size:14px;
+      font-weight:600;
+      cursor:pointer;
+      font-family:'DM Sans',sans-serif;
+      display:flex;align-items:center;gap:6px;
+    }
+    .btn-depense {
+      padding:10px 18px;
+      background:#059669;
+      color:white;
+      border:none;
+      border-radius:10px;
+      font-size:14px;
+      font-weight:600;
+      cursor:pointer;
+      font-family:'DM Sans',sans-serif;
+      display:flex;align-items:center;gap:6px;
+    }
+    .btn-cat:hover { background:#1e3a7a; }
+    .btn-depense:hover { background:#047857; }
+
+    /* ===== WIDGET CATÉGORIE (distinct) ===== */
+    .categorie-widget {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+      overflow: hidden;
+      border: 1px solid #E5E7EB;
+    }
+    .widget-color-bar {
+      height: 5px;
+    }
+    .widget-body { padding: 18px 20px 16px; }
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .widget-title-row { display:flex; align-items:center; gap:10px; }
+    .widget-icon {
+      width:36px;height:36px;
+      border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;
+    }
+    .widget-titre {
+      font-family:'DM Sans',sans-serif;
+      font-size:16px;
+      font-weight:700;
+      color:#111827;
+    }
+    .widget-total {
+      font-family:'DM Sans',sans-serif;
+      font-size:14px;
+      font-weight:600;
+      color:#6B7280;
+    }
+    .widget-actions { display:flex; gap:8px; }
+    .btn-round-edit {
+      width:34px;height:34px;
+      border-radius:8px;
+      border:1.5px solid #FCD34D;
+      background:#FFFBEB;
+      cursor:pointer;
+      font-size:14px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .btn-round-del {
+      width:34px;height:34px;
+      border-radius:8px;
+      border:none;
+      background:#FEE2E2;
+      color:#EF4444;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .btn-round-edit:hover { background:#FEF3C7; }
+    .btn-round-del:hover { background:#FECACA; }
+
+    /* ===== COMPOSANT DÉPENSE (distinct des widgets) ===== */
+    .depenses-section {
+      background: #F9FAFB;
+      border-radius: 16px;
+      border: 1.5px dashed #D1D5DB;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .depenses-section-titre {
+      font-family:'DM Sans',sans-serif;
+      font-size:15px;
+      font-weight:700;
+      color:#374151;
+      margin-bottom:14px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .depense-item {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:white;
+      border-radius:10px;
+      padding:10px 14px;
+      margin-bottom:8px;
+      border:1px solid #E5E7EB;
+      transition: box-shadow 0.15s;
+    }
+    .depense-item:hover { box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    .depense-item-left { display:flex; align-items:center; gap:10px; }
+    .depense-dot {
+      width:10px;height:10px;
+      border-radius:50%;
+      flex-shrink:0;
+    }
+    .depense-titre {
+      font-family:'DM Sans',sans-serif;
+      font-size:14px;
+      font-weight:600;
+      color:#111827;
+    }
+    .depense-meta {
+      font-size:12px;
+      color:#9CA3AF;
+      margin-top:2px;
+    }
+    .depense-montant {
+      font-family:'DM Sans',sans-serif;
+      font-size:15px;
+      font-weight:700;
+      color:#111827;
+    }
+    .depense-cat-badge {
+      font-size:11px;
+      font-weight:600;
+      padding:2px 8px;
+      border-radius:20px;
+      background:#EEF2FF;
+      color:#4F46E5;
+    }
+
+    /* ===== HISTORIQUE ===== */
+    .historique-section {
+      background:white;
+      border-radius:16px;
+      box-shadow:0 2px 12px rgba(0,0,0,0.08);
+      border:1px solid #E5E7EB;
+      padding:20px;
+      margin-top:24px;
+    }
+    .historique-titre {
+      font-family:'DM Sans',sans-serif;
+      font-size:16px;
+      font-weight:700;
+      color:#111827;
+      margin-bottom:16px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .historique-item {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 0;
+      border-bottom:1px solid #F3F4F6;
+    }
+    .historique-item:last-child { border-bottom:none; }
+    .historique-left { display:flex; align-items:center; gap:12px; }
+    .historique-icon {
+      width:38px;height:38px;
+      border-radius:10px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;
+    }
+    .historique-info-titre {
+      font-family:'DM Sans',sans-serif;
+      font-size:14px;
+      font-weight:600;
+      color:#111827;
+    }
+    .historique-info-sub {
+      font-size:12px;
+      color:#9CA3AF;
+      margin-top:1px;
+    }
+    .historique-right { text-align:right; }
+    .historique-montant {
+      font-family:'DM Sans',sans-serif;
+      font-size:15px;
+      font-weight:700;
+      color:#111827;
+    }
+    .historique-date {
+      font-size:11px;
+      color:#9CA3AF;
+      margin-top:2px;
+    }
+    .empty-historique {
+      text-align:center;
+      color:#9CA3AF;
+      font-size:14px;
+      padding:20px 0;
+    }
+
+    /* Couleurs des catégories */
+    .color-loyer    { background:#DBEAFE; color:#1D4ED8; }
+    .color-activite { background:#D1FAE5; color:#065F46; }
+    .color-courses  { background:#FEF3C7; color:#92400E; }
+    .color-extra    { background:#EDE9FE; color:#5B21B6; }
+
+    .bar-loyer    { background: linear-gradient(90deg,#3B82F6,#60A5FA); }
+    .bar-activite { background: linear-gradient(90deg,#10B981,#34D399); }
+    .bar-courses  { background: linear-gradient(90deg,#F59E0B,#FCD34D); }
+    .bar-extra    { background: linear-gradient(90deg,#8B5CF6,#A78BFA); }
+  </style>
 </head>
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 <body>
@@ -17,11 +243,9 @@
   <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
   <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
   <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
-  <a href="#" class="nav-link">Chat</a>
-  <a href="#" class="nav-link">Bon plan</a>
   <div class="nav-right">
     {% if session.get('user_id') %}
-      <div class="nav-avatar">👤</div>
+      <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
       <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
     {% else %}
       <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
@@ -31,16 +255,20 @@
 
 <div class="container">
 
-  <!-- En-tête -->
+  <!-- En-tête avec 2 boutons -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
     <div>
-      <div style="font-family:'Arial',sans-serif;font-size:24px;font-weight:800;color:#111827">Dépenses</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:24px;font-weight:800;color:#111827">Dépenses</div>
       <div style="font-size:13px;color:#6B7280;margin-top:4px">{{ total }} € dépensés sur {{ pot_total }} €</div>
     </div>
-    <button onclick="ouvrirModalNouvelleCategorie()"
-            style="padding:10px 20px;background:#2b4d97;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Arial',sans-serif">
-      ＋ Ajouter une catégorie
-    </button>
+    <div class="header-btns">
+      <button class="btn-cat" onclick="ouvrirModalNouvelleCategorie()">
+        🏷️ Catégorie
+      </button>
+      <button class="btn-depense" onclick="ouvrirModalAjouterDepense()">
+        ＋ Dépense
+      </button>
+    </div>
   </div>
 
   <!-- Pot commun -->
@@ -51,86 +279,149 @@
     </div>
     <div>
       <div class="pot-label">Dépensé</div>
-      <div style="font-family:'Arial',sans-serif;font-size:25px;font-weight:800;color:red"> - {{ total }} €</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:25px;font-weight:800;color:#EF4444"> − {{ total }} €</div>
     </div>
     <div>
       <div class="pot-label">Reste</div>
-      <div style="font-family:'Arial',sans-serif;font-size:25px;font-weight:800;color:green">{{ reste }} €</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:25px;font-weight:800;color:#10B981">{{ reste }} €</div>
     </div>
   </div>
 
-  <!-- Loyer -->
-  <div class="categorie-card" id="cat-loyer">
-    <div class="cat-header">
-      <span class="cat-titre">Répartition loyer</span>
-      <div class="cat-actions">
-        <button class="btn-round" onclick="ouvrirModalModifier('loyer')" title="Modifier" style="border-color: orange">✏️</button>
-        <button class="btn-round" onclick="supprimerCategorie('loyer')" title="Supprimer" style="background-color:#EF4444; color: white">X</button>
+  <!-- ===== SECTION COMPOSANTS DÉPENSES PAR CATÉGORIE ===== -->
+  <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin:24px 0 12px">
+    Répartition par catégorie
+  </div>
+
+  <!-- Widget Loyer -->
+  <div class="categorie-widget" id="cat-loyer">
+    <div class="widget-color-bar bar-loyer"></div>
+    <div class="widget-body">
+      <div class="widget-header">
+        <div class="widget-title-row">
+          <div class="widget-icon color-loyer">🏠</div>
+          <div>
+            <div class="widget-titre">Loyer</div>
+            <div class="widget-total" id="total-loyer">0 €</div>
+          </div>
+        </div>
+        <div class="widget-actions">
+          <button class="btn-round-edit" onclick="ouvrirModalModifier('loyer')" title="Modifier">✏️</button>
+          <button class="btn-round-del"  onclick="supprimerCategorie('loyer')"  title="Supprimer">✕</button>
+        </div>
       </div>
+      <div class="barre-wrap"><div class="barre" id="barre-loyer"></div></div>
+      <div class="barre-legende" id="legende-loyer"></div>
     </div>
-    <div class="barre-wrap">
-      <div class="barre" id="barre-loyer"></div>
-    </div>
-    <div class="barre-legende" id="legende-loyer"></div>
   </div>
 
-  <!-- Activité principale -->
-  <div class="categorie-card" id="cat-activite">
-    <div class="cat-header">
-      <span class="cat-titre">Activité principale</span>
-      <div class="cat-actions">
-        <button class="btn-round" onclick="ouvrirModalModifier('activite')" title="Modifier" style="border-color: orange">✏️</button>
-        <button class="btn-round" onclick="supprimerCategorie('activite')" title="Supprimer" style="background-color:#EF4444; color: white">X</button>
+  <!-- Widget Activité -->
+  <div class="categorie-widget" id="cat-activite">
+    <div class="widget-color-bar bar-activite"></div>
+    <div class="widget-body">
+      <div class="widget-header">
+        <div class="widget-title-row">
+          <div class="widget-icon color-activite">🎯</div>
+          <div>
+            <div class="widget-titre">Activité principale</div>
+            <div class="widget-total" id="total-activite">0 €</div>
+          </div>
+        </div>
+        <div class="widget-actions">
+          <button class="btn-round-edit" onclick="ouvrirModalModifier('activite')" title="Modifier">✏️</button>
+          <button class="btn-round-del"  onclick="supprimerCategorie('activite')"  title="Supprimer">✕</button>
+        </div>
       </div>
+      <div class="barre-wrap"><div class="barre" id="barre-activite"></div></div>
+      <div class="barre-legende" id="legende-activite"></div>
     </div>
-    <div class="barre-wrap">
-      <div class="barre" id="barre-activite"></div>
-    </div>
-    <div class="barre-legende" id="legende-activite"></div>
   </div>
 
-  <!-- Courses -->
-  <div class="categorie-card" id="cat-courses">
-    <div class="cat-header">
-      <span class="cat-titre">Courses</span>
-      <div class="cat-actions">
-        <button class="btn-round" onclick="ouvrirModalModifier('courses')" title="Modifier" style="border-color: orange">✏️</button>
-        <button class="btn-round" onclick="supprimerCategorie('courses')" title="Supprimer"  style="background-color:#EF4444; color: white">X</button>
+  <!-- Widget Courses -->
+  <div class="categorie-widget" id="cat-courses">
+    <div class="widget-color-bar bar-courses"></div>
+    <div class="widget-body">
+      <div class="widget-header">
+        <div class="widget-title-row">
+          <div class="widget-icon color-courses">🛒</div>
+          <div>
+            <div class="widget-titre">Courses</div>
+            <div class="widget-total" id="total-courses">0 €</div>
+          </div>
+        </div>
+        <div class="widget-actions">
+          <button class="btn-round-edit" onclick="ouvrirModalModifier('courses')" title="Modifier">✏️</button>
+          <button class="btn-round-del"  onclick="supprimerCategorie('courses')"  title="Supprimer">✕</button>
+        </div>
       </div>
+      <div class="barre-wrap"><div class="barre" id="barre-courses"></div></div>
+      <div class="barre-legende" id="legende-courses"></div>
     </div>
-    <div class="barre-wrap">
-      <div class="barre" id="barre-courses"></div>
-    </div>
-    <div class="barre-legende" id="legende-courses"></div>
-    <div class="courses-row" style="margin-top:14px">
-      <input type="text" class="courses-input" id="input-courses" placeholder="Ajouter un article...">
-    </div>
-    <div id="liste-articles" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
   </div>
 
-  <!-- Catégories dynamiques depuis la BDD -->
+  <!-- Widgets catégories dynamiques -->
   {% for cat in cats_extra %}
-  <div class="categorie-card" id="cat-{{ cat }}">
-    <div class="cat-header">
-      <span class="cat-titre">{{ cat }}</span>
-      <div class="cat-actions">
-        <button class="btn-round" onclick="ouvrirModalModifier('{{ cat }}')" title="Modifier">✏️</button>
-        <button class="btn-round" onclick="supprimerCategorie('{{ cat }}')" title="Supprimer" style="color:#EF4444">x</button>
+  <div class="categorie-widget" id="cat-{{ cat }}">
+    <div class="widget-color-bar bar-extra"></div>
+    <div class="widget-body">
+      <div class="widget-header">
+        <div class="widget-title-row">
+          <div class="widget-icon color-extra">📂</div>
+          <div>
+            <div class="widget-titre">{{ cat }}</div>
+            <div class="widget-total" id="total-{{ cat }}">0 €</div>
+          </div>
+        </div>
+        <div class="widget-actions">
+          <button class="btn-round-edit" onclick="ouvrirModalModifier('{{ cat }}')" title="Modifier">✏️</button>
+          <button class="btn-round-del"  onclick="supprimerCategorie('{{ cat }}')"  title="Supprimer">✕</button>
+        </div>
       </div>
+      <div class="barre-wrap"><div class="barre" id="barre-{{ cat }}"></div></div>
+      <div class="barre-legende" id="legende-{{ cat }}"></div>
     </div>
-    <div class="barre-wrap">
-      <div class="barre" id="barre-{{ cat }}"></div>
-    </div>
-    <div class="barre-legende" id="legende-{{ cat }}"></div>
   </div>
   {% endfor %}
 
+  <!-- ===== HISTORIQUE DES DÉPENSES ===== -->
+  <div class="historique-section">
+    <div class="historique-titre">🕐 Historique des dépenses</div>
+    {% set depenses_reelles = depenses | selectattr('payeur', 'ne', 'none') | list %}
+    {% if depenses_reelles %}
+      {% for d in depenses_reelles | sort(attribute='date', reverse=True) %}
+      <div class="historique-item">
+        <div class="historique-left">
+          <div class="historique-icon
+            {% if d.categorie == 'loyer' %}color-loyer
+            {% elif d.categorie == 'activite' %}color-activite
+            {% elif d.categorie == 'courses' %}color-courses
+            {% else %}color-extra{% endif %}">
+            {% if d.categorie == 'loyer' %}🏠
+            {% elif d.categorie == 'activite' %}🎯
+            {% elif d.categorie == 'courses' %}🛒
+            {% else %}📂{% endif %}
+          </div>
+          <div>
+            <div class="historique-info-titre">{{ d.titre }}</div>
+            <div class="historique-info-sub">{{ d.payeur }} · <span class="depense-cat-badge">{{ d.categorie }}</span></div>
+          </div>
+        </div>
+        <div class="historique-right">
+          <div class="historique-montant">{{ "%.2f"|format(d.montant) }} €</div>
+          <div class="historique-date">{{ d.date.strftime('%d/%m/%Y') }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-historique">Aucune dépense enregistrée</div>
+    {% endif %}
+  </div>
+
 </div>
 
-<!-- Modal ajouter/modifier participant -->
+<!-- ===== MODAL MODIFIER (crayon) ===== -->
 <div class="modal-overlay" id="modal-participant">
   <div class="modal">
-    <div class="modal-titre" id="modal-titre-participant">Ajouter un participant</div>
+    <div class="modal-titre" id="modal-titre-participant">Modifier la dépense</div>
     <input type="hidden" id="modal-categorie">
     <div class="field-group">
       <label class="field-label">Qui paie ?</label>
@@ -141,8 +432,11 @@
       </select>
     </div>
     <div class="field-group">
-      <label class="field-label">Montant (€)</label>
+      <label class="field-label">Montant à ajouter (€)</label>
       <input type="number" class="field-input" id="input-montant" placeholder="ex: 20" step="0.01" min="0">
+    </div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:-8px;margin-bottom:8px">
+      ℹ️ Ce montant sera ajouté au total existant
     </div>
     <div class="modal-actions">
       <button class="btn-annuler" onclick="fermerModal('modal-participant')">✕ Annuler</button>
@@ -151,7 +445,66 @@
   </div>
 </div>
 
-<!-- Modal pot commun -->
+<!-- ===== MODAL AJOUTER DÉPENSE (bouton vert) ===== -->
+<div class="modal-overlay" id="modal-ajouter-depense">
+  <div class="modal">
+    <div class="modal-titre">Ajouter une dépense</div>
+    <div class="field-group">
+      <label class="field-label">Catégorie</label>
+      <select class="field-input" id="input-depense-categorie">
+        <option value="loyer">🏠 Loyer</option>
+        <option value="activite">🎯 Activité</option>
+        <option value="courses" selected>🛒 Courses</option>
+        {% for cat in cats_extra %}
+        <option value="{{ cat }}">📂 {{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Qui paie ?</label>
+      <select class="field-input" id="input-depense-payeur">
+        {% for nom, couleur in couleurs.items() %}
+        <option value="{{ nom }}">{{ nom }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Description</label>
+      <input type="text" class="field-input" id="input-depense-titre" placeholder="ex: Supermarché U">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Montant (€)</label>
+      <input type="number" class="field-input" id="input-depense-montant" placeholder="ex: 45.50" step="0.01" min="0">
+    </div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:-8px;margin-bottom:8px">
+      ℹ️ Le montant sera ajouté au total de cette catégorie pour ce payeur
+    </div>
+    <div class="modal-actions">
+      <button class="btn-annuler" onclick="fermerModal('modal-ajouter-depense')">✕ Annuler</button>
+      <button class="btn-valider" style="background:#059669" onclick="validerAjouterDepense()">＋ Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL NOUVELLE CATÉGORIE ===== -->
+<div class="modal-overlay" id="modal-categorie-nouvelle">
+  <div class="modal">
+    <div class="modal-titre">Nouvelle catégorie</div>
+    <div class="field-group">
+      <label class="field-label">Nom de la catégorie</label>
+      <input type="text" class="field-input" id="input-nouvelle-cat" placeholder="ex: Activité scolaire">
+    </div>
+    <div id="msg-doublon" style="display:none;color:#EF4444;font-size:12px;margin-top:-8px;margin-bottom:8px">
+      ⚠️ Cette catégorie existe déjà !
+    </div>
+    <div class="modal-actions">
+      <button class="btn-annuler" onclick="fermerModal('modal-categorie-nouvelle')">Annuler</button>
+      <button class="btn-valider" onclick="ajouterNouvelleCategorie()">✓ Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL POT COMMUN ===== -->
 <div class="modal-overlay" id="modal-pot">
   <div class="modal">
     <div class="modal-titre">Modifier le pot commun</div>
@@ -166,30 +519,21 @@
   </div>
 </div>
 
-<!-- Modal nouvelle catégorie -->
-<div class="modal-overlay" id="modal-categorie-nouvelle">
-  <div class="modal">
-    <div class="modal-titre">Nouvelle catégorie</div>
-    <div class="field-group">
-      <label class="field-label">Nom de la catégorie</label>
-      <input type="text" class="field-input" id="input-nouvelle-cat" placeholder="ex: Activité scolaire">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-annuler" onclick="fermerModal('modal-categorie-nouvelle')">Annuler</button>
-      <button class="btn-valider" onclick="ajouterNouvelleCategorie()">✓ Créer</button>
-    </div>
-  </div>
-</div>
-
 
 <script>
-    const donneesFlask = [
+const donneesFlask = [
   {% for d in depenses %}
-  { payeur: "{{ d.payeur }}", montant: {{ d.montant }}, categorie: "{{ d.categorie }}" }{% if not loop.last %},{% endif %}
+  { payeur: "{{ d.payeur }}", montant: {{ d.montant }}, categorie: "{{ d.categorie }}", titre: "{{ d.titre }}" }{% if not loop.last %},{% endif %}
   {% endfor %}
 ];
 
 const COULEURS_MAP = {{ couleurs | tojson }};
+
+// Liste des catégories existantes (pour vérifier les doublons côté client)
+const CATEGORIES_EXISTANTES = new Set([
+  'loyer', 'activite', 'courses'
+  {% for cat in cats_extra %}, '{{ cat }}'{% endfor %}
+]);
 
 const categories = {
   loyer:    { participants: [] },
@@ -216,11 +560,14 @@ function rendreBarre(categorie) {
   const data    = categories[categorie];
   const barre   = document.getElementById('barre-' + categorie);
   const legende = document.getElementById('legende-' + categorie);
+  const totalEl = document.getElementById('total-' + categorie);
   if (!barre || !legende) return;
 
   const total = data.participants.reduce((s, p) => s + p.montant, 0);
   barre.innerHTML   = '';
   legende.innerHTML = '';
+
+  if (totalEl) totalEl.textContent = total.toFixed(2) + ' €';
 
   if (total === 0) {
     barre.style.background = '#E5E7EB';
@@ -242,7 +589,7 @@ function rendreBarre(categorie) {
 
     const tip = document.createElement('div');
     tip.className   = 'tooltip';
-    tip.textContent = p.nom + ' — ' + p.montant + ' €';
+    tip.textContent = p.nom + ' — ' + p.montant.toFixed(2) + ' €';
     seg.appendChild(tip);
     barre.appendChild(seg);
 
@@ -251,30 +598,27 @@ function rendreBarre(categorie) {
     item.innerHTML = `
       <div class="legende-dot" style="background:${p.couleur}"></div>
       <span class="legende-nom">${p.nom}</span>
-      <span>${p.montant} €</span>
+      <span>${p.montant.toFixed(2)} €</span>
     `;
     legende.appendChild(item);
   });
 }
 
-function ouvrirModalAjouter(categorie) {
-  document.getElementById('modal-titre-participant').textContent = 'Ajouter';
+// Ouvre le modal crayon (modifier une catégorie spécifique)
+function ouvrirModalModifier(categorie) {
+  document.getElementById('modal-titre-participant').textContent = 'Modifier — ' + categorie;
   document.getElementById('modal-categorie').value = categorie;
   document.getElementById('input-montant').value   = '';
   document.getElementById('modal-participant').classList.add('active');
 }
 
-function ouvrirModalModifier(categorie) {
-  ouvrirModalAjouter(categorie);
-}
-
 function validerParticipant() {
   const categorie = document.getElementById('modal-categorie').value;
-  const nom = document.getElementById('input-nom').value;
+  const nom       = document.getElementById('input-nom').value;
   const montant   = parseFloat(document.getElementById('input-montant').value);
 
-  if (!nom || isNaN(montant)) {
-    alert('Remplis le nom et le montant !');
+  if (!nom || isNaN(montant) || montant <= 0) {
+    alert('Remplis correctement le nom et le montant !');
     return;
   }
 
@@ -292,12 +636,75 @@ function validerParticipant() {
   form.submit();
 }
 
-function supprimerCategorie(categorie) {
-  if (!confirm('Supprimer toutes les dépenses de "' + categorie + '" ?')) return;
+// Ouvre le modal "Ajouter une dépense" (bouton vert)
+function ouvrirModalAjouterDepense() {
+  document.getElementById('input-depense-montant').value = '';
+  document.getElementById('input-depense-titre').value   = '';
+  document.getElementById('modal-ajouter-depense').classList.add('active');
+}
+
+function validerAjouterDepense() {
+  const categorie = document.getElementById('input-depense-categorie').value;
+  const payeur    = document.getElementById('input-depense-payeur').value;
+  const titre     = document.getElementById('input-depense-titre').value.trim() || payeur;
+  const montant   = parseFloat(document.getElementById('input-depense-montant').value);
+
+  if (!payeur || isNaN(montant) || montant <= 0) {
+    alert('Remplis correctement le payeur et le montant !');
+    return;
+  }
 
   const form = document.createElement('form');
   form.method = 'POST';
+  form.action = '/depenses/ajouter';
+
+  [['titre', titre], ['montant', montant], ['payeur', payeur], ['categorie', categorie]].forEach(([k, v]) => {
+    const i = document.createElement('input');
+    i.type = 'hidden'; i.name = k; i.value = v;
+    form.appendChild(i);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function supprimerCategorie(categorie) {
+  if (!confirm('Supprimer toutes les dépenses de "' + categorie + '" ?')) return;
+  const form = document.createElement('form');
+  form.method = 'POST';
   form.action = '/depenses/supprimer-categorie/' + categorie;
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function ouvrirModalNouvelleCategorie() {
+  document.getElementById('input-nouvelle-cat').value = '';
+  document.getElementById('msg-doublon').style.display = 'none';
+  document.getElementById('modal-categorie-nouvelle').classList.add('active');
+}
+
+function ajouterNouvelleCategorie() {
+  const nom = document.getElementById('input-nouvelle-cat').value.trim();
+  if (!nom) { alert('Donne un nom !'); return; }
+
+  const slug = nom.toLowerCase().replace(/\s+/g, '-');
+
+  // Vérification doublon côté client
+  if (CATEGORIES_EXISTANTES.has(slug)) {
+    document.getElementById('msg-doublon').style.display = 'block';
+    return;
+  }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/depenses/categorie/ajouter';
+
+  const input = document.createElement('input');
+  input.type  = 'hidden';
+  input.name  = 'categorie';
+  input.value = slug;
+  form.appendChild(input);
+
   document.body.appendChild(form);
   form.submit();
 }
@@ -326,39 +733,10 @@ document.addEventListener('keydown', e => {
       .forEach(m => m.classList.remove('active'));
 });
 
-document.getElementById('input-courses').addEventListener('keydown', function(e) {
-  if (e.key !== 'Enter') return;
-  const val = this.value.trim();
-  if (!val) return;
-  const tag = document.createElement('span');
-  tag.style.cssText = 'background:#EEF2FF;color:#5B6CFF;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
-  tag.innerHTML = val + ' <span style="cursor:pointer;opacity:0.6" onclick="this.parentElement.remove()">✕</span>';
-  document.getElementById('liste-articles').appendChild(tag);
-  this.value = '';
+// Effacer message doublon quand on tape
+document.getElementById('input-nouvelle-cat').addEventListener('input', function() {
+  document.getElementById('msg-doublon').style.display = 'none';
 });
-
-function ouvrirModalNouvelleCategorie() {
-  document.getElementById('input-nouvelle-cat').value = '';
-  document.getElementById('modal-categorie-nouvelle').classList.add('active');
-}
-
-function ajouterNouvelleCategorie() {
-  const nom = document.getElementById('input-nouvelle-cat').value.trim();
-  if (!nom) { alert('Donne un nom !'); return; }
-
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = '/depenses/categorie/ajouter';
-
-  const input = document.createElement('input');
-  input.type  = 'hidden';
-  input.name  = 'categorie';
-  input.value = nom.toLowerCase().replace(/\s+/g, '-');
-  form.appendChild(input);
-
-  document.body.appendChild(form);
-  form.submit();
-}
 
 ['loyer', 'activite', 'courses'].forEach(rendreBarre);
 {% for cat in cats_extra %}

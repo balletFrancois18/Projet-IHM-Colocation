@@ -2,177 +2,230 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Réservations</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    .resa-select {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1.5px solid #dde3ea;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: 'DM Sans', sans-serif;
-      background: white;
-      color: #222;
-      cursor: pointer;
-      appearance: auto;
-      -webkit-appearance: auto;
-    }
-  </style>
 </head>
 <body class="index-page">
- 
+
   <nav>
     <div class="nav-logo">Co<span>Loc</span></div>
     <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link" style="background:rgba(255,255,255,0.15);">Réservations</a>
-    <a href="#" class="nav-link">Chat</a>
-    <a href="#" class="nav-link">Bon plan</a>
     <div class="nav-right">
       {% if session.get('user_id') %}
-        <div class="nav-avatar">👤</div>
+        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
         <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
       {% endif %}
     </div>
   </nav>
- 
-  <div style="max-width:900px; margin:0 auto; padding:2rem;">
- 
+
+  <div class="resa-page">
+
     <!-- EN-TÊTE -->
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+    <div class="resa-header">
       <div>
-        <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Réservations</h1>
-        <p style="font-size:0.85rem; color:var(--muted); margin-top:0.2rem;">Espaces et ressources de la coloc</p>
+        <h1 class="resa-title">Réservations</h1>
+        <p class="resa-sub">Espaces et ressources de la colocation</p>
       </div>
-          {% if session.get('user_id') %}
-        <button onclick="document.getElementById('modal').style.display='flex'" class="btn-action-primary">+ Réserver</button>
+      {% if session.get('user_id') %}
+        <button onclick="ouvrirModal()" class="btn-action-primary">+ Réserver</button>
       {% else %}
         <a href="{{ url_for('auth.login') }}" class="btn-action-primary">+ Réserver</a>
       {% endif %}
     </div>
- 
-    <!-- TABLEAU -->
-    <div style="background:white; border-radius:12px; border:1px solid var(--border); overflow:hidden;">
-      <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
-        <thead>
-          <tr style="background:var(--blue-bg);">
-            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Espace</th>
-            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Statut</th>
-            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Réservé par</th>
-            <th style="padding:12px 16px; text-align:left; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Créneau</th>
-            <th style="padding:12px 16px; text-align:center; color:var(--muted); font-size:0.75rem; text-transform:uppercase; border-bottom:1px solid var(--border);">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for espace in espaces %}
-          {% set r = reservations_actives.get(espace) %}
-          <tr style="border-bottom:1px solid var(--border);">
- 
-            <td style="padding:12px 16px; font-weight:600; color:var(--text);">
-              {% if espace == 'Cuisine' %}🍳
-              {% elif espace == 'Salon' %}🛋️
-              {% elif espace == 'Salle de bain' %}🚿
-              {% elif espace == 'Machine à laver' %}🧺
-              {% elif espace == 'Voiture' %}🚗
-              {% elif espace == 'Trottinette' %}🛴
-              {% elif espace == 'Vélos' %}🚲
-              {% elif espace == 'Télévision' %}📺
-              {% else %}📌{% endif %}
-              {{ espace }}
-            </td>
- 
-            <td style="padding:12px 16px;">
-              {% if r %}
-                <span style="background:#fee2e2; color:#dc2626; font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:20px;">
-                  {% if r.type_event %}{{ r.type_event }}{% else %}Occupé{% endif %}
-                </span>
-              {% else %}
-                <span style="background:#d1fae5; color:#065f46; font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:20px;">Libre</span>
-              {% endif %}
-            </td>
- 
-            <td style="padding:12px 16px; color:var(--text);">
-              {% if r %}{{ r.profil }}{% else %}<span style="color:var(--muted);">—</span>{% endif %}
-            </td>
- 
-            <td style="padding:12px 16px; color:var(--muted); font-size:0.8rem;">
-              {% if r %}{{ r.date }} · {{ r.heure_debut }}→{{ r.heure_fin }}{% else %}—{% endif %}
-            </td>
- 
-            <td style="padding:12px 16px; text-align:center;">
-              {% if r and session.get('user_id') and r.user_id == session.get('user_id') %}
-                <form method="POST" action="{{ url_for('reservations.supprimer_reservation', id=r.id) }}" style="margin:0; display:inline;">
-                  <button type="submit" onclick="return confirm('Libérer ?')"
-                          style="background:none; border:none; cursor:pointer; color:#ef4444; font-size:1rem; font-weight:700;">✕</button>
-                </form>
-              {% elif not r %}
-                {% if session.get('user_id') %}
-                  <button onclick="preselecter('{{ espace }}')"
-                          style="background:none; border:1px solid var(--border); border-radius:6px; padding:4px 12px; cursor:pointer; font-size:0.78rem; color:var(--blue-dark); font-weight:600;">
-                    Réserver
-                  </button>
-                {% else %}
-                  <a href="{{ url_for('auth.login') }}"
-                    style="background:none; border:1px solid var(--border); border-radius:6px; padding:4px 12px; font-size:0.78rem; color:var(--blue-dark); font-weight:600; text-decoration:none;">
-                    Réserver
-                  </a>
-                {% endif %}
-              {% else %}
-                —
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for category, message in messages %}
+        <div style="padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem;
+          {% if category=='success'%}background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;
+          {% else %}background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <!-- LÉGENDE COULEURS -->
+    {% if reservations %}
+    <div class="resa-legende">
+      {% set seen = [] %}
+      {% for r in reservations %}
+        {% set uid = r.user_id if r.user_id is not none else r.profil %}
+        {% if uid not in seen %}
+          {% set _ = seen.append(uid) %}
+          <div class="resa-legende-item">
+            <span class="resa-legende-dot" style="background:{{ couleurs.get(uid, '#888') }};"></span>
+            <span>{{ r.profil }}{% if r.user_id == session.get('user_id') %} (moi){% endif %}</span>
+          </div>
+        {% endif %}
+      {% endfor %}
     </div>
- 
-  </div>
- 
-  <!-- MODAL -->
-  <div id="modal"
-       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;"
-       onclick="if(event.target===this) this.style.display='none'">
-    <div style="background:white; border-radius:14px; padding:28px; width:360px; box-shadow:0 16px 48px rgba(0,0,0,0.15);">
-      <div style="font-size:16px; font-weight:700; color:var(--text); margin-bottom:20px;">📅 Nouvelle réservation</div>
- 
-      <form method="POST" action="{{ url_for('reservations.ajouter_reservation') }}">
- 
-        <div style="margin-bottom:12px;">
-          <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Espace</label>
-          <select name="espace" id="select-espace" class="resa-select" required>
-            {% for espace in espaces %}
-            <option value="{{ espace }}">{{ espace }}</option>
+    {% endif %}
+
+    <!-- CARD TABLEAU -->
+    <div class="card-dash" style="padding:0; overflow:hidden;">
+
+      <!-- Barre de filtres -->
+      <div class="resa-filtres-bar">
+        <div class="resa-filtres-left">
+          <select id="filtre-espace" class="resa-filtre-select" onchange="filtrerTable()">
+            <option value="">Tous les espaces</option>
+            {% set espaces_vus = [] %}
+            {% for r in reservations %}
+              {% if r.espace not in espaces_vus %}
+                {% set _ = espaces_vus.append(r.espace) %}
+                <option value="{{ r.espace }}">{{ r.espace }}</option>
+              {% endif %}
             {% endfor %}
           </select>
+          <select id="filtre-periode" class="resa-filtre-select" onchange="filtrerTable()">
+            <option value="tout">Toutes les dates</option>
+            <option value="futur" selected>À venir</option>
+            <option value="passe">Passées</option>
+          </select>
         </div>
- 
-        <div style="margin-bottom:12px;">
-          <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Date</label>
-          <input type="date" name="date" required
-                 style="width:100%; padding:9px 12px; border:1.5px solid #dde3ea; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; box-sizing:border-box;">
+        <input id="recherche" class="resa-recherche" type="search" placeholder="🔍 Rechercher…" oninput="filtrerTable()">
+      </div>
+
+      <!-- Tableau -->
+      <div style="overflow-x:auto;">
+        <table class="resa-tableau" id="tableau-reservations">
+          <thead>
+            <tr>
+              <th class="resa-th" onclick="trierPar('espace')" style="cursor:pointer;">Espace <span class="sort-ico">↕</span></th>
+              <th class="resa-th" onclick="trierPar('profil')" style="cursor:pointer;">Réservé par <span class="sort-ico">↕</span></th>
+              <th class="resa-th" onclick="trierPar('date')" style="cursor:pointer;">Date <span class="sort-ico">↕</span></th>
+              <th class="resa-th">Créneau</th>
+              <th class="resa-th">Type</th>
+              <th class="resa-th">Statut</th>
+              <th class="resa-th" style="text-align:center;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-reservations">
+            {% if reservations %}
+              {% for r in reservations %}
+                {% set uid = r.user_id if r.user_id is not none else r.profil %}
+                {% set couleur = couleurs.get(uid, '#888') %}
+                {% set est_moi = r.user_id == session.get('user_id') %}
+                {% set est_passe = r.date < today %}
+                <tr class="resa-row {% if est_passe %}resa-row-passe{% endif %}"
+                    data-espace="{{ r.espace }}"
+                    data-profil="{{ r.profil }}"
+                    data-date="{{ r.date }}"
+                    data-periode="{{ 'passe' if est_passe else 'futur' }}"
+                    style="border-left: 4px solid {{ couleur }};">
+                  <td class="resa-td resa-td-espace">
+                    <span class="resa-ico-espace">
+                      {% if r.espace == 'Cuisine' %}🍳
+                      {% elif r.espace == 'Salon' %}🛋️
+                      {% elif r.espace == 'Salle de bain' %}🚿
+                      {% elif r.espace == 'Machine à laver' %}🧺
+                      {% elif r.espace == 'Voiture' %}🚗
+                      {% elif r.espace == 'Trottinette' %}🛴
+                      {% elif r.espace == 'Vélos' %}🚲
+                      {% elif r.espace == 'Télévision' %}📺
+                      {% else %}📌{% endif %}
+                    </span>
+                    {{ r.espace }}
+                  </td>
+                  <td class="resa-td">
+                    <div class="resa-profil-cell">
+                      <span class="resa-profil-dot" style="background:{{ couleur }};"></span>
+                      <span>{{ r.profil }}{% if est_moi %} <span class="resa-moi-badge">moi</span>{% endif %}</span>
+                    </div>
+                  </td>
+                  <td class="resa-td resa-td-date">
+                    {{ r.date[8:10] }}/{{ r.date[5:7] }}/{{ r.date[0:4] }}
+                  </td>
+                  <td class="resa-td resa-td-creneau">{{ r.heure_debut }} – {{ r.heure_fin }}</td>
+                  <td class="resa-td">{{ r.type_event if r.type_event else '—' }}</td>
+                  <td class="resa-td">
+                    {% if est_passe %}
+                      <span class="resa-statut passe">Passée</span>
+                    {% else %}
+                      <span class="resa-statut confirmee">Confirmée</span>
+                    {% endif %}
+                  </td>
+                  <td class="resa-td" style="text-align:center;">
+                    {% if est_moi and not est_passe %}
+                      <form method="POST" action="{{ url_for('reservations.supprimer_reservation', id=r.id) }}" style="margin:0;display:inline;">
+                        <button type="submit" onclick="return confirm('Supprimer cette réservation ?')" class="resa-btn-suppr" title="Supprimer">✕</button>
+                      </form>
+                    {% else %}—{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+        <div id="resa-vide" style="display:none; text-align:center; padding:2.5rem; color:var(--muted); font-size:0.875rem;">
+          Aucune réservation ne correspond aux filtres.
         </div>
- 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
-          <div>
-            <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Début</label>
-            <input type="time" name="heure_debut" required
-                   style="width:100%; padding:9px 12px; border:1.5px solid #dde3ea; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; box-sizing:border-box;">
+      </div>
+
+      <div class="resa-footer" id="resa-count"></div>
+    </div>
+
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal-overlay"
+       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;"
+       onclick="if(event.target===this) fermerModal()">
+    <div class="resa-modal">
+      <div class="resa-modal-title">📅 Nouvelle réservation</div>
+      <form method="POST" action="{{ url_for('reservations.ajouter_reservation') }}">
+
+        <div class="resa-field">
+          <label class="resa-label">Espace</label>
+          <select name="espace" id="select-espace" class="resa-input" onchange="gererAutreEspace(this)" required>
+            <optgroup label="🏠 Pièces communes">
+              <option value="Cuisine">🍳 Cuisine</option>
+              <option value="Salon">🛋️ Salon</option>
+              <option value="Salle de bain">🚿 Salle de bain</option>
+            </optgroup>
+            <optgroup label="🚗 Véhicules">
+              <option value="Voiture">🚗 Voiture</option>
+              <option value="Trottinette">🛴 Trottinette</option>
+              <option value="Vélos">🚲 Vélos</option>
+            </optgroup>
+            <optgroup label="📦 Équipements">
+              <option value="Machine à laver">🧺 Machine à laver</option>
+              <option value="Télévision">📺 Télévision</option>
+            </optgroup>
+            <option value="__autre__">➕ Autre espace...</option>
+          </select>
+        </div>
+
+        <div class="resa-field" id="champ-autre-espace" style="display:none;">
+          <label class="resa-label">Nom de l'espace</label>
+          <input type="text" id="input-autre-espace" class="resa-input" placeholder="ex: Cave, Terrasse..." maxlength="50">
+        </div>
+        <input type="hidden" name="espace_final" id="espace-final">
+
+        <div class="resa-field">
+          <label class="resa-label">Date</label>
+          <input type="date" name="date" id="modal-date" class="resa-input" required>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="resa-field">
+            <label class="resa-label">Heure début</label>
+            <input type="time" name="heure_debut" class="resa-input" required>
           </div>
-          <div>
-            <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Fin</label>
-            <input type="time" name="heure_fin" required
-                   style="width:100%; padding:9px 12px; border:1.5px solid #dde3ea; border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; box-sizing:border-box;">
+          <div class="resa-field">
+            <label class="resa-label">Heure fin</label>
+            <input type="time" name="heure_fin" class="resa-input" required>
           </div>
         </div>
- 
-        <div style="margin-bottom:20px;">
-          <label style="font-size:11px; font-weight:700; color:#6b7280; display:block; margin-bottom:4px; text-transform:uppercase;">Type (optionnel)</label>
-          <select name="type_event" class="resa-select">
+
+        <div class="resa-field">
+          <label class="resa-label">Type <span style="color:var(--muted);font-weight:400;">(optionnel)</span></label>
+          <select name="type_event" class="resa-input">
             <option value="">Normal</option>
             <option value="🎉 Fête">🎉 Fête</option>
             <option value="👥 Invités">👥 Invités</option>
@@ -180,31 +233,93 @@
             <option value="🔧 Maintenance">🔧 Maintenance</option>
           </select>
         </div>
- 
-        <div style="display:flex; justify-content:flex-end; gap:8px;">
-          <button type="button" onclick="document.getElementById('modal').style.display='none'"
-                  style="padding:9px 16px; background:white; color:#6b7280; border:1.5px solid #dde3ea; border-radius:8px; cursor:pointer; font-size:13px;">
-            Annuler
-          </button>
-          <button type="submit"
-                  style="padding:9px 20px; background:#7bafd4; color:white; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">
-            ✓ Réserver
-          </button>
+
+        <div class="resa-modal-actions">
+          <button type="button" class="btn-annuler" onclick="fermerModal()">Annuler</button>
+          <button type="submit" class="btn-valider" onclick="return soumettreModal()">✓ Réserver</button>
         </div>
- 
       </form>
     </div>
   </div>
- 
+
   <script>
-    function preselecter(espace) {
-      document.getElementById('select-espace').value = espace;
-      document.getElementById('modal').style.display = 'flex';
+    const TODAY = "{{ today }}";
+
+    // ── MODAL ──────────────────────────────────
+    document.getElementById('modal-date').valueAsDate = new Date();
+
+    function ouvrirModal(espace) {
+      if (espace) document.getElementById('select-espace').value = espace;
+      gererAutreEspace(document.getElementById('select-espace'));
+      document.getElementById('modal-overlay').style.display = 'flex';
     }
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') document.getElementById('modal').style.display = 'none';
-    });
+    function fermerModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+      document.getElementById('champ-autre-espace').style.display = 'none';
+    }
+    function gererAutreEspace(sel) {
+      const c = document.getElementById('champ-autre-espace');
+      if (sel.value === '__autre__') { c.style.display = 'block'; document.getElementById('input-autre-espace').focus(); }
+      else c.style.display = 'none';
+    }
+    function soumettreModal() {
+      const sel = document.getElementById('select-espace');
+      let espace = sel.value;
+      if (espace === '__autre__') {
+        espace = document.getElementById('input-autre-espace').value.trim();
+        if (!espace) { document.getElementById('input-autre-espace').focus(); return false; }
+      }
+      document.getElementById('espace-final').value = espace;
+      sel.disabled = true;
+      return true;
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') fermerModal(); });
+
+    // ── FILTRE & RECHERCHE ─────────────────────
+    function filtrerTable() {
+      const filEspace  = document.getElementById('filtre-espace').value.toLowerCase();
+      const filPeriode = document.getElementById('filtre-periode').value;
+      const recherche  = document.getElementById('recherche').value.toLowerCase();
+      const rows = document.querySelectorAll('#tbody-reservations tr');
+      let visible = 0;
+      rows.forEach(row => {
+        const espace  = row.dataset.espace.toLowerCase();
+        const profil  = row.dataset.profil.toLowerCase();
+        const periode = row.dataset.periode;
+        const texte   = espace + ' ' + profil + ' ' + row.dataset.date;
+        const ok = (!filEspace  || espace === filEspace)
+                && (filPeriode === 'tout' || periode === filPeriode)
+                && (!recherche || texte.includes(recherche));
+        row.style.display = ok ? '' : 'none';
+        if (ok) visible++;
+      });
+      document.getElementById('resa-vide').style.display = visible === 0 ? 'block' : 'none';
+      document.getElementById('resa-count').textContent = visible + ' réservation' + (visible > 1 ? 's' : '');
+    }
+
+    // ── TRI ────────────────────────────────────
+    let triCol = 'date', triAsc = true;
+    function trierPar(col) {
+      if (triCol === col) triAsc = !triAsc; else { triCol = col; triAsc = true; }
+      const tbody = document.getElementById('tbody-reservations');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.sort((a, b) => {
+        const va = a.dataset[col] || '';
+        const vb = b.dataset[col] || '';
+        return triAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+      });
+      rows.forEach(r => tbody.appendChild(r));
+      // Icônes de tri
+      document.querySelectorAll('.sort-ico').forEach(el => el.textContent = '↕');
+      const ths = ['espace','profil','date'];
+      const idx = ths.indexOf(col);
+      if (idx >= 0) document.querySelectorAll('.sort-ico')[idx].textContent = triAsc ? '↑' : '↓';
+      filtrerTable();
+    }
+
+    // Initialisation : tri par date, filtre "à venir"
+    trierPar('date');
   </script>
- 
+
 </body>
 </html>

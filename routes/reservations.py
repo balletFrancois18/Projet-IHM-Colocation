@@ -16,28 +16,43 @@ ESPACES = [
     'Télévision',
 ]
 
-@reservations_bp.route('/reservations')
-def liste_reservations():
+PALETTE = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
+
+def build_context(current_user_id):
     today = str(today_date.today())
     reservations = Reservation.query.order_by(
         Reservation.date, Reservation.heure_debut
     ).all()
-
-    # Une réservation active par espace (aujourd'hui ou dans le futur)
     reservations_actives = {}
     for r in reservations:
         if r.date >= today and r.espace not in reservations_actives:
             reservations_actives[r.espace] = r
+    # Couleur fixe par user_id (le user connecté = bleu #3b82f6, les autres tournent sur la palette sans bleu)
+    autres_palette = ['#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
+    couleurs = {}
+    idx = 0
+    for r in reservations:
+        uid = r.user_id if r.user_id is not None else r.profil
+        if uid not in couleurs:
+            if uid == current_user_id:
+                couleurs[uid] = '#3b82f6'
+            else:
+                couleurs[uid] = autres_palette[idx % len(autres_palette)]
+                idx += 1
+    return dict(espaces=ESPACES, reservations=reservations,
+                reservations_actives=reservations_actives,
+                couleurs=couleurs, today=today)
 
-    return render_template('reservations.html',
-                           espaces=ESPACES,
-                           reservations=reservations,
-                           reservations_actives=reservations_actives)
+@reservations_bp.route('/reservations')
+def liste_reservations():
+    ctx = build_context(session.get('user_id'))
+    return render_template('reservations.html', **ctx)
 
 @reservations_bp.route('/reservations/ajouter', methods=['POST'])
 @login_required
 def ajouter_reservation():
-    espace      = request.form.get('espace')
+    # Priorité à espace_final (gère le cas "Autre espace")
+    espace      = request.form.get('espace_final') or request.form.get('espace')
     date        = request.form.get('date')
     heure_debut = request.form.get('heure_debut')
     heure_fin   = request.form.get('heure_fin')

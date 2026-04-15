@@ -14,9 +14,18 @@ def liste_taches():
 @taches_bp.route('/taches/ajouter', methods=['POST'])
 @login_required
 def ajouter_tache():
+    from datetime import date as date_type
     titre = request.form['titre']
+    date_str = request.form.get('date_echeance', '').strip()
+    date_echeance = None
+    if date_str:
+        try:
+            date_echeance = date_type.fromisoformat(date_str)
+        except ValueError:
+            pass
     user = db.session.get(User, session['user_id'])
-    db.session.add(Tache(titre=titre, assignee=user.prenom, faite=False, user_id=user.id))
+    db.session.add(Tache(titre=titre, assignee=user.prenom, faite=False,
+                         user_id=user.id, date_echeance=date_echeance))
     db.session.commit()
     return redirect(url_for('taches.liste_taches'))
 

@@ -6,7 +6,6 @@
   <title>CoLoc — Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<script src="{{ url_for('static', filename='script.js') }}"></script>
 <body class="index-page">
 
   <!-- NAVBAR EN HAUT -->
@@ -15,11 +14,9 @@
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
-    <a href="#" class="nav-link">Chat</a>
-    <a href="#" class="nav-link">Bon plan</a>
     <div class="nav-right">
       {% if session.get('user_id') %}
-        <div class="nav-avatar">👤</div>
+        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
         <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
@@ -30,7 +27,7 @@
    <!-- EN-TÊTE PAGE -->
   <div class="page-header">
     <div class="page-title">
-      {% if session.get('user_id') %}Bonjour {{ session.get('user_id').prenom }}!{% else %}Dashboard{% endif %}
+      {% if session.get('user_prenom') %}Bonjour {{ session.get('user_prenom') }} 👋{% else %}Dashboard{% endif %}
     </div>
     <div class="page-sub">Vue d'ensemble de votre colocation</div>
   </div>
@@ -45,60 +42,94 @@
       <div class="card-dash">
         <div class="card-head">
           <div class="card-title">Annonces</div>
-          <span style="font-size:0.75rem; background:var(--blue); color:white; padding:0.2rem 0.6rem; border-radius:20px; font-weight:600;">3</span>
+          {% if annonces %}
+            <span style="font-size:0.75rem;background:var(--blue);color:white;padding:0.2rem 0.6rem;border-radius:20px;font-weight:600;">{{ annonces|length }}</span>
+          {% endif %}
+          {% if session.get('user_id') %}
+            <button onclick="document.getElementById('modal-annonce').style.display='flex'" class="card-btn" style="margin-left:0.5rem;">+ Ajouter</button>
+          {% endif %}
         </div>
-        <div style="display:flex; flex-direction:column; gap:0.6rem;">
-          <div class="notif-item notif-urgent">
-            <div class="notif-body">
-              <div class="notif-title">Réunion coloc samedi à 18h</div>
-              <div class="notif-sub">Il y a 2 heures</div>
+        <div style="display:flex;flex-direction:column;gap:0.6rem;">
+          {% if annonces %}
+            {% for a in annonces %}
+            <div class="notif-item notif-{{ a.categorie }}">
+              <div class="notif-body">
+                <div class="notif-title">{{ a.titre }}</div>
+                <div class="notif-sub">{{ a.auteur }} · {{ a.date.strftime('%d/%m à %Hh%M') }}</div>
+              </div>
+              <span class="notif-badge {{ a.categorie }}">{{ a.categorie | capitalize }}</span>
+              {% if session.get('user_id') and a.user_id == session.get('user_id') %}
+                <form method="POST" action="{{ url_for('auth.supprimer_annonce', id=a.id) }}" style="margin:0;">
+                  <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.85rem;padding:0 0 0 0.4rem;" title="Supprimer">✕</button>
+                </form>
+              {% endif %}
             </div>
-            <span class="notif-badge urgent">Urgent</span>
-          </div>
-          <div class="notif-item notif-info">
-            <div class="notif-body">
-              <div class="notif-title">Plombier prévu mardi matin</div>
-              <div class="notif-sub">Il y a 1 jour</div>
-            </div>
-            <span class="notif-badge info">Info</span>
-          </div>
-          <div class="notif-item notif-rappel">
-            <div class="notif-body">
-              <div class="notif-title">Penser à renouveler le bail</div>
-              <div class="notif-sub">Il y a 3 jours</div>
-            </div>
-            <span class="notif-badge rappel">Rappel</span>
-          </div>
+            {% endfor %}
+          {% else %}
+            <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:0.75rem 0;">Aucune annonce pour l'instant</p>
+          {% endif %}
         </div>
       </div>
 
-      <!-- Chat -->
-      <a href="#" class="btn-chat">Voir le chat</a>
+      <!-- Modal ajout annonce -->
+      {% if session.get('user_id') %}
+      <div id="modal-annonce" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center;"
+           onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:white;border-radius:16px;padding:28px;width:340px;box-shadow:0 16px 48px rgba(0,0,0,0.15);">
+          <div style="font-size:17px;font-weight:700;margin-bottom:18px;">📢 Nouvelle annonce</div>
+          <form method="POST" action="{{ url_for('auth.ajouter_annonce') }}">
+            <div class="field-group">
+              <label class="field-label">Message</label>
+              <input type="text" name="titre" class="field-input" placeholder="ex: Réunion samedi 18h" required maxlength="150">
+            </div>
+            <div class="field-group" style="margin-top:12px;">
+              <label class="field-label">Catégorie</label>
+              <select name="categorie" class="field-input">
+                <option value="info">ℹ️ Info</option>
+                <option value="urgent">🚨 Urgent</option>
+                <option value="rappel">🔔 Rappel</option>
+              </select>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+              <button type="button" class="btn-annuler" onclick="document.getElementById('modal-annonce').style.display='none'">Annuler</button>
+              <button type="submit" class="btn-valider">✓ Publier</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
 
       <!-- Pot commun -->
       <div class="card-dash">
         <div class="card-head">
-        <div class="card-title">Pot commun</div>
+          <div class="card-title">Pot commun</div>
           <a href="{{ url_for('depenses.liste_depenses') }}" class="card-btn">Voir tout →</a>
         </div>
         <div class="pot-total">
           {% if depenses %}{{ "%.2f"|format(depenses | sum(attribute='montant')) }} €
           {% else %}0 €{% endif %}
         </div>
+        <!-- Timeline dépenses -->
         {% if depenses %}
-          {% for depense in depenses %}
-          <div class="pot-ligne">
-            <div class="pot-label">
-              <span>{{ depense.titre }}</span>
-              <span>{{ "%.2f"|format(depense.montant) }} €</span>
+          <div class="timeline">
+            {% for depense in depenses | sort(attribute='date', reverse=True) | list %}
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:
+                {% if depense.categorie == 'courses' %}#10b981
+                {% elif depense.categorie == 'factures' %}#ef4444
+                {% elif depense.categorie == 'loyer' %}#7bafd4
+                {% else %}#f59e0b{% endif %};"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">{{ depense.titre }}</div>
+                <div class="timeline-meta">
+                  <span>{{ depense.payeur }}</span>
+                  <span>{{ depense.date.strftime('%d/%m') if depense.date else '' }}</span>
+                  <span class="timeline-prix">{{ "%.2f"|format(depense.montant) }} €</span>
+                </div>
+              </div>
             </div>
-            <div class="pot-bar">
-              <div class="pot-bar-seg" style="width:33%; background:#f59e0b;"></div>
-              <div class="pot-bar-seg" style="width:34%; background:var(--blue);"></div>
-              <div class="pot-bar-seg" style="width:33%; background:#10b981;"></div>
-            </div>
+            {% endfor %}
           </div>
-          {% endfor %}
         {% else %}
           <p style="text-align:center;color:var(--muted);font-size:0.85rem;padding:1rem 0;">Aucune dépense</p>
         {% endif %}
@@ -116,7 +147,8 @@
         </div>
         <div class="planning-nav">
           <button onclick="changerSemaine(-1)">&#8249;</button>
-          <span id="semaine-label">Chargement...</span>
+          <span id="semaine-label" onclick="document.getElementById('planning-datepicker').showPicker()" title="Choisir une date" style="cursor:pointer; user-select:none;">Chargement...</span>
+          <input type="date" id="planning-datepicker" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="allerADate(this.value)">
           <button onclick="changerSemaine(1)">&#8250;</button>
         </div>
         <table class="planning-grid" id="planning-table">
@@ -177,7 +209,10 @@
                   {% if tache.faite %}✓{% endif %}
                 </div>
               </a>
-              <span class="task-label {% if tache.faite %}done{% endif %}">{{ tache.titre }}</span>
+              <div style="flex:1; min-width:0;">
+                <span class="task-label {% if tache.faite %}done{% endif %}">{{ tache.titre }}</span>
+                <div style="font-size:0.7rem; color:var(--muted); margin-top:1px;">👤 {{ tache.assignee }}</div>
+              </div>
               <span class="task-chip {% if tache.faite %}chip-done{% else %}chip-todo{% endif %}">
                 {% if tache.faite %}Fait{% else %}À faire{% endif %}
               </span>
@@ -218,24 +253,36 @@
         <div class="right-col">
           <div class="card-dash">
             <div class="card-head">
-              <div class="card-title">Historique de présence</div>
+              <div class="card-title">Présence en ligne</div>
             </div>
-            {% if taches %}
-              {% set colocataires = taches | map(attribute='assignee') | unique | list %}
-              {% for coloc in colocataires %}
-              <div class="pres-row">
-                <div class="pres-av on">{{ coloc[0] | upper }}</div>
-                <div>
-                  <div class="pres-name">{{ coloc }}</div>
-                  <div class="pres-stat"><span class="dot" style="background:#10b981;"></span> Présent</div>
+            {% if utilisateurs %}
+              {% for u in utilisateurs %}
+                {% set en_ligne = u.last_seen and ((now - u.last_seen).total_seconds() < 300) %}
+                {% set recemment = u.last_seen and ((now - u.last_seen).total_seconds() < 3600) %}
+                <div class="pres-row">
+                  <div class="pres-av {% if en_ligne %}on{% endif %}" style="{% if not en_ligne %}background:var(--muted);{% endif %}">
+                    {{ u.prenom[0] | upper }}
+                  </div>
+                  <div style="flex:1;">
+                    <div class="pres-name">{{ u.prenom }} {{ u.nom }}</div>
+                    <div class="pres-stat">
+                      {% if en_ligne %}
+                        <span class="dot" style="background:#10b981;"></span> En ligne
+                      {% elif recemment %}
+                        <span class="dot" style="background:#f59e0b;"></span>
+                        Il y a {{ ((now - u.last_seen).total_seconds() / 60) | int }} min
+                      {% elif u.last_seen %}
+                        <span class="dot" style="background:var(--muted);"></span>
+                        {{ u.last_seen.strftime('%d/%m à %Hh%M') }}
+                      {% else %}
+                        <span class="dot" style="background:var(--muted);"></span> Jamais connecté
+                      {% endif %}
+                    </div>
+                  </div>
                 </div>
-              </div>
               {% endfor %}
             {% else %}
-              <div class="pres-row">
-                <div class="pres-av on">L</div>
-                <div><div class="pres-name">Lucas</div><div class="pres-stat"><span class="dot" style="background:#10b981;"></span> Présent</div></div>
-              </div>
+              <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem 0;">Aucun utilisateur</p>
             {% endif %}
           </div>
         </div>
@@ -243,5 +290,10 @@
       </div>
     </div>
   </div>
+
+<script>
+window.planningData = {{ planning_events | safe }};
+</script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

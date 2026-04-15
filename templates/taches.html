@@ -15,11 +15,9 @@
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link" style="background:rgba(255,255,255,0.15);">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="#" class="nav-link">Réservations</a>
-    <a href="#" class="nav-link">Chat</a>
-    <a href="#" class="nav-link">Bon plan</a>
     <div class="nav-right">
       {% if session.get('user_id') %}
-        <div class="nav-avatar">👤</div>
+        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
         <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
@@ -90,7 +88,7 @@
 
             <div class="tache-info">
               <div class="tache-titre {% if tache.faite %}done{% endif %}">{{ tache.titre }}</div>
-              <div class="tache-assignee">👤 {{ tache.assignee }}</div>
+              <div class="tache-assignee">👤 {{ tache.assignee }}{% if tache.date_echeance %} · 📅 {{ tache.date_echeance.strftime('%d/%m/%Y') }}{% endif %}</div>
             </div>
 
             <span class="tache-badge {% if tache.faite %}badge-done{% else %}badge-todo{% endif %}">
@@ -161,6 +159,10 @@
           <label class="field-label">Titre</label>
           <input type="text" name="titre" class="field-input"
                  placeholder="ex: Passer l'aspirateur" required>
+        </div>
+        <div class="field-group" style="margin-top:12px;">
+          <label class="field-label">Date d'échéance <span style="color:var(--muted);font-weight:400;">(optionnelle)</span></label>
+          <input type="date" name="date_echeance" class="field-input">
         </div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
           <button type="button" class="btn-annuler" onclick="fermerModal()">✕ Annuler</button>

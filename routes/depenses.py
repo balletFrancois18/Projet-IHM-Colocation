@@ -75,8 +75,8 @@ def ajouter_depense():
         ).first()
 
         if existante:
-            existante.montant = montant
-            existante.payeur  = payeur
+            existante.montant += montant  # Cumul au lieu de remplacement
+            existante.titre    = titre
         else:
             nouvelle = Depense(titre=titre, montant=montant,
                                payeur=payeur, categorie=categorie)
