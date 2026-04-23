@@ -11,7 +11,7 @@
 
   <nav>
     <a href="{{ url_for('index') }}" class="nav-logo">Co<span>Loc</span></a>
-    <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+    <a href="{{ url_for('index') }}" class="nav-link">Accueil</a>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link" style="background:rgba(255,255,255,0.15);">Réservations</a>
@@ -28,14 +28,36 @@
   <!-- Messages flash -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div style="max-width:1400px; margin:1rem auto; padding:0 3rem;">
-        {% for category, message in messages %}
+      {% for category, message in messages %}
+        {% if category == 'error_date_passee' %}
+        <div id="modal-date-passee-resa" style="display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;align-items:center;justify-content:center;">
+          <div style="background:white;border-radius:20px;padding:3rem 2.5rem;max-width:460px;width:92%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,0.25);">
+            <div style="font-size:3.5rem;margin-bottom:0.75rem;">📅</div>
+            <div style="font-size:1.4rem;font-weight:800;color:#dc2626;margin-bottom:0.75rem;">Date déjà passée !</div>
+            <p style="font-size:1rem;color:#6B7280;margin-bottom:0.5rem;">Impossible de réserver à une date <strong>antérieure à aujourd'hui</strong>.</p>
+            <p style="font-size:0.9rem;color:#9CA3AF;margin-bottom:2rem;">Veuillez choisir une date à partir d'aujourd'hui.</p>
+            <button onclick="document.getElementById('modal-date-passee-resa').style.display='none'" style="padding:0.75rem 2.5rem;background:#dc2626;color:white;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;">OK, compris</button>
+          </div>
+        </div>
+        {% elif category == 'error' and 'déjà réservé' in message %}
+        <!-- Modale d'erreur conflit bien visible -->
+        <div id="modal-conflit" style="display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;align-items:center;justify-content:center;">
+          <div style="background:white;border-radius:16px;padding:2.5rem 2rem;max-width:420px;width:92%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+            <div style="font-size:3rem;margin-bottom:0.5rem;">🚫</div>
+            <div style="font-size:1.25rem;font-weight:800;color:#dc2626;margin-bottom:0.75rem;">Créneau déjà réservé !</div>
+            <p style="font-size:0.95rem;color:#6B7280;margin-bottom:1.5rem;">Cet espace est déjà occupé à l'heure choisie. Veuillez sélectionner un autre créneau ou un autre espace.</p>
+            <button onclick="document.getElementById('modal-conflit').style.display='none'" style="padding:0.6rem 1.8rem;background:#dc2626;color:white;border:none;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;">OK, compris</button>
+          </div>
+        </div>
+        {% else %}
+        <div style="max-width:1400px; margin:1rem auto; padding:0 3rem;">
           <div class="flash-global flash-global-{{ category }}">
             <span>{{ message }}</span>
             <button onclick="this.parentElement.remove()" class="flash-global-close">✕</button>
           </div>
-        {% endfor %}
-      </div>
+        </div>
+        {% endif %}
+      {% endfor %}
       <script>
         document.querySelectorAll('.flash-global').forEach(function(el){
           setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); },400); }, 5000);
@@ -225,12 +247,12 @@
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div class="resa-field">
-            <label class="resa-label">Heure début</label>
-            <input type="time" name="heure_debut" class="resa-input" required>
+            <label class="resa-label" style="display:flex;align-items:baseline;gap:4px;">Heure début <span style="color:var(--muted);font-weight:400;font-size:0.75em;">(optionnelle)</span></label>
+            <input type="time" name="heure_debut" class="resa-input">
           </div>
           <div class="resa-field">
-            <label class="resa-label">Heure fin</label>
-            <input type="time" name="heure_fin" class="resa-input" required>
+            <label class="resa-label" style="display:flex;align-items:baseline;gap:4px;">Heure fin <span style="color:var(--muted);font-weight:400;font-size:0.75em;">(optionnelle)</span></label>
+            <input type="time" name="heure_fin" class="resa-input">
           </div>
         </div>
 

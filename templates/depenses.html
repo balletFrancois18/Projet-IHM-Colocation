@@ -296,7 +296,7 @@
 
 <nav>
   <a href="{{ url_for('index') }}" class="nav-logo">Co<span>Loc</span></a>
-  <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+  <a href="{{ url_for('index') }}" class="nav-link">Accueil</a>
   <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
   <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
   <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
@@ -394,29 +394,52 @@
           <div class="barre-wrap"><div class="barre" id="barre-{{ cat }}"></div></div>
           <div class="barre-legende" id="legende-{{ cat }}"></div>
           {% set mes_dep = depenses | selectattr('payeur', 'equalto', current_user_prenom) | selectattr('categorie', 'equalto', cat) | list %}
-          {% if mes_dep %}
+          {% set autres_dep = depenses | rejectattr('payeur', 'equalto', current_user_prenom) | selectattr('categorie', 'equalto', cat) | selectattr('payeur', 'ne', 'none') | list %}
+          {% set autres_dep_tri = (autres_dep | sort(attribute='date', reverse=True))[:5] %}
+          {% if mes_dep or autres_dep_tri %}
           <div style="margin-top:14px;border-top:2px solid #F3F4F6;padding-top:12px;">
+            {% if mes_dep %}
             <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">
               <span style="display:inline-flex;align-items:center;justify-content:center;background:#EEF2FF;color:#4F46E5;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.04em;">Mes dépenses</span>
             </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
             {% for d in mes_dep %}
-            <div style="display:flex;align-items:center;justify-content:space-between;background:#F5F7FF;border:1px solid #E0E7FF;border-radius:8px;padding:8px 10px;margin-bottom:6px;">
-              <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;flex-direction:column;justify-content:space-between;background:#F5F7FF;border:1px solid #E0E7FF;border-radius:8px;padding:8px 10px;min-width:140px;flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
                 <span style="width:8px;height:8px;border-radius:50%;background:#818CF8;flex-shrink:0;"></span>
-                <div>
-                  <div style="font-size:13px;font-weight:600;color:#111827;">{{ d.titre }}</div>
-                  <div style="font-size:11px;color:#9CA3AF;">{{ d.date.strftime('%d/%m/%Y') }}</div>
-                </div>
+                <div style="font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ d.titre }}</div>
               </div>
-              <div style="display:flex;align-items:center;gap:6px;">
+              <div style="font-size:11px;color:#9CA3AF;margin-bottom:6px;">{{ d.date.strftime('%d/%m/%Y') }}</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
                 <span style="font-size:14px;font-weight:700;color:#4F46E5;">{{ "%.2f"|format(d.montant) }} €</span>
-                <button class="btn-round-edit" onclick="ouvrirModalModifierDepense({{ d.id }}, '{{ d.titre }}', {{ d.montant }}, '{{ d.categorie }}')" title="Modifier la dépense"><i data-lucide="pencil"></i></button>
-                <form method="POST" action="{{ url_for('depenses.supprimer_depense', id=d.id) }}" style="margin:0;" onsubmit="return confirm('Supprimer cette dépense ?')">
-                  <button type="submit" class="btn-round-del" title="Supprimer la dépense"><i data-lucide="trash-2"></i></button>
-                </form>
+                <div style="display:flex;gap:4px;">
+                  <button class="btn-round-edit" onclick="ouvrirModalModifierDepense({{ d.id }}, '{{ d.titre }}', {{ d.montant }}, '{{ d.categorie }}')" title="Modifier"><i data-lucide="pencil"></i></button>
+                  <form method="POST" action="{{ url_for('depenses.supprimer_depense', id=d.id) }}" style="margin:0;" onsubmit="return confirm('Supprimer cette dépense ?')">
+                    <button type="submit" class="btn-round-del" title="Supprimer"><i data-lucide="trash-2"></i></button>
+                  </form>
+                </div>
               </div>
             </div>
             {% endfor %}
+            </div>
+            {% endif %}
+            {% if autres_dep_tri %}
+            <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin:10px 0 8px;">
+              <span style="display:inline-flex;align-items:center;justify-content:center;background:#F0FDF4;color:#16A34A;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:.04em;">Dépenses des colocataires</span>
+            </div>
+            {% for d in autres_dep_tri %}
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;margin-bottom:6px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:{{ couleurs.get(d.payeur, '#9CA3AF') }};flex-shrink:0;"></span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#111827;">{{ d.titre }}</div>
+                  <div style="font-size:11px;color:#9CA3AF;">{{ d.payeur }} · {{ d.date.strftime('%d/%m/%Y') }}</div>
+                </div>
+              </div>
+              <span style="font-size:14px;font-weight:700;color:#374151;">{{ "%.2f"|format(d.montant) }} €</span>
+            </div>
+            {% endfor %}
+            {% endif %}
           </div>
           {% endif %}
         </div>
@@ -616,6 +639,7 @@ donneesFlask.forEach(d => {
   if (categories[cat]) {
     categories[cat].participants.push({
       nom:     d.payeur,
+      titre:   d.titre,
       montant: d.montant,
       couleur: COULEURS_MAP[d.payeur] || '#888888'
     });
@@ -653,9 +677,10 @@ function rendreBarre(categorie) {
     if (i === data.participants.length - 1) seg.style.borderRadius = '0 20px 20px 0';
     if (data.participants.length === 1) seg.style.borderRadius = '20px';
 
+    const label = p.titre && p.titre !== p.nom ? p.titre : p.nom;
     const tip = document.createElement('div');
     tip.className   = 'tooltip';
-    tip.textContent = p.nom + ' — ' + p.montant.toFixed(2) + ' €';
+    tip.textContent = label + ' (' + p.nom + ') — ' + p.montant.toFixed(2) + ' €';
     seg.appendChild(tip);
     barre.appendChild(seg);
 
@@ -663,7 +688,7 @@ function rendreBarre(categorie) {
     item.className = 'legende-item';
     item.innerHTML = `
       <div class="legende-dot" style="background:${p.couleur}"></div>
-      <span class="legende-nom">${p.nom}</span>
+      <span class="legende-nom">${label} <span style="color:#9CA3AF;font-size:0.85em;">(${p.nom})</span></span>
       <span>${p.montant.toFixed(2)} €</span>
     `;
     legende.appendChild(item);

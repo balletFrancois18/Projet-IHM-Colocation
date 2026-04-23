@@ -60,13 +60,22 @@ def ajouter_reservation():
     heure_fin   = request.form.get('heure_fin')
     type_event  = request.form.get('type_event', '')
 
-    # Vérifie conflit
-    conflit = Reservation.query.filter_by(
-        espace=espace, date=date
-    ).filter(
-        Reservation.heure_debut < heure_fin,
-        Reservation.heure_fin   > heure_debut
-    ).first()
+    # Bloque si la date est dans le passé
+    if date and date < str(today_date.today()):
+        flash("date_passee_resa", 'error_date_passee')
+        return redirect(url_for('reservations.liste_reservations'))
+
+    # Vérifie conflit uniquement si les deux heures sont renseignées
+    conflit = None
+    if heure_debut and heure_fin:
+        conflit = Reservation.query.filter_by(
+            espace=espace, date=date
+        ).filter(
+            Reservation.heure_debut != None,
+            Reservation.heure_fin   != None,
+            Reservation.heure_debut < heure_fin,
+            Reservation.heure_fin   > heure_debut
+        ).first()
 
     if conflit:
         flash("Créneau déjà réservé pour cet espace.", 'error')

@@ -12,7 +12,7 @@
   <!-- NAVBAR -->
   <nav>
     <a href="{{ url_for('index') }}" class="nav-logo">Co<span>Loc</span></a>
-    <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+    <a href="{{ url_for('index') }}" class="nav-link">Accueil</a>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
@@ -127,6 +127,27 @@
           </div>
           <button type="submit" class="btn-profil-save">Modifier le mot de passe</button>
         </form>
+      </div>
+
+      <!-- Supprimer le compte -->
+      <div class="profil-section">
+        <div class="profil-section-title" style="color:#ef4444;">Zone dangereuse</div>
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:0.75rem;">La suppression est définitive et irréversible.</p>
+        <button type="button" onclick="document.getElementById('modal-suppr-compte').style.display='flex'" class="btn-profil-save" style="background:#ef4444;">Supprimer mon compte</button>
+      </div>
+
+      <!-- Modal confirmation suppression -->
+      <div id="modal-suppr-compte" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:14px;padding:2rem;max-width:380px;width:90%;text-align:center;">
+          <div style="font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;">Supprimer mon compte ?</div>
+          <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1.25rem;">Cette action est irréversible. Toutes vos données seront supprimées.</p>
+          <div style="display:flex;gap:0.75rem;justify-content:center;">
+            <button onclick="document.getElementById('modal-suppr-compte').style.display='none'" style="padding:0.5rem 1.2rem;border-radius:8px;border:1.5px solid var(--border);background:white;cursor:pointer;font-weight:600;">Annuler</button>
+            <form method="POST" action="{{ url_for('auth.supprimer_compte') }}" style="margin:0;">
+              <button type="submit" style="padding:0.5rem 1.2rem;border-radius:8px;border:none;background:#ef4444;color:white;cursor:pointer;font-weight:600;">Confirmer</button>
+            </form>
+          </div>
+        </div>
       </div>
 
       <!-- Stats rapides -->

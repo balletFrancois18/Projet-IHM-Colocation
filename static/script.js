@@ -7,11 +7,10 @@
 
  // PLANNING
 
-// Les événements sont injectés depuis Flask via window.planningData
-// Format : [{date: "YYYY-MM-DD", heure: 14, titre: "...", type: "resa"|"tache", couleur: "#..."}]
+// Les événements sont chargés en temps réel depuis /api/planning-events
 
 const jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-const heures = [6, 12, 18, 23];
+const heures = [6, 12, 18, 0];
 const mois = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Aoû","Sep","Oct","Nov","Déc"];
 let offsetSemaine = 0;
 
@@ -31,7 +30,7 @@ function afficherSemaine() {
   vendredi.setDate(lundi.getDate() + 4);
 
   // Label semaine
-  document.getElementById('semaine-label').textContent =
+  document.getElementById('semaine-label-text').textContent =
     `${lundi.getDate()} ${mois[lundi.getMonth()]} — ${vendredi.getDate()} ${mois[vendredi.getMonth()]} ${vendredi.getFullYear()}`;
 
   // En-têtes avec vraies dates
@@ -53,35 +52,50 @@ function afficherSemaine() {
   // Affiche les événements réels (tâches + réservations)
   const events = window.planningData || [];
   for (const ev of events) {
-    // Calcul du jour de la semaine à partir de la date ISO
+    if (window.filtreType && window.filtreType !== 'tous' && ev.type !== window.filtreType) continue;
     const evDate = new Date(ev.date + 'T00:00:00');
-    const evDay  = evDate.getDay(); // 0=dim, 1=lun...
-    // Convertir en index 0=lun..6=dim
+    const evDay  = evDate.getDay();
     const jourIdx = evDay === 0 ? 6 : evDay - 1;
-    // Vérifier que la date appartient à la semaine affichée
     const debutSemaine = new Date(lundi);
     const finSemaine   = new Date(lundi);
     finSemaine.setDate(lundi.getDate() + 6);
     finSemaine.setHours(23, 59, 59);
     if (evDate < debutSemaine || evDate > finSemaine) continue;
-    // Trouver le slot d'heure le plus proche
     const h = ev.heure;
     let slot;
-    if (h < 9)       slot = 6;
-    else if (h < 15) slot = 12;
-    else if (h < 20) slot = 18;
-    else             slot = 23;
+    if (h < 12)       slot = 6;
+    else if (h < 18)  slot = 12;
+    else if (h < 24)  slot = 18;
+    else              slot = 0;
     const cell = document.getElementById(`cell-${jourIdx}-${slot}`);
     if (cell) {
       const couleur = ev.couleur || '#7bafd4';
       const url = ev.type === 'tache' ? '/taches' : '/reservations';
-      const shortTitle = ev.titre.length > 12 ? ev.titre.substring(0, 11) + '…' : ev.titre;
-      const typeLabel = ev.type === 'tache' ? 'Tâche' : 'Réservation';
-      const personne = ev.personne ? ` — ${ev.personne}` : '';
-      const details = `${typeLabel}: ${ev.titre}${personne} | ${ev.date} ${ev.heure}h`;
-      cell.innerHTML += `<a href="${url}" class="resa" style="background:${couleur}; border-left-color:${couleur}; cursor:pointer; text-decoration:none;" title="${details}">${shortTitle}</a>`;
+      const personne = ev.personne || '';
+      let label, tooltip;
+      const heure = ev.heure_str || (ev.heure !== undefined ? String(ev.heure).padStart(2,'0') + 'h' : '');
+      const heureFin = ev.heure_fin_str || '';
+      const plage = heureFin ? `${heure} – ${heureFin}` : heure;
+      if (ev.type === 'tache') {
+        label = `Tâche : ${ev.titre}`;
+        tooltip = `Tâche à faire : ${ev.titre} — ${personne}${plage ? ' à ' + plage : ''}`;
+      } else {
+        label = `Résa. salle ${ev.titre}`;
+        tooltip = `Réservation de la salle ${ev.titre} — ${personne}${plage ? ' ' + plage : ''}`;
+      }
+      const shortLabel = label.length > 18 ? label.substring(0, 17) + '…' : label;
+      const heureTag = plage ? `<span style="float:right;font-size:0.75em;font-weight:700;opacity:0.95;margin-left:4px;">${plage}</span>` : '';
+      cell.innerHTML += `<a href="${url}" class="resa" style="background:${couleur};border-left-color:rgba(0,0,0,0.25);" title="${tooltip}">${heureTag}${shortLabel}<br><span style="font-size:0.85em;opacity:0.9;">${personne}</span></a>`;
     }
   }
+}
+
+window.filtreType = 'tous';
+function setFiltreType(type, btn) {
+  window.filtreType = type;
+  document.querySelectorAll('.filtre-planning').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  afficherSemaine();
 }
 
 function changerSemaine(delta) {
@@ -102,8 +116,20 @@ function allerADate(dateStr) {
   afficherSemaine();
 }
 
-// Attend que le DOM soit prêt
-document.addEventListener('DOMContentLoaded', afficherSemaine); 
+function chargerEtAfficher() {
+  fetch('/api/planning-events')
+    .then(r => r.json())
+    .then(data => {
+      window.planningData = data;
+      afficherSemaine();
+    });
+}
+
+// Chargement initial puis rafraîchissement toutes les 30 secondes
+document.addEventListener('DOMContentLoaded', function() {
+  chargerEtAfficher();
+  setInterval(chargerEtAfficher, 30000);
+});
 
 
 

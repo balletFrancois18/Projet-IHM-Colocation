@@ -30,7 +30,10 @@ def ajouter_tache():
                          user_id=user.id, date_echeance=date_echeance,
                          heure_debut=heure_debut, heure_fin=heure_fin))
     db.session.commit()
-    flash("Tâche ajoutée avec succès.", 'success')
+    if date_echeance and date_echeance < date_type.today():
+        flash("date_passee", 'warning_date_passee')
+    else:
+        flash("Tâche ajoutée avec succès.", 'success')
     return redirect(url_for('taches.liste_taches'))
 
 

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session
+from flask import Flask, render_template, session, jsonify
 from flask_mail import Mail
 from models import db, Tache, Depense, Reservation, EspaceReservation, User, Annonce
 from routes.taches   import taches_bp
@@ -58,32 +58,54 @@ def index():
     planning_events = []
     for r in reservations:
         try:
-            heure = int(r.heure_debut.split(':')[0])
+            parts = r.heure_debut.split(':')
+            heure = int(parts[0])
+            minutes = int(parts[1]) if len(parts) > 1 else 0
+            heure_str = f"{heure:02d}h{minutes:02d}" if minutes else f"{heure:02d}h"
         except Exception:
-            heure = 9
+            heure, heure_str = 9, "09h"
+        try:
+            fparts = r.heure_fin.split(':')
+            fh, fm = int(fparts[0]), int(fparts[1]) if len(fparts) > 1 else 0
+            heure_fin_str = f"{fh:02d}h{fm:02d}" if fm else f"{fh:02d}h"
+        except Exception:
+            heure_fin_str = ''
         planning_events.append({
-            'date':    r.date,
-            'heure':   heure,
-            'titre':   r.espace,
-            'type':    'resa',
-            'couleur': couleurs_users.get(r.profil, '#7bafd4'),
-            'personne': r.profil
+            'date':          r.date,
+            'heure':         heure,
+            'heure_str':     heure_str,
+            'heure_fin_str': heure_fin_str,
+            'titre':         r.espace,
+            'type':          'resa',
+            'couleur':       couleurs_users.get(r.profil, '#7bafd4'),
+            'personne':      r.profil
         })
     for t in Tache.query.filter_by(faite=False).all():
         if t.date_echeance:
             try:
-                heure_t = int(t.heure_debut.split(':')[0]) if t.heure_debut else 9
+                parts = t.heure_debut.split(':') if t.heure_debut else ['9', '0']
+                heure_t = int(parts[0])
+                minutes_t = int(parts[1]) if len(parts) > 1 else 0
+                heure_str_t = f"{heure_t:02d}h{minutes_t:02d}" if minutes_t else f"{heure_t:02d}h"
             except Exception:
-                heure_t = 9
+                heure_t, heure_str_t = 9, "09h"
+            try:
+                fparts_t = t.heure_fin.split(':') if t.heure_fin else []
+                fh_t, fm_t = int(fparts_t[0]), int(fparts_t[1]) if len(fparts_t) > 1 else 0
+                heure_fin_str_t = f"{fh_t:02d}h{fm_t:02d}" if fm_t else f"{fh_t:02d}h"
+            except Exception:
+                heure_fin_str_t = ''
             planning_events.append({
-                'date':        t.date_echeance.isoformat(),
-                'heure':       heure_t,
-                'heure_debut': t.heure_debut or '',
-                'heure_fin':   t.heure_fin or '',
-                'titre':       t.titre,
-                'type':        'tache',
-                'couleur':     couleurs_users.get(t.assignee, '#f59e0b'),
-                'personne':    t.assignee
+                'date':          t.date_echeance.isoformat(),
+                'heure':         heure_t,
+                'heure_str':     heure_str_t,
+                'heure_fin_str': heure_fin_str_t,
+                'heure_debut':   t.heure_debut or '',
+                'heure_fin':     t.heure_fin or '',
+                'titre':         t.titre,
+                'type':          'tache',
+                'couleur':       couleurs_users.get(t.assignee, '#f59e0b'),
+                'personne':      t.assignee
             })
 
     utilisateurs = User.query.all()
@@ -96,6 +118,63 @@ def index():
                            couleurs_users=couleurs_users,
                            now=datetime.utcnow(),
                            planning_events=json.dumps(planning_events))
+
+@app.route('/api/planning-events')
+def api_planning_events():
+    reservations = Reservation.query.all()
+    PALETTE = ['#F59E0B', '#5B6CFF', '#34D399', '#A78BFA', '#FF7A59', '#F87171', '#60A5FA']
+    prenoms_users = {u.prenom for u in User.query.all()}
+    prenoms_historiques = {d.payeur for d in Depense.query.all() if d.payeur and d.payeur != 'none'}
+    tous_prenoms = sorted({p.lower() for p in (prenoms_users | prenoms_historiques)})
+    couleurs_users = {p: PALETTE[i % len(PALETTE)] for i, p in enumerate(tous_prenoms)}
+    for p in list(prenoms_users | prenoms_historiques):
+        couleurs_users.setdefault(p, couleurs_users.get(p.lower(), PALETTE[0]))
+
+    events = []
+    for r in reservations:
+        try:
+            parts = r.heure_debut.split(':')
+            heure = int(parts[0])
+            minutes = int(parts[1]) if len(parts) > 1 else 0
+            heure_str = f"{heure:02d}h{minutes:02d}" if minutes else f"{heure:02d}h"
+        except Exception:
+            heure, heure_str = 9, "09h"
+        try:
+            fparts = r.heure_fin.split(':')
+            fh, fm = int(fparts[0]), int(fparts[1]) if len(fparts) > 1 else 0
+            heure_fin_str = f"{fh:02d}h{fm:02d}" if fm else f"{fh:02d}h"
+        except Exception:
+            heure_fin_str = ''
+        events.append({
+            'date': r.date, 'heure': heure, 'heure_str': heure_str,
+            'heure_fin_str': heure_fin_str, 'titre': r.espace,
+            'type': 'resa', 'couleur': couleurs_users.get(r.profil, '#7bafd4'),
+            'personne': r.profil
+        })
+    for t in Tache.query.filter_by(faite=False).all():
+        if t.date_echeance:
+            try:
+                parts = t.heure_debut.split(':') if t.heure_debut else ['9', '0']
+                heure_t = int(parts[0])
+                minutes_t = int(parts[1]) if len(parts) > 1 else 0
+                heure_str_t = f"{heure_t:02d}h{minutes_t:02d}" if minutes_t else f"{heure_t:02d}h"
+            except Exception:
+                heure_t, heure_str_t = 9, "09h"
+            try:
+                fparts_t = t.heure_fin.split(':') if t.heure_fin else []
+                fh_t, fm_t = int(fparts_t[0]), int(fparts_t[1]) if len(fparts_t) > 1 else 0
+                heure_fin_str_t = f"{fh_t:02d}h{fm_t:02d}" if fm_t else f"{fh_t:02d}h"
+            except Exception:
+                heure_fin_str_t = ''
+            events.append({
+                'date': t.date_echeance.isoformat(), 'heure': heure_t,
+                'heure_str': heure_str_t, 'heure_fin_str': heure_fin_str_t,
+                'heure_debut': t.heure_debut or '', 'heure_fin': t.heure_fin or '',
+                'titre': t.titre, 'type': 'tache',
+                'couleur': couleurs_users.get(t.assignee, '#f59e0b'),
+                'personne': t.assignee
+            })
+    return jsonify(events)
 
 def seed_data():
     if Tache.query.count() == 0:

@@ -82,22 +82,11 @@ def ajouter_depense():
         user = db.session.get(User, session['user_id'])
         payeur = user.prenom
 
-        existante = Depense.query.filter(
-            db.func.lower(Depense.payeur) == payeur.lower(),
-            Depense.categorie == categorie
-        ).first()
-
-        if existante:
-            existante.montant += montant
-            existante.titre    = titre
-            db.session.commit()
-            flash("Dépense modifiée avec succès.", 'success')
-        else:
-            nouvelle = Depense(titre=titre, montant=montant,
-                               payeur=payeur, categorie=categorie)
-            db.session.add(nouvelle)
-            db.session.commit()
-            flash("Dépense ajoutée avec succès.", 'success')
+        nouvelle = Depense(titre=titre, montant=montant,
+                           payeur=payeur, categorie=categorie)
+        db.session.add(nouvelle)
+        db.session.commit()
+        flash("Dépense ajoutée avec succès.", 'success')
         return redirect(url_for('depenses.liste_depenses'))
     return redirect(url_for('depenses.liste_depenses'))
 

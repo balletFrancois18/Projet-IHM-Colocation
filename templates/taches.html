@@ -12,7 +12,7 @@
   <!-- NAVBAR -->
   <nav>
     <a href="{{ url_for('index') }}" class="nav-logo">Co<span>Loc</span></a>
-    <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+    <a href="{{ url_for('index') }}" class="nav-link">Accueil</a>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link" style="background:rgba(255,255,255,0.15);">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
@@ -29,14 +29,42 @@
   <!-- Messages flash -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div style="max-width:1400px; margin:1rem auto; padding:0 3rem;">
-        {% for category, message in messages %}
+      {% for category, message in messages %}
+        {% if category == 'warning_date_passee' %}
+        <div id="modal-date-passee-tache" style="display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;align-items:center;justify-content:center;">
+          <div style="background:white;border-radius:20px;padding:3rem 2.5rem;max-width:460px;width:92%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,0.25);">
+            <div style="margin-bottom:0.75rem;display:flex;justify-content:center;"><i data-lucide="alarm-clock" style="width:56px;height:56px;color:#dc2626;stroke-width:1.5;"></i></div>
+            <div style="font-size:1.4rem;font-weight:800;color:#dc2626;margin-bottom:0.75rem;">Tâche dans le passé !</div>
+            <p style="font-size:1rem;color:#222222;margin-bottom:0.5rem;">La tâche a bien été ajoutée, mais sa date d'échéance est <strong>déjà dépassée</strong>.</p>
+            <p style="font-size:0.9rem;color:#222222;margin-bottom:2rem;">Pensez à la traiter au plus vite ou à corriger la date.</p>
+            <button id="btn-compris-tache" onclick="fermerModalDatePasseeTache(this)" style="padding:0.75rem 2.5rem;background:#dc2626;color:white;border:none;border-radius:10px;font-weight:700;font-size:1rem;cursor:pointer;transition:background 0.2s,transform 0.1s,box-shadow 0.2s;box-shadow:0 4px 12px rgba(220,38,38,0.3);"
+              onmouseover="this.style.background='#b91c1c';this.style.boxShadow='0 6px 20px rgba(220,38,38,0.45)';this.style.transform='translateY(-1px)'"
+              onmouseout="this.style.background='#dc2626';this.style.boxShadow='0 4px 12px rgba(220,38,38,0.3)';this.style.transform='translateY(0)'"
+              onmousedown="this.style.transform='scale(0.97)'"
+              onmouseup="this.style.transform='translateY(-1px)'">J'ai compris</button>
+            <script>
+            function fermerModalDatePasseeTache(btn) {
+              btn.disabled = true;
+              btn.textContent = '✓ OK !';
+              btn.style.background = '#16a34a';
+              btn.style.boxShadow = '0 4px 12px rgba(22,163,74,0.35)';
+              const modal = document.getElementById('modal-date-passee-tache');
+              modal.style.transition = 'opacity 0.35s ease';
+              modal.style.opacity = '0';
+              setTimeout(function(){ modal.style.display = 'none'; modal.style.opacity = '1'; }, 370);
+            }
+            </script>
+          </div>
+        </div>
+        {% else %}
+        <div style="max-width:1400px; margin:1rem auto; padding:0 3rem;">
           <div class="flash-global flash-global-{{ category }}">
             <span>{{ message }}</span>
             <button onclick="this.parentElement.remove()" class="flash-global-close">✕</button>
           </div>
-        {% endfor %}
-      </div>
+        </div>
+        {% endif %}
+      {% endfor %}
       <script>
         document.querySelectorAll('.flash-global').forEach(function(el){
           setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); },400); }, 5000);
@@ -190,6 +218,17 @@
       </form>
     </div>
   </div>
+  <script>
+    document.querySelector('input[name="date_echeance"]').addEventListener('change', function() {
+      const val = this.value;
+      const alerte = document.getElementById('alerte-date-passee');
+      if (val && val < new Date().toISOString().slice(0, 10)) {
+        alerte.style.display = 'block';
+      } else {
+        alerte.style.display = 'none';
+      }
+    });
+  </script>
 
   <!-- Modal modifier tâche -->
   {% for tache in taches %}

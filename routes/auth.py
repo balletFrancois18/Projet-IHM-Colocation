@@ -51,6 +51,16 @@ def login():
     return render_template('login.html')
 
 # ── LOGOUT ────────────────────────────────────
+@auth_bp.route('/profil/supprimer', methods=['POST'])
+@login_required
+def supprimer_compte():
+    user = db.session.get(User, session['user_id'])
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+    session.clear()
+    return redirect(url_for('auth.login'))
+
 @auth_bp.route('/logout')
 def logout():
     user_id = session.get('user_id')
