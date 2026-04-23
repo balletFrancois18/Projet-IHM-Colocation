@@ -1,39 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="index-page">
 
   <!-- NAVBAR EN HAUT -->
   <nav>
-    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="{{ url_for('index') }}" class="nav-logo">Co<span>Loc</span></a>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
     <div class="nav-right">
       {% if session.get('user_id') %}
-        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
-        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+      <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil"><i
+          data-lucide="user"></i></a>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
       {% else %}
-        <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
+      <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
       {% endif %}
     </div>
   </nav>
 
-   <!-- EN-TÊTE PAGE -->
+  <!-- EN-TÊTE PAGE -->
   <div class="page-header">
     <div class="page-title">
-      {% if session.get('user_prenom') %}Bonjour {{ session.get('user_prenom') }} 👋{% else %}Dashboard{% endif %}
+      {% if session.get('user_prenom') %}Bonjour {{ session.get('user_prenom') }}{% else %}Dashboard{% endif %}
     </div>
     <div class="page-sub">Vue d'ensemble de votre colocation</div>
   </div>
   <!-- GRILLE PRINCIPALE -->
   <div class="main-grid" style="grid-template-columns: 320px 1fr;">
-    
+
 
     <!-- COLONNE GAUCHE -->
     <div style="display:flex; flex-direction:column; gap:1rem;">
@@ -43,56 +47,67 @@
         <div class="card-head">
           <div class="card-title">Annonces</div>
           {% if annonces %}
-            <span style="font-size:0.75rem;background:var(--blue);color:white;padding:0.2rem 0.6rem;border-radius:20px;font-weight:600;">{{ annonces|length }}</span>
+          <span
+            style="font-size:0.75rem;background:var(--blue);color:white;padding:0.2rem 0.6rem;border-radius:20px;font-weight:600;">{{
+            annonces|length }}</span>
           {% endif %}
           {% if session.get('user_id') %}
-            <button onclick="document.getElementById('modal-annonce').style.display='flex'" class="card-btn" style="margin-left:0.5rem;">+ Ajouter</button>
+          <button onclick="document.getElementById('modal-annonce').style.display='flex'" class="card-btn"
+            style="margin-left:0.5rem;"><i data-lucide="plus"></i> Ajouter</button>
           {% endif %}
         </div>
         <div style="display:flex;flex-direction:column;gap:0.6rem;">
           {% if annonces %}
-            {% for a in annonces %}
-            <div class="notif-item notif-{{ a.categorie }}">
-              <div class="notif-body">
-                <div class="notif-title">{{ a.titre }}</div>
-                <div class="notif-sub">{{ a.auteur }} · {{ a.date.strftime('%d/%m à %Hh%M') }}</div>
-              </div>
-              <span class="notif-badge {{ a.categorie }}">{{ a.categorie | capitalize }}</span>
-              {% if session.get('user_id') and a.user_id == session.get('user_id') %}
-                <form method="POST" action="{{ url_for('auth.supprimer_annonce', id=a.id) }}" style="margin:0;">
-                  <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.85rem;padding:0 0 0 0.4rem;" title="Supprimer">✕</button>
-                </form>
-              {% endif %}
+          {% for a in annonces %}
+          <div class="notif-item notif-{{ a.categorie }}">
+            <div class="notif-body">
+              <div class="notif-title">{{ a.titre }}</div>
+              <div class="notif-sub">{{ a.auteur }} · {{ a.date.strftime('%d/%m à %Hh%M') }}</div>
             </div>
-            {% endfor %}
+            <span class="notif-badge {{ a.categorie }}">{{ a.categorie | capitalize }}</span>
+            {% if session.get('user_id') and a.user_id == session.get('user_id') %}
+            <form method="POST" action="{{ url_for('auth.supprimer_annonce', id=a.id) }}" style="margin:0;">
+              <button type="submit"
+                style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.85rem;padding:0 0 0 0.4rem;"
+                title="Supprimer">✕</button>
+            </form>
+            {% endif %}
+          </div>
+          {% endfor %}
           {% else %}
-            <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:0.75rem 0;">Aucune annonce pour l'instant</p>
+          <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:0.75rem 0;">Aucune annonce pour
+            l'instant</p>
           {% endif %}
         </div>
       </div>
 
       <!-- Modal ajout annonce -->
       {% if session.get('user_id') %}
-      <div id="modal-annonce" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center;"
-           onclick="if(event.target===this)this.style.display='none'">
-        <div style="background:white;border-radius:16px;padding:28px;width:340px;box-shadow:0 16px 48px rgba(0,0,0,0.15);">
-          <div style="font-size:17px;font-weight:700;margin-bottom:18px;">📢 Nouvelle annonce</div>
+      <div id="modal-annonce"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:200;align-items:center;justify-content:center;"
+        onclick="if(event.target===this)this.style.display='none'">
+        <div
+          style="background:white;border-radius:16px;padding:28px;width:340px;box-shadow:0 16px 48px rgba(0,0,0,0.15);">
+          <div style="font-size:17px;font-weight:700;margin-bottom:18px;"><i data-lucide="megaphone"></i> Nouvelle
+            annonce</div>
           <form method="POST" action="{{ url_for('auth.ajouter_annonce') }}">
             <div class="field-group">
               <label class="field-label">Message</label>
-              <input type="text" name="titre" class="field-input" placeholder="ex: Réunion samedi 18h" required maxlength="150">
+              <input type="text" name="titre" class="field-input" placeholder="ex: Réunion samedi 18h" required
+                maxlength="150">
             </div>
             <div class="field-group" style="margin-top:12px;">
               <label class="field-label">Catégorie</label>
               <select name="categorie" class="field-input">
-                <option value="info">ℹ️ Info</option>
-                <option value="urgent">🚨 Urgent</option>
-                <option value="rappel">🔔 Rappel</option>
+                <option value="info"><i data-lucide="info"></i> Info</option>
+                <option value="urgent"><i data-lucide="alert-triangle"></i> Urgent</option>
+                <option value="rappel"><i data-lucide="bell"></i> Rappel</option>
               </select>
             </div>
             <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
-              <button type="button" class="btn-annuler" onclick="document.getElementById('modal-annonce').style.display='none'">Annuler</button>
-              <button type="submit" class="btn-valider">✓ Publier</button>
+              <button type="button" class="btn-annuler"
+                onclick="document.getElementById('modal-annonce').style.display='none'">Annuler</button>
+              <button type="submit" class="btn-valider"><i data-lucide="check"></i> Publier</button>
             </div>
           </form>
         </div>
@@ -103,7 +118,8 @@
       <div class="card-dash">
         <div class="card-head">
           <div class="card-title">Pot commun</div>
-          <a href="{{ url_for('depenses.liste_depenses') }}" class="card-btn">Voir tout →</a>
+          <a href="{{ url_for('depenses.liste_depenses') }}" class="card-btn"><i data-lucide="chevron-right"></i> Voir
+            tout</a>
         </div>
         <div class="pot-total">
           {% if depenses %}{{ "%.2f"|format(depenses | sum(attribute='montant')) }} €
@@ -111,27 +127,23 @@
         </div>
         <!-- Timeline dépenses -->
         {% if depenses %}
-          <div class="timeline">
-            {% for depense in depenses | sort(attribute='date', reverse=True) | list %}
-            <div class="timeline-item">
-              <div class="timeline-dot" style="background:
-                {% if depense.categorie == 'courses' %}#10b981
-                {% elif depense.categorie == 'factures' %}#ef4444
-                {% elif depense.categorie == 'loyer' %}#7bafd4
-                {% else %}#f59e0b{% endif %};"></div>
-              <div class="timeline-content">
-                <div class="timeline-title">{{ depense.titre }}</div>
-                <div class="timeline-meta">
-                  <span>{{ depense.payeur }}</span>
-                  <span>{{ depense.date.strftime('%d/%m') if depense.date else '' }}</span>
-                  <span class="timeline-prix">{{ "%.2f"|format(depense.montant) }} €</span>
-                </div>
+        <div class="timeline">
+          {% for depense in depenses | sort(attribute='date', reverse=True) | list %}
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background:{{ couleurs_users.get(depense.payeur, '#7bafd4') }};"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">{{ depense.titre }}</div>
+              <div class="timeline-meta">
+                <span>{{ depense.payeur }}</span>
+                <span>{{ depense.date.strftime('%d/%m') if depense.date else '' }}</span>
+                <span class="timeline-prix">{{ "%.2f"|format(depense.montant) }} €</span>
               </div>
             </div>
-            {% endfor %}
           </div>
+          {% endfor %}
+        </div>
         {% else %}
-          <p style="text-align:center;color:var(--muted);font-size:0.85rem;padding:1rem 0;">Aucune dépense</p>
+        <p style="text-align:center;color:var(--muted);font-size:0.85rem;padding:1rem 0;">Aucune dépense</p>
         {% endif %}
       </div>
 
@@ -147,43 +159,65 @@
         </div>
         <div class="planning-nav">
           <button onclick="changerSemaine(-1)">&#8249;</button>
-          <span id="semaine-label" onclick="document.getElementById('planning-datepicker').showPicker()" title="Choisir une date" style="cursor:pointer; user-select:none;">Chargement...</span>
-          <input type="date" id="planning-datepicker" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="allerADate(this.value)">
+          <span id="semaine-label" onclick="document.getElementById('planning-datepicker').showPicker()"
+            title="Choisir une date" style="cursor:pointer; user-select:none;">Chargement...</span>
+          <input type="date" id="planning-datepicker"
+            style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="allerADate(this.value)">
           <button onclick="changerSemaine(1)">&#8250;</button>
         </div>
         <table class="planning-grid" id="planning-table">
           <thead>
             <tr>
               <th>H.</th>
-              <th id="jour-0"></th><th id="jour-1"></th>
-              <th id="jour-2"></th><th id="jour-3"></th>
-              <th id="jour-4"></th><th id="jour-5"></th><th id="jour-6"></th>
+              <th id="jour-0"></th>
+              <th id="jour-1"></th>
+              <th id="jour-2"></th>
+              <th id="jour-3"></th>
+              <th id="jour-4"></th>
+              <th id="jour-5"></th>
+              <th id="jour-6"></th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="heure">6h</td>
-              <td id="cell-0-6"></td><td id="cell-1-6"></td>
-              <td id="cell-2-6"></td><td id="cell-3-6"></td>
-              <td id="cell-4-6"></td><td id="cell-5-6"></td><td id="cell-6-6"></td>
+              <td id="cell-0-6"></td>
+              <td id="cell-1-6"></td>
+              <td id="cell-2-6"></td>
+              <td id="cell-3-6"></td>
+              <td id="cell-4-6"></td>
+              <td id="cell-5-6"></td>
+              <td id="cell-6-6"></td>
             </tr>
             <tr>
               <td class="heure">12h</td>
-              <td id="cell-0-12"></td><td id="cell-1-12"></td>
-              <td id="cell-2-12"></td><td id="cell-3-12"></td>
-              <td id="cell-4-12"></td><td id="cell-5-12"></td><td id="cell-6-12"></td>
+              <td id="cell-0-12"></td>
+              <td id="cell-1-12"></td>
+              <td id="cell-2-12"></td>
+              <td id="cell-3-12"></td>
+              <td id="cell-4-12"></td>
+              <td id="cell-5-12"></td>
+              <td id="cell-6-12"></td>
             </tr>
             <tr>
               <td class="heure">18h</td>
-              <td id="cell-0-18"></td><td id="cell-1-18"></td>
-              <td id="cell-2-18"></td><td id="cell-3-18"></td>
-              <td id="cell-4-18"></td><td id="cell-5-18"></td><td id="cell-6-18"></td>
+              <td id="cell-0-18"></td>
+              <td id="cell-1-18"></td>
+              <td id="cell-2-18"></td>
+              <td id="cell-3-18"></td>
+              <td id="cell-4-18"></td>
+              <td id="cell-5-18"></td>
+              <td id="cell-6-18"></td>
             </tr>
             <tr>
               <td class="heure">23h</td>
-              <td id="cell-0-23"></td><td id="cell-1-23"></td>
-              <td id="cell-2-23"></td><td id="cell-3-23"></td>
-              <td id="cell-4-23"></td><td id="cell-5-23"></td><td id="cell-6-23"></td>
+              <td id="cell-0-23"></td>
+              <td id="cell-1-23"></td>
+              <td id="cell-2-23"></td>
+              <td id="cell-3-23"></td>
+              <td id="cell-4-23"></td>
+              <td id="cell-5-23"></td>
+              <td id="cell-6-23"></td>
             </tr>
           </tbody>
         </table>
@@ -199,27 +233,29 @@
         <div class="card-dash">
           <div class="card-head">
             <div class="card-title">Tâches récentes</div>
-            <a href="{{ url_for('taches.liste_taches') }}" class="card-btn">Voir tout →</a>
+            <a href="{{ url_for('taches.liste_taches') }}" class="card-btn"><i data-lucide="chevron-right"></i> Voir
+              tout</a>
           </div>
           {% if taches %}
-            {% for tache in taches[:5] %}
-            <div class="task-row">
-              <a href="{{ url_for('taches.cocher_tache', id=tache.id) }}" style="display:contents;">
-                <div class="task-check {% if tache.faite %}done{% endif %}">
-                  {% if tache.faite %}✓{% endif %}
-                </div>
-              </a>
-              <div style="flex:1; min-width:0;">
-                <span class="task-label {% if tache.faite %}done{% endif %}">{{ tache.titre }}</span>
-                <div style="font-size:0.7rem; color:var(--muted); margin-top:1px;">👤 {{ tache.assignee }}</div>
+          {% for tache in taches[:5] %}
+          <div class="task-row">
+            <a href="{{ url_for('taches.cocher_tache', id=tache.id) }}" style="display:contents;">
+              <div class="task-check {% if tache.faite %}done{% endif %}">
+                {% if tache.faite %}<i data-lucide="check"></i>{% endif %}
               </div>
-              <span class="task-chip {% if tache.faite %}chip-done{% else %}chip-todo{% endif %}">
-                {% if tache.faite %}Fait{% else %}À faire{% endif %}
-              </span>
+            </a>
+            <div style="flex:1; min-width:0;">
+              <span class="task-label {% if tache.faite %}done{% endif %}">{{ tache.titre }}</span>
+              <div style="font-size:0.7rem; color:var(--muted); margin-top:1px;"><i data-lucide="user"></i> {{
+                tache.assignee }}</div>
             </div>
-            {% endfor %}
+            <span class="task-chip {% if tache.faite %}chip-done{% else %}chip-todo{% endif %}">
+              {% if tache.faite %}Fait{% else %}À faire{% endif %}
+            </span>
+          </div>
+          {% endfor %}
           {% else %}
-            <p style="color:var(--muted);font-size:0.85rem;padding:1rem 0;text-align:center;">Aucune tâche</p>
+          <p style="color:var(--muted);font-size:0.85rem;padding:1rem 0;text-align:center;">Aucune tâche</p>
           {% endif %}
         </div>
 
@@ -228,24 +264,25 @@
           <div class="card-head">
             <div class="card-title">Dépenses récentes</div>
             {% if session.get('user_id') %}
-             <a href="{{ url_for('depenses.liste_depenses') }}" class="card-btn">+ Ajouter</a>
+            <a href="{{ url_for('depenses.liste_depenses') }}" class="card-btn"><i data-lucide="chevron-right"></i> Voir
+              tout</a>
             {% endif %}
           </div>
           {% if depenses %}
-            {% for depense in depenses[:4] %}
-            <div class="dep-row">
-              <div class="dep-left">
-                <div class="dep-ico">💳</div>
-                <div>
-                  <div class="dep-name">{{ depense.titre }}</div>
-                  <div class="dep-who">Payé par {{ depense.payeur }}</div>
-                </div>
+          {% for depense in depenses[:4] %}
+          <div class="dep-row">
+            <div class="dep-left">
+              <div class="dep-ico"><i data-lucide="credit-card"></i></div>
+              <div>
+                <div class="dep-name">{{ depense.titre }}</div>
+                <div class="dep-who">Payé par {{ depense.payeur }}</div>
               </div>
-              <div class="dep-price">{{ "%.2f"|format(depense.montant) }} €</div>
             </div>
-            {% endfor %}
+            <div class="dep-price">{{ "%.2f"|format(depense.montant) }} €</div>
+          </div>
+          {% endfor %}
           {% else %}
-            <p style="color:var(--muted);font-size:0.85rem;padding:1rem 0;text-align:center;">Aucune dépense</p>
+          <p style="color:var(--muted);font-size:0.85rem;padding:1rem 0;text-align:center;">Aucune dépense</p>
           {% endif %}
         </div>
 
@@ -256,44 +293,59 @@
               <div class="card-title">Présence en ligne</div>
             </div>
             {% if utilisateurs %}
-              {% for u in utilisateurs %}
-                {% set en_ligne = u.last_seen and ((now - u.last_seen).total_seconds() < 300) %}
-                {% set recemment = u.last_seen and ((now - u.last_seen).total_seconds() < 3600) %}
-                <div class="pres-row">
-                  <div class="pres-av {% if en_ligne %}on{% endif %}" style="{% if not en_ligne %}background:var(--muted);{% endif %}">
-                    {{ u.prenom[0] | upper }}
-                  </div>
-                  <div style="flex:1;">
-                    <div class="pres-name">{{ u.prenom }} {{ u.nom }}</div>
-                    <div class="pres-stat">
-                      {% if en_ligne %}
-                        <span class="dot" style="background:#10b981;"></span> En ligne
-                      {% elif recemment %}
-                        <span class="dot" style="background:#f59e0b;"></span>
-                        Il y a {{ ((now - u.last_seen).total_seconds() / 60) | int }} min
-                      {% elif u.last_seen %}
-                        <span class="dot" style="background:var(--muted);"></span>
-                        {{ u.last_seen.strftime('%d/%m à %Hh%M') }}
-                      {% else %}
-                        <span class="dot" style="background:var(--muted);"></span> Jamais connecté
-                      {% endif %}
-                    </div>
-                  </div>
+            {% for u in utilisateurs %}
+            {% set en_ligne = u.last_seen and ((now - u.last_seen).total_seconds() < 300) %} {% set
+              recemment=u.last_seen and ((now - u.last_seen).total_seconds() < 3600) %} <div class="pres-row">
+              <div class="pres-av {% if en_ligne %}on{% endif %}"
+                style="background:{{ couleurs_users.get(u.prenom, '#7bafd4') }};">
+                {{ u.prenom[0] | upper }}
+              </div>
+              <div style="flex:1;">
+                <div class="pres-name">{{ u.prenom }} {{ u.nom }}</div>
+                <div class="pres-stat">
+                  {% if en_ligne %}
+                  <span class="dot" style="background:#10b981;"></span> En ligne
+                  {% elif recemment %}
+                  <span class="dot" style="background:#f59e0b;"></span>
+                  Il y a {{ ((now - u.last_seen).total_seconds() / 60) | int }} min
+                  {% elif u.last_seen %}
+                  <span class="dot" style="background:var(--muted);"></span>
+                  {{ u.last_seen.strftime('%d/%m à %Hh%M') }}
+                  {% else %}
+                  <span class="dot" style="background:var(--muted);"></span> Jamais connecté
+                  {% endif %}
                 </div>
-              {% endfor %}
-            {% else %}
-              <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem 0;">Aucun utilisateur</p>
-            {% endif %}
+              </div>
           </div>
+          {% endfor %}
+          {% else %}
+          <p style="color:var(--muted);font-size:0.85rem;text-align:center;padding:1rem 0;">Aucun utilisateur</p>
+          {% endif %}
         </div>
-
       </div>
+
     </div>
   </div>
+  </div>
 
-<script>
-window.planningData = {{ planning_events | safe }};
-</script>
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    window.planningData = {{ planning_events | safe }};
+  </script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    lucide.createIcons();
+
+    document.querySelectorAll('.dep-ico, .nav-avatar').forEach(function (el) {
+      el.style.display = 'flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+    });
+
+    document.querySelectorAll('[data-lucide]').forEach(function (icon) {
+      icon.style.width = '18px';
+      icon.style.height = '18px';
+    });
+  </script>
 </body>
+
 </html>

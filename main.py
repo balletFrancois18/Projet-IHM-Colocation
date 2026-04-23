@@ -40,9 +40,19 @@ app.register_blueprint(reservations_bp)
 
 @app.route('/')
 def index():
-    taches      = Tache.query.all()
-    depenses    = Depense.query.all()
+    taches      = Tache.query.order_by(Tache.id.desc()).limit(5).all()
+    depenses    = Depense.query.filter(Depense.payeur != 'none').order_by(Depense.id.desc()).limit(5).all()
     reservations = Reservation.query.all()
+
+    # Palette couleur identique à la page dépenses (tri alphabétique sur prénoms + historiques)
+    PALETTE = ['#F59E0B', '#5B6CFF', '#34D399', '#A78BFA', '#FF7A59', '#F87171', '#60A5FA']
+    prenoms_users = {u.prenom for u in User.query.all()}
+    prenoms_historiques = {d.payeur for d in Depense.query.all() if d.payeur and d.payeur != 'none'}
+    tous_prenoms = sorted({p.lower() for p in (prenoms_users | prenoms_historiques)})
+    couleurs_users = {p: PALETTE[i % len(PALETTE)] for i, p in enumerate(tous_prenoms)}
+    # Ajouter aussi les variantes de casse pour les lookups
+    for p in list(prenoms_users | prenoms_historiques):
+        couleurs_users.setdefault(p, couleurs_users.get(p.lower(), PALETTE[0]))
 
     # Construire les événements du planning pour le JS
     planning_events = []
@@ -56,16 +66,24 @@ def index():
             'heure':   heure,
             'titre':   r.espace,
             'type':    'resa',
-            'couleur': '#7bafd4'
+            'couleur': couleurs_users.get(r.profil, '#7bafd4'),
+            'personne': r.profil
         })
-    for t in taches:
+    for t in Tache.query.filter_by(faite=False).all():
         if t.date_echeance:
+            try:
+                heure_t = int(t.heure_debut.split(':')[0]) if t.heure_debut else 9
+            except Exception:
+                heure_t = 9
             planning_events.append({
-                'date':    t.date_echeance.isoformat(),
-                'heure':   9,
-                'titre':   t.titre,
-                'type':    'tache',
-                'couleur': '#f59e0b'
+                'date':        t.date_echeance.isoformat(),
+                'heure':       heure_t,
+                'heure_debut': t.heure_debut or '',
+                'heure_fin':   t.heure_fin or '',
+                'titre':       t.titre,
+                'type':        'tache',
+                'couleur':     couleurs_users.get(t.assignee, '#f59e0b'),
+                'personne':    t.assignee
             })
 
     utilisateurs = User.query.all()
@@ -75,6 +93,7 @@ def index():
                            taches=taches,
                            depenses=depenses,
                            utilisateurs=utilisateurs,
+                           couleurs_users=couleurs_users,
                            now=datetime.utcnow(),
                            planning_events=json.dumps(planning_events))
 

@@ -5,19 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Tâches</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="index-page">
 
   <!-- NAVBAR -->
   <nav>
-    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="{{ url_for('index') }}" class="nav-logo">Co<span>Loc</span></a>
     <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link" style="background:rgba(255,255,255,0.15);">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
-    <a href="#" class="nav-link">Réservations</a>
+    <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link">Réservations</a>
     <div class="nav-right">
       {% if session.get('user_id') %}
-        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
+        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil"><i data-lucide="user"></i></a>
         <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
@@ -28,21 +29,24 @@
   <!-- Messages flash -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div style="max-width:1000px; margin:1rem auto; padding:0 2rem;">
+      <div style="max-width:1400px; margin:1rem auto; padding:0 3rem;">
         {% for category, message in messages %}
-          <div style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:0.5rem;
-                      background:{{ '#fee2e2' if category == 'error' else '#dcfce7' }};
-                      color:{{ '#991b1b' if category == 'error' else '#166534' }};
-                      font-size:0.875rem;">
-            {{ message }}
+          <div class="flash-global flash-global-{{ category }}">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="flash-global-close">✕</button>
           </div>
         {% endfor %}
       </div>
+      <script>
+        document.querySelectorAll('.flash-global').forEach(function(el){
+          setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); },400); }, 5000);
+        });
+      </script>
     {% endif %}
   {% endwith %}
 
-  <!-- EN-TÊTE -->
-  <div style="max-width:1000px; margin:0 auto; padding:2rem 2rem 0 2rem;">
+<!-- EN-TÊTE -->
+  <div style="max-width:1400px; margin:0 auto; padding:2rem 3rem 0 3rem;">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
       <div>
         <h1 style="font-size:1.5rem; font-weight:700; color:var(--text);">Tâches</h1>
@@ -50,21 +54,23 @@
           {{ taches | selectattr('faite') | list | length }} / {{ taches | length }} tâches complétées
         </p>
       </div>
-      {% if session.get('user_id') %}
-        <button onclick="ouvrirModal()" class="btn-action-primary">+ Ajouter une tâche</button>
-      {% endif %}
     </div>
   </div>
 
   <!-- GRID — filtres + liste à gauche, contribution à droite -->
-  <div style="max-width:1000px; margin:0 auto; padding:0 2rem 2rem 2rem; display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start;">
+  <div style="max-width:1400px; margin:0 auto; padding:0 3rem 2rem 3rem; display:grid; grid-template-columns:1fr 380px; gap:1.5rem; align-items:start;">
 
     <div>
-      <!-- Filtres -->
-      <div class="filtres">
-        <button class="filtre-btn active" onclick="filtrer('tous', this)">Toutes ({{ taches | length }})</button>
-        <button class="filtre-btn" onclick="filtrer('todo', this)">À faire ({{ taches | rejectattr('faite') | list | length }})</button>
-        <button class="filtre-btn" onclick="filtrer('fait', this)">Fait ({{ taches | selectattr('faite') | list | length }})</button>
+      <!-- Filtres + bouton ajouter -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+        <div class="filtres">
+          <button class="filtre-btn active" onclick="filtrer('tous', this)">Toutes ({{ taches | length }})</button>
+          <button class="filtre-btn" onclick="filtrer('todo', this)">À faire ({{ taches | rejectattr('faite') | list | length }})</button>
+          <button class="filtre-btn" onclick="filtrer('fait', this)">Fait ({{ taches | selectattr('faite') | list | length }})</button>
+        </div>
+        {% if session.get('user_id') %}
+        <button onclick="ouvrirModal()" class="btn-action-primary" style="margin:0;"><i data-lucide="plus-circle"></i> Ajouter une tâche</button>
+        {% endif %}
       </div>
 
       <!-- Liste tâches -->
@@ -88,7 +94,7 @@
 
             <div class="tache-info">
               <div class="tache-titre {% if tache.faite %}done{% endif %}">{{ tache.titre }}</div>
-              <div class="tache-assignee">👤 {{ tache.assignee }}{% if tache.date_echeance %} · 📅 {{ tache.date_echeance.strftime('%d/%m/%Y') }}{% endif %}</div>
+              <div class="tache-assignee"><i data-lucide="user"></i> {{ tache.assignee }}{% if tache.date_echeance %} · <i data-lucide="calendar"></i> {{ tache.date_echeance.strftime('%d/%m/%Y') }}{% endif %}</div>
             </div>
 
             <span class="tache-badge {% if tache.faite %}badge-done{% else %}badge-todo{% endif %}">
@@ -96,10 +102,13 @@
             </span>
 
             {% if tache.user_id == session.get('user_id') %}
-              <form method="POST" action="{{ url_for('taches.supprimer_tache', id=tache.id) }}" style="margin:0; margin-left:10px;">
+              <button onclick="document.getElementById('modal-modifier-{{ tache.id }}').style.display='flex'"
+                      class="btn-edit"
+                      title="Modifier"><i data-lucide="pencil"></i></button>
+              <form method="POST" action="{{ url_for('taches.supprimer_tache', id=tache.id) }}" style="margin:0; margin-left:4px;">
                 <button type="submit"
                         onclick="return confirm('Supprimer cette tâche ?')"
-                        class="btn-supprimer">✕</button>
+                        class="btn-supprimer"><i data-lucide="trash-2"></i></button>
               </form>
             {% endif %}
 
@@ -164,15 +173,79 @@
           <label class="field-label">Date d'échéance <span style="color:var(--muted);font-weight:400;">(optionnelle)</span></label>
           <input type="date" name="date_echeance" class="field-input">
         </div>
+        <div style="display:flex; gap:10px; margin-top:12px;">
+          <div class="field-group" style="flex:1;">
+            <label class="field-label">Heure début <span style="color:var(--muted);font-weight:400;">(opt.)</span></label>
+            <input type="time" name="heure_debut" class="field-input">
+          </div>
+          <div class="field-group" style="flex:1;">
+            <label class="field-label">Heure fin <span style="color:var(--muted);font-weight:400;">(opt.)</span></label>
+            <input type="time" name="heure_fin" class="field-input">
+          </div>
+        </div>
         <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
-          <button type="button" class="btn-annuler" onclick="fermerModal()">✕ Annuler</button>
-          <button type="submit" class="btn-valider">✓ Valider</button>
+          <button type="button" class="btn-annuler" onclick="fermerModal()"><i data-lucide="x"></i> Annuler</button>
+          <button type="submit" class="btn-valider"><i data-lucide="check"></i> Valider</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal modifier tâche -->
+  {% for tache in taches %}
+  {% if tache.user_id == session.get('user_id') %}
+  <div id="modal-modifier-{{ tache.id }}"
+       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:200; align-items:center; justify-content:center;"
+       onclick="if(event.target === this) this.style.display='none'">
+    <div style="background:white; border-radius:16px; padding:28px; width:360px; box-shadow:0 16px 48px rgba(0,0,0,0.15);">
+      <div style="font-size:17px; font-weight:700; margin-bottom:18px;"><i data-lucide="pencil"></i> Modifier la tâche</div>
+      <form method="POST" action="{{ url_for('taches.modifier_tache', id=tache.id) }}">
+        <div class="field-group">
+          <label class="field-label">Titre</label>
+          <input type="text" name="titre" class="field-input" value="{{ tache.titre }}" required>
+        </div>
+        <div class="field-group" style="margin-top:12px;">
+          <label class="field-label">Date d'échéance <span style="color:var(--muted);font-weight:400;">(optionnelle)</span></label>
+          <input type="date" name="date_echeance" class="field-input" value="{{ tache.date_echeance or '' }}">
+        </div>
+        <div style="display:flex; gap:10px; margin-top:12px;">
+          <div class="field-group" style="flex:1;">
+            <label class="field-label">Heure début <span style="color:var(--muted);font-weight:400;">(opt.)</span></label>
+            <input type="time" name="heure_debut" class="field-input" value="{{ tache.heure_debut or '' }}">
+          </div>
+          <div class="field-group" style="flex:1;">
+            <label class="field-label">Heure fin <span style="color:var(--muted);font-weight:400;">(opt.)</span></label>
+            <input type="time" name="heure_fin" class="field-input" value="{{ tache.heure_fin or '' }}">
+          </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+          <button type="button" onclick="document.getElementById('modal-modifier-{{ tache.id }}').style.display='none'" class="btn-annuler"><i data-lucide="x"></i> Annuler</button>
+          <button type="submit" class="btn-valider"><i data-lucide="check"></i> Enregistrer</button>
         </div>
       </form>
     </div>
   </div>
   {% endif %}
+  {% endfor %}
+  {% endif %}
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+lucide.createIcons();
+
+document.querySelectorAll('.btn-supprimer, .btn-edit').forEach(function(el) {
+  el.style.display = 'inline-flex';
+  el.style.alignItems = 'center';
+  el.style.justifyContent = 'center';
+  el.style.padding = '6px';
+});
+
+document.querySelectorAll('[data-lucide]').forEach(function(icon) {
+  if (icon.closest('.btn-supprimer') || icon.closest('.btn-edit')) {
+    icon.style.width = '14px';
+    icon.style.height = '14px';
+  }
+});
+</script>
 </body>
 </html>

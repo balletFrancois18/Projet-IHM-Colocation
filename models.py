@@ -36,6 +36,8 @@ class Tache(db.Model):
     faite          = db.Column(db.Boolean, default=False)
     user_id        = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     date_echeance  = db.Column(db.Date, nullable=True)
+    heure_debut    = db.Column(db.String(5), nullable=True)
+    heure_fin      = db.Column(db.String(5), nullable=True)
 
 
 class EspaceReservation(db.Model):

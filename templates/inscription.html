@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inscription — ColocApp</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body class="auth-page">
@@ -18,11 +18,18 @@
       <!--affichage du message d'erreur si le mail est déjà utilisé-->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
-      <div class="flash-{{ category }}">
-        {% if category == 'error' %}❌{% else %}✅{% endif %}
-        {{ message }}
+      <div class="flash-global flash-global-{{ category }}" style="margin-bottom:1rem;">
+        <span>{{ message }}</span>
+        <button onclick="this.parentElement.remove()" class="flash-global-close">✕</button>
       </div>
     {% endfor %}
+    {% if messages %}
+    <script>
+      document.querySelectorAll('.flash-global').forEach(function(el){
+        setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); },400); }, 5000);
+      });
+    </script>
+    {% endif %}
   {% endwith %}
       <h2>Créer un compte</h2>
       <p class="subtitle">Rejoignez votre colocation en quelques secondes</p>
@@ -54,4 +61,5 @@
     </div>
   </div>
 </body>
+<script>lucide.createIcons();</script>
 </html>

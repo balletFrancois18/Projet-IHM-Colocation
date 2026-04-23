@@ -75,7 +75,11 @@ function afficherSemaine() {
     if (cell) {
       const couleur = ev.couleur || '#7bafd4';
       const url = ev.type === 'tache' ? '/taches' : '/reservations';
-      cell.innerHTML += `<a href="${url}" class="resa" style="background:${couleur}; cursor:pointer; text-decoration:none;" title="${ev.titre}">${ev.titre}</a>`;
+      const shortTitle = ev.titre.length > 12 ? ev.titre.substring(0, 11) + '…' : ev.titre;
+      const typeLabel = ev.type === 'tache' ? 'Tâche' : 'Réservation';
+      const personne = ev.personne ? ` — ${ev.personne}` : '';
+      const details = `${typeLabel}: ${ev.titre}${personne} | ${ev.date} ${ev.heure}h`;
+      cell.innerHTML += `<a href="${url}" class="resa" style="background:${couleur}; border-left-color:${couleur}; cursor:pointer; text-decoration:none;" title="${details}">${shortTitle}</a>`;
     }
   }
 }

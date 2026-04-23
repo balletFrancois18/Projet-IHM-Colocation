@@ -41,6 +41,8 @@ def inscription():
 def login():
     if request.method == 'POST':
         user = User.query.filter_by(email=request.form['email']).first()
+        if user:
+            db.session.refresh(user)
         if user and user.password == request.form['password']:
             session['user_id']     = user.id
             session['user_prenom'] = user.prenom
@@ -51,6 +53,12 @@ def login():
 # ── LOGOUT ────────────────────────────────────
 @auth_bp.route('/logout')
 def logout():
+    user_id = session.get('user_id')
+    if user_id:
+        user = db.session.get(User, user_id)
+        if user:
+            user.last_seen = None
+            db.session.commit()
     session.clear()
     return redirect(url_for('auth.login'))
 
@@ -162,7 +170,8 @@ def reservations():
 @auth_bp.route('/profil', methods=['GET', 'POST'])
 @login_required
 def profil():
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
+    db.session.refresh(user)
     if request.method == 'POST':
         action = request.form.get('action')
         if action == 'update_info':
@@ -187,8 +196,8 @@ def profil():
                 flash('Mot de passe modifié avec succès.', 'success')
         return redirect(url_for('auth.profil'))
 
-    nb_taches      = Tache.query.filter_by(user_id=user.id).count()
-    nb_depenses    = Depense.query.filter_by(user_id=user.id).count()
+    nb_taches       = Tache.query.filter_by(user_id=user.id).count()
+    nb_depenses     = Depense.query.filter(Depense.payeur == user.prenom, Depense.payeur != 'none').count()
     nb_reservations = Reservation.query.filter_by(user_id=user.id).count()
     return render_template('profil.html', user=user,
                            nb_taches=nb_taches,

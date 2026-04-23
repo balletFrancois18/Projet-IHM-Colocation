@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
-from models import db, Reservation
+from flask import Blueprint, flash, render_template, request, redirect, url_for, session
+from models import db, Reservation, User
 from routes.auth import login_required
 from datetime import date as today_date
 
@@ -16,7 +16,7 @@ ESPACES = [
     'Télévision',
 ]
 
-PALETTE = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
+PALETTE = ['#F59E0B', '#5B6CFF', '#34D399', '#A78BFA', '#FF7A59', '#F87171', '#60A5FA']
 
 def build_context(current_user_id):
     today = str(today_date.today())
@@ -27,21 +27,23 @@ def build_context(current_user_id):
     for r in reservations:
         if r.date >= today and r.espace not in reservations_actives:
             reservations_actives[r.espace] = r
-    # Couleur fixe par user_id (le user connecté = bleu #3b82f6, les autres tournent sur la palette sans bleu)
-    autres_palette = ['#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
+    # Couleurs identiques à la page dépenses : tri alphabétique sur prénoms + historiques
+    from models import Depense
+    prenoms_users = {u.prenom for u in User.query.all()}
+    prenoms_historiques = {d.payeur for d in Depense.query.all() if d.payeur and d.payeur != 'none'}
+    tous_prenoms = sorted({p.lower() for p in (prenoms_users | prenoms_historiques)})
+    couleurs_users = {p: PALETTE[i % len(PALETTE)] for i, p in enumerate(tous_prenoms)}
+    for p in list(prenoms_users | prenoms_historiques):
+        couleurs_users.setdefault(p, couleurs_users.get(p.lower(), PALETTE[0]))
+    # Mapping uid → couleur pour le template (qui utilise r.user_id ou r.profil)
     couleurs = {}
-    idx = 0
     for r in reservations:
         uid = r.user_id if r.user_id is not None else r.profil
         if uid not in couleurs:
-            if uid == current_user_id:
-                couleurs[uid] = '#3b82f6'
-            else:
-                couleurs[uid] = autres_palette[idx % len(autres_palette)]
-                idx += 1
+            couleurs[uid] = couleurs_users.get(r.profil, PALETTE[0])
     return dict(espaces=ESPACES, reservations=reservations,
                 reservations_actives=reservations_actives,
-                couleurs=couleurs, today=today)
+                couleurs=couleurs, couleurs_users=couleurs_users, today=today)
 
 @reservations_bp.route('/reservations')
 def liste_reservations():
@@ -66,7 +68,9 @@ def ajouter_reservation():
         Reservation.heure_fin   > heure_debut
     ).first()
 
-    if not conflit:
+    if conflit:
+        flash("Créneau déjà réservé pour cet espace.", 'error')
+    else:
         nouvelle = Reservation(
             espace      = espace,
             date        = date,
@@ -79,6 +83,7 @@ def ajouter_reservation():
         )
         db.session.add(nouvelle)
         db.session.commit()
+        flash("Réservation ajoutée avec succès.", 'success')
 
     return redirect(url_for('reservations.liste_reservations'))
 
@@ -89,4 +94,23 @@ def supprimer_reservation(id):
     if r.user_id == session.get('user_id'):
         db.session.delete(r)
         db.session.commit()
+        flash("Réservation supprimée.", 'success')
+    else:
+        flash("Vous ne pouvez pas supprimer la réservation de quelqu'un d'autre.", 'error')
+    return redirect(url_for('reservations.liste_reservations'))
+
+
+@reservations_bp.route('/reservations/modifier/<int:id>', methods=['POST'])
+@login_required
+def modifier_reservation(id):
+    r = Reservation.query.get_or_404(id)
+    if r.user_id == session.get('user_id'):
+        r.espace = request.form.get('espace')
+        r.date = request.form.get('date')
+        r.heure_debut = request.form.get('heure_debut')
+        r.heure_fin = request.form.get('heure_fin')
+        db.session.commit()
+        flash("Réservation modifiée avec succès.", 'success')
+    else:
+        flash("Vous ne pouvez pas modifier la réservation de quelqu'un d'autre.", 'error')
     return redirect(url_for('reservations.liste_reservations'))

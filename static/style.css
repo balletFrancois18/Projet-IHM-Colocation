@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -26,7 +28,7 @@ body.auth-page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Josefin Sans', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   color: var(--text);
 }
 
@@ -199,10 +201,11 @@ input::placeholder { color: var(--muted); font-weight: 300; }
    ============================================ */
 
 body.index-page {
-  font-family: 'Arial', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   background: var(--blue-bg);
   color: var(--text);
   text-align: left;
+  padding-bottom: 2.5rem;
 }
 
 nav {
@@ -218,6 +221,12 @@ nav {
   box-shadow: 0 2px 8px rgba(90,143,184,0.2);
 }
 
+nav [data-lucide] {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
 .nav-logo {
   background: white;
   color: var(--blue);
@@ -226,6 +235,13 @@ nav {
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
   margin-right: 0.5rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.nav-logo:hover {
+  transform: scale(1.05);
 }
 
 .nav-logo span { color: var(--text); }
@@ -254,7 +270,34 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
   background: white;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 1rem;
+  color: var(--blue); font-size: 1rem;
+  border: 2px solid rgba(255,255,255,0.5);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+}
+
+.nav-avatar:hover {
+  border-color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transform: scale(1.08);
+}
+
+.nav-avatar [data-lucide] {
+  width: 18px;
+  height: 18px;
+  color: var(--blue-dark);
+}
+
+.dep-ico {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--blue-light);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue-dark);
+}
+
+.dep-ico [data-lucide] {
+  width: 16px;
+  height: 16px;
 }
 
 .btn-connect {
@@ -682,14 +725,22 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 }
 
 .card-btn {
-  font-size: 0.78rem; color:white; text-decoration: none;
-  font-weight: 500; padding: 0.25rem 0.6rem;
-  border: 1px solid var(--blue-light); border-radius: 6px;
+  font-size: 0.78rem; color: white; text-decoration: none;
+  font-weight: 500; padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(255,255,255,0.3); border-radius: 6px;
   background-color: var(--blue-dark);
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-.card-btn:hover { background: var(--blue-light); }
+.card-btn:hover { background: var(--blue); }
+
+.card-btn [data-lucide] {
+  width: 14px;
+  height: 14px;
+}
 
 /* ── PLANNING ── */
 .planning-nav {
@@ -732,7 +783,7 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 
 .planning-grid td {
   border: 1px solid var(--border);
-  padding: 0.25rem; height: 42px; vertical-align: top;
+  padding: 0.3rem; height: 52px; vertical-align: top;
 }
 
 .planning-grid .heure {
@@ -744,16 +795,17 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
 
 .resa {
   display: block;
-  background: var(--blue-light);
-  border-left: 2px solid var(--blue);
-  border-radius: 3px;
-  padding: 0.15rem 0.3rem;
-  font-size: 0.65rem; color: var(--blue-dark); font-weight: 600;
+  background: #3b82f6;
+  border-left: 3px solid #1e40af;
+  border-radius: 4px;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.72rem; color: white; font-weight: 600;
   transition: filter 0.15s, transform 0.15s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  line-height: 1.2;
 }
 a.resa:hover {
   filter: brightness(0.88);
@@ -770,7 +822,7 @@ a.resa:hover {
   border: none; border-radius: 8px;
   font-size: 0.8rem; font-weight: 600;
   text-align: center; text-decoration: none;
-  font-family: 'Arial', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   transition: background 0.15s, transform 0.15s;
 }
 
@@ -862,8 +914,6 @@ a.resa:hover {
   font-size: 0.78rem; font-weight: 700; color: white; flex-shrink: 0;
 }
 
-.pres-av.on  { background: linear-gradient(135deg, #10b981, #059669); }
-.pres-av.off { background: linear-gradient(135deg, #ef4444, #dc2626); }
 
 .pres-name { font-size: 0.83rem; font-weight: 600; }
 .pres-stat { font-size: 0.7rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; }
@@ -976,7 +1026,7 @@ a.resa:hover {
       padding: 0.75rem 1rem;
       border: 1.5px solid var(--border);
       border-radius: 10px;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-size: 0.9rem;
       color: var(--text);
       background: var(--blue-bg);
@@ -1001,7 +1051,7 @@ a.resa:hover {
       font-weight: 600;
       cursor: pointer;
       transition: background 0.2s, transform 0.15s;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'DM Sans', sans-serif;
     }
 
     .modal-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
@@ -1023,7 +1073,7 @@ a.resa:hover {
       color: var(--muted);
       cursor: pointer;
       transition: all 0.15s;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'DM Sans', sans-serif;
     }
 
     .filtre-btn:hover { border-color: var(--blue); color: var(--blue); }
@@ -1133,45 +1183,55 @@ a.resa:hover {
 
   /* Le bouton par défaut */
   .btn-supprimer {
-    background: var(--red);
-    border: none;
+    background: #FEE2E2;
+    border: 1.5px solid #FCA5A5;
     cursor: pointer;
-    color: white;
+    color: #DC2626;
     font-size: 10px;
     padding: 6px 10px;
-    border-radius: 4px;
-    transition: all 0.2s ease; /* Animation fluide */
-    display: flex;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 34px;
+    height: 34px;
   }
 
   /* L'effet au survol (Hover) */
   .btn-supprimer:hover {
-    background: red; /* Devient rouge plein */
-    color: white;        /* Le texte devient blanc */
-    transform: scale(1.1); /* Grossit légèrement */
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    background: #FECACA;
+    color: #DC2626;
   }
-
-  /* Optionnel : effet au clic */
-  .btn-supprimer:active {
-    transform: scale(0.95);
+  
+  .btn-supprimer [data-lucide] {
+    width: 14px;
+    height: 14px;
   }
 
 .btn-edit {
-      background: none;
-      border: none;
+      background: #FFFBEB;
+      border: 1.5px solid #FCD34D;
       cursor: pointer;
-      color: var(--muted);
+      color: #92400E;
       font-size: 16px;
       padding: 4px 8px;
-      border-radius: 6px;
+      border-radius: 8px;
       transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
     }
     .btn-edit:hover {
-      color: #3b82f6;
-      background: rgba(59, 130, 246, 0.1);
+      color: #92400E;
+      background: #FEF3C7;
+    }
+    .btn-edit [data-lucide] {
+      width: 14px;
+      height: 14px;
+    }
     }
 
 
@@ -1185,7 +1245,7 @@ a.resa:hover {
 }
 
 .section-titre {
-  font-family: 'Arial', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 16px; font-weight: 700;
   margin-bottom: 16px; color: #374151;
 }
@@ -1202,7 +1262,7 @@ a.resa:hover {
   width: 120px; padding: 9px 12px;
   border: 2px solid #5B6CFF; border-radius: 10px;
   font-size: 15px; font-weight: 700;
-  text-align: right; font-family: 'Arial', sans-serif;
+  text-align: right; font-family: 'DM Sans', sans-serif;
   color: #5B6CFF;
 }
 .mon-input:focus { outline: none; border-color: #4455EE; }
@@ -1231,14 +1291,14 @@ a.resa:hover {
       margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.07);
     }
     .pot-label { font-size: 13px; color: #6B7280; margin-bottom: 4px; }
-    .pot-montant { font-family: 'Arial', sans-serif; font-size: 28px; font-weight: 800; color:#2b4d97; }
+    .pot-montant { font-family: 'DM Sans', sans-serif; font-size: 28px; font-weight: 800; color:#2b4d97; }
 
     .categorie-card {
       background: white; border-radius: 16px; padding: 22px 26px;
       margin-bottom: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.07);
     }
     .cat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .cat-titre { font-family: 'Arial', sans-serif; font-size: 15px; font-weight: 700; }
+    .cat-titre { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700; }
     .cat-actions { display: flex; gap: 8px; }
     .btn-round {
       width: 32px; height: 32px; border-radius: 50%;
@@ -1284,14 +1344,14 @@ a.resa:hover {
       box-shadow: 0 16px 48px rgba(0,0,0,0.15); animation: slideUp 0.2s ease-out;
     }
     @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal-titre { font-family: 'Arial', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+    .modal-titre { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 18px; }
     .field-group { margin-bottom: 12px; }
     .field-label { font-size: 11px; font-weight: 700; color: #6B7280; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .field-input { width: 100%; padding: 10px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; font-size: 13px; font-family: 'Arial', sans-serif; }
+    .field-input { width: 100%; padding: 10px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; }
     .field-input:focus { outline: none; border-color: #5B6CFF; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
-    .btn-valider { padding: 9px 20px; background: #2b4d97; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'Arial', sans-serif; }
-    .btn-annuler { padding: 9px 16px; background: white; color: #6B7280; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: 'Arial', sans-serif; }
+    .btn-valider { padding: 9px 20px; background: #2b4d97; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+    .btn-annuler { padding: 9px 16px; background: white; color: #6B7280; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; }
 
 
 
@@ -1302,9 +1362,9 @@ a.resa:hover {
    ============================================ */
 
 .resa-page {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 3rem;
 }
 
 /* En-tête */
@@ -1788,9 +1848,9 @@ table.resa-table {
 
 /* ── PAGE RÉSERVATIONS REFAITE ────────────── */
 .resa-page {
-  max-width: 960px;
+  max-width: 1400px;
   margin: 2rem auto;
-  padding: 0 1.5rem 3rem;
+  padding: 0 3rem 3rem;
 }
 
 .resa-header {
@@ -2182,3 +2242,30 @@ table.resa-table {
 
 .profil-avatar-wrap:hover .profil-avatar-overlay { opacity: 1; }
 .profil-avatar-wrap:hover .profil-avatar-big     { filter: brightness(0.7); }
+
+/* ===== FLASH MESSAGES GLOBAL ===== */
+.flash-global {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: opacity 0.4s ease;
+}
+.flash-global-success { background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; }
+.flash-global-error   { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+.flash-global-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.flash-global-close:hover { opacity: 1; }

@@ -5,24 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CoLoc — Réservations</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="index-page">
 
   <nav>
-    <div class="nav-logo">Co<span>Loc</span></div>
+    <a href="{{ url_for('index') }}" class="nav-logo">Co<span>Loc</span></a>
     <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
     <a href="{{ url_for('taches.liste_taches') }}" class="nav-link">Tâches</a>
     <a href="{{ url_for('depenses.liste_depenses') }}" class="nav-link">Dépenses</a>
     <a href="{{ url_for('reservations.liste_reservations') }}" class="nav-link" style="background:rgba(255,255,255,0.15);">Réservations</a>
     <div class="nav-right">
       {% if session.get('user_id') %}
-        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil">👤</a>
+        <a href="{{ url_for('auth.profil') }}" class="nav-avatar nav-avatar-link" title="Mon profil"><i data-lucide="user"></i></a>
         <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}" class="btn-connect">Se connecter</a>
       {% endif %}
     </div>
   </nav>
+
+  <!-- Messages flash -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div style="max-width:1400px; margin:1rem auto; padding:0 3rem;">
+        {% for category, message in messages %}
+          <div class="flash-global flash-global-{{ category }}">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="flash-global-close">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        document.querySelectorAll('.flash-global').forEach(function(el){
+          setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); },400); }, 5000);
+        });
+      </script>
+    {% endif %}
+  {% endwith %}
 
   <div class="resa-page">
 
@@ -33,21 +53,11 @@
         <p class="resa-sub">Espaces et ressources de la colocation</p>
       </div>
       {% if session.get('user_id') %}
-        <button onclick="ouvrirModal()" class="btn-action-primary">+ Réserver</button>
+        <button onclick="ouvrirModal()" class="btn-action-primary"><i data-lucide="plus-circle"></i> Ajouter une réservation</button>
       {% else %}
-        <a href="{{ url_for('auth.login') }}" class="btn-action-primary">+ Réserver</a>
+        <a href="{{ url_for('auth.login') }}" class="btn-action-primary"><i data-lucide="plus-circle"></i> Ajouter une réservation</a>
       {% endif %}
     </div>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}{% for category, message in messages %}
-        <div style="padding:.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem;
-          {% if category=='success'%}background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;
-          {% else %}background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;{% endif %}">
-          {{ message }}
-        </div>
-      {% endfor %}{% endif %}
-    {% endwith %}
 
     <!-- LÉGENDE COULEURS -->
     {% if reservations %}
@@ -152,8 +162,9 @@
                   </td>
                   <td class="resa-td" style="text-align:center;">
                     {% if est_moi and not est_passe %}
+                      <button onclick="document.getElementById('modal-modifier-{{ r.id }}').style.display='flex'" class="btn-edit" title="Modifier" style="margin-right:4px;"><i data-lucide="pencil"></i></button>
                       <form method="POST" action="{{ url_for('reservations.supprimer_reservation', id=r.id) }}" style="margin:0;display:inline;">
-                        <button type="submit" onclick="return confirm('Supprimer cette réservation ?')" class="resa-btn-suppr" title="Supprimer">✕</button>
+                        <button type="submit" onclick="return confirm('Supprimer cette réservation ?')" class="btn-supprimer" title="Supprimer"><i data-lucide="trash-2"></i></button>
                       </form>
                     {% else %}—{% endif %}
                   </td>
@@ -177,7 +188,7 @@
        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;"
        onclick="if(event.target===this) fermerModal()">
     <div class="resa-modal">
-      <div class="resa-modal-title">📅 Nouvelle réservation</div>
+      <div class="resa-modal-title"><i data-lucide="calendar-plus"></i> Nouvelle réservation</div>
       <form method="POST" action="{{ url_for('reservations.ajouter_reservation') }}">
 
         <div class="resa-field">
@@ -320,6 +331,46 @@
     // Initialisation : tri par date, filtre "à venir"
     trierPar('date');
   </script>
-
+  
+  <!-- Modal modifier réservation -->
+  {% for r in reservations %}
+  {% if r.user_id == session.get('user_id') %}
+  <div id="modal-modifier-{{ r.id }}"
+       style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; align-items:center; justify-content:center;"
+       onclick="if(event.target===this) this.style.display='none'">
+    <div class="resa-modal">
+      <div class="resa-modal-title"><i data-lucide="pencil"></i> Modifier la réservation</div>
+      <form method="POST" action="{{ url_for('reservations.modifier_reservation', id=r.id) }}">
+        <div class="resa-field">
+          <label class="resa-label">Espace</label>
+          <select name="espace" class="resa-input">
+            <option value="{{ r.espace }}">{{ r.espace }}</option>
+          </select>
+        </div>
+        <div class="resa-field">
+          <label class="resa-label">Date</label>
+          <input type="date" name="date" class="resa-input" value="{{ r.date }}" required>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="resa-field">
+            <label class="resa-label">Heure début</label>
+            <input type="time" name="heure_debut" class="resa-input" value="{{ r.heure_debut }}" required>
+          </div>
+          <div class="resa-field">
+            <label class="resa-label">Heure fin</label>
+            <input type="time" name="heure_fin" class="resa-input" value="{{ r.heure_fin }}" required>
+          </div>
+        </div>
+        <div class="resa-modal-actions">
+          <button type="button" onclick="document.getElementById('modal-modifier-{{ r.id }}').style.display='none'" class="btn-annuler"><i data-lucide="x"></i> Annuler</button>
+          <button type="submit" class="btn-valider"><i data-lucide="check"></i> Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+  
+  <script>lucide.createIcons();</script>
 </body>
 </html>
