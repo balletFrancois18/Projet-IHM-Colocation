@@ -65,17 +65,33 @@ def ajouter_reservation():
         flash("date_passee_resa", 'error_date_passee')
         return redirect(url_for('reservations.liste_reservations'))
 
-    # Vérifie conflit uniquement si les deux heures sont renseignées
+    # Vérifie conflit sur le créneau (comparaison en minutes pour gérer minuit "00:00")
+    def to_minutes(t):
+        if not t:
+            return None
+        h, m = map(int, t.split(':'))
+        # 00:00 en tant que fin de créneau = minuit = 1440 min
+        return (h * 60 + m) or 1440
+
     conflit = None
-    if heure_debut and heure_fin:
-        conflit = Reservation.query.filter_by(
-            espace=espace, date=date
-        ).filter(
-            Reservation.heure_debut != None,
-            Reservation.heure_fin   != None,
-            Reservation.heure_debut < heure_fin,
-            Reservation.heure_fin   > heure_debut
-        ).first()
+    existantes = Reservation.query.filter_by(espace=espace, date=date).all()
+    if heure_debut:
+        new_start = to_minutes(heure_debut)
+        new_end   = to_minutes(heure_fin) if heure_fin else None
+        for ex in existantes:
+            ex_start = to_minutes(ex.heure_debut)
+            ex_end   = to_minutes(ex.heure_fin) if ex.heure_fin else None
+            if ex_start is None:
+                continue
+            # Même heure de début = conflit direct
+            if ex_start == new_start:
+                conflit = ex
+                break
+            # Chevauchement d'intervalles si les deux ont une heure de fin
+            if new_end and ex_end:
+                if new_start < ex_end and ex_start < new_end:
+                    conflit = ex
+                    break
 
     if conflit:
         flash("Créneau déjà réservé pour cet espace.", 'error')

@@ -366,7 +366,23 @@
         <div class="resa-field">
           <label class="resa-label">Espace</label>
           <select name="espace" class="resa-input">
-            <option value="{{ r.espace }}">{{ r.espace }}</option>
+            <optgroup label="🏠 Pièces communes">
+              <option value="Cuisine" {% if r.espace == 'Cuisine' %}selected{% endif %}>🍳 Cuisine</option>
+              <option value="Salon" {% if r.espace == 'Salon' %}selected{% endif %}>🛋️ Salon</option>
+              <option value="Salle de bain" {% if r.espace == 'Salle de bain' %}selected{% endif %}>🚿 Salle de bain</option>
+            </optgroup>
+            <optgroup label="🚗 Véhicules">
+              <option value="Voiture" {% if r.espace == 'Voiture' %}selected{% endif %}>🚗 Voiture</option>
+              <option value="Trottinette" {% if r.espace == 'Trottinette' %}selected{% endif %}>🛴 Trottinette</option>
+              <option value="Vélos" {% if r.espace == 'Vélos' %}selected{% endif %}>🚲 Vélos</option>
+            </optgroup>
+            <optgroup label="📦 Équipements">
+              <option value="Machine à laver" {% if r.espace == 'Machine à laver' %}selected{% endif %}>🧺 Machine à laver</option>
+              <option value="Télévision" {% if r.espace == 'Télévision' %}selected{% endif %}>📺 Télévision</option>
+            </optgroup>
+            {% if r.espace not in ['Cuisine','Salon','Salle de bain','Voiture','Trottinette','Vélos','Machine à laver','Télévision'] %}
+              <option value="{{ r.espace }}" selected>📌 {{ r.espace }}</option>
+            {% endif %}
           </select>
         </div>
         <div class="resa-field">

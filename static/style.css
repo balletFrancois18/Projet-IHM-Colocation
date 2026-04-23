@@ -478,6 +478,20 @@ nav a.nav-link:hover { background: rgba(255,255,255,0.15); }
   font-family: inherit;
 }
 .btn-profil-save:hover { background: var(--blue-dark); }
+.btn-profil-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.55rem 1.3rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+.btn-profil-danger:hover { background: #dc2626; }
+.btn-profil-danger:active { transform: scale(0.97); }
 
 .profil-stats {
   display: grid;

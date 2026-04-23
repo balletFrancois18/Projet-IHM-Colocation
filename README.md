@@ -51,6 +51,10 @@ activer le venv
 ```
 source venv/bin/activate
 ```
+lancer le localhost
+```
+ venv/bin/python main.py
+```
 
 Lancer Flask
 ```
